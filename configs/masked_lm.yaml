@@ -18,7 +18,9 @@ PRETEXT:
 
 MODEL:
   VISUAL:
-    NAME: torchvision::resnext101_32x8d
+    NAME: torchvision::resnet50
+    NORM_LAYER: groupnorm
+    NUM_GROUPS: 32
     PRETRAINED: false
 
   LINGUISTIC:

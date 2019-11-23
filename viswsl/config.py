@@ -81,6 +81,12 @@ class Config(object):
         Parameters defining the architecture of the visual stream.
     MODEL.VISUAL.NAME: "torchvision::resnext101_32x8d"
         Name of the visual stream model. Torchvision models supported for now.
+    MODEL.VISUAL.NORM_LAYER: groupnorm
+        One of ``["batchnorm", "groupnorm"]``. Instance Norm and Layer Norm are
+        special cases of Group Norm.
+    MODEL.VISUAL.NUM_GROUPS: 32
+        Number of groups for Group Norm. Ignored if ``MODEL.VISUAL.NORM_LAYER``
+        is ``batchnorm``.
     MODEL.VISUAL.PRETRAINED:
         Whether to initialize model from ImageNet pre-trained weights.
     _____
@@ -113,15 +119,16 @@ class Config(object):
     OPTIM.WARMUP_STEPS: 2000
         Number of steps to perform LR warmup. Learning rate goes linearly from
         0 to ``OPTIM.LR`` for ``OPTIM.WARMUP_STEPS`` steps. A good rule of
-        thumb is to set it as ``(2 / beta2 - 1)`` for Adam-like optimizers.
+        thumb is to set it as ``(2 / 1 - beta2)`` for Adam-like optimizers, or
+        5-10% of total number of iterations.
     OPTIM.WEIGHT_DECAY: 1e-3
         Weight decay co-efficient for optimizer.
     OPTIM.SGD_MOMENTUM: 0.9
         Value for momentum co-efficient, only used when ``OPTIM.OPTIMIZER_NAME``
-        is "sgd", else ignored.
+        is ``sgd``, else ignored.
     OPTIM.SGD_NESTEROV: True
         Whether to use Nesterive accelerated gradient, only used when
-        ``OPTIM.OPTIMIZER_NAME`` is "sgd", else ignored.
+        ``OPTIM.OPTIMIZER_NAME`` is ``sgd``, else ignored.
     OPTIM.CLAMP_GRADIENTS: 10
         Threshold to clamp gradients for avoiding exploding gradients.
     """
@@ -148,7 +155,9 @@ class Config(object):
 
         _C.MODEL = CN()
         _C.MODEL.VISUAL = CN()
-        _C.MODEL.VISUAL.NAME = "torchvision::resnext101_32x8d"
+        _C.MODEL.VISUAL.NAME = "torchvision::resnet50"
+        _C.MODEL.VISUAL.NORM_LAYER = "groupnorm"
+        _C.MODEL.VISUAL.NUM_GROUPS = 32
         _C.MODEL.VISUAL.PRETRAINED = False
 
         _C.MODEL.LINGUISTIC = CN()

@@ -45,7 +45,13 @@ class VisualStreamFactory(Factory):
         _C = config
         if "torchvision" in _C.MODEL.VISUAL.NAME:
             cnn_name = _C.MODEL.VISUAL.NAME.split("::")[-1]
-            kwargs = {"pretrained": _C.MODEL.VISUAL.PRETRAINED}
+            kwargs = {
+                "pretrained": _C.MODEL.VISUAL.PRETRAINED,
+                "num_groups": _C.MODEL.VISUAL.NUM_GROUPS,
+                "norm_layer": nn.BatchNorm2d
+                if _C.MODEL.VISUAL.NORM_LAYER == "batchnorm"
+                else nn.GroupNorm,
+            }
             return cls.create("torchvision", cnn_name, **kwargs)
 
         return cls.create(_C.MODEL.VISUAL.NAME)
