@@ -1,6 +1,10 @@
+import os
+import pkg_resources
+import re
+from typing import Dict
+
 import torch
 from torch import nn
-from torchvision import models as tv_models
 
 
 class TorchvisionVisualStream(nn.Module):
@@ -13,10 +17,14 @@ class TorchvisionVisualStream(nn.Module):
         **kwargs,
     ):
         super().__init__()
+
+        # Protect import because it should be an optional dependency, one may
+        # only use `D2BackboneVisualStream`.
+        from torchvision import models as tv_models
         try:
             model_creation_method = getattr(tv_models, name)
         except AttributeError as err:
-            raise AttributeError(f"{name} if not a torchvision model.")
+            raise RuntimeError(f"{name} if not a torchvision model.")
 
         # Initialize with BatchNorm, convert all Batchnorm to GroupNorm if
         # needed, later.
@@ -50,6 +58,76 @@ class TorchvisionVisualStream(nn.Module):
                 name, self._batchnorm_to_groupnorm(child, num_groups)
             )
         return mod
+
+
+class D2BackboneVisualStream(nn.Module):
+
+    # TODO: (add more later). Think about FPNs.
+    MODEL_NAME_TO_CFG_PATH: Dict[str, str] = {
+        "coco_faster_rcnn_R_50_C4": "COCO-Detection/faster_rcnn_R_50_C4_3x.yaml",
+        "coco_faster_rcnn_R_50_DC5": "COCO-Detection/faster_rcnn_R_50_DC5_3x.yaml",
+        "coco_faster_rcnn_R_101_C4": "COCO-Detection/faster_rcnn_R_101_C4_3x.yaml",
+        "coco_faster_rcnn_R_101_DC5": "COCO-Detection/faster_rcnn_R_101_DC5_3x.yaml",
+
+        "coco_mask_rcnn_R_50_C4": "COCO-InstanceSegmentation/mask_rcnn_R_50_C4_3x.yaml",
+        "coco_mask_rcnn_R_50_DC5": "COCO-InstanceSegmentation/mask_rcnn_R_50_DC5_3x.yaml",
+        "coco_mask_rcnn_R_101_C4": "COCO-InstanceSegmentation/mask_rcnn_R_101_C4_3x.yaml",
+        "coco_mask_rcnn_R_101_DC5": "COCO-InstanceSegmentation/mask_rcnn_R_101_DC5_3x.yaml",
+    }
+
+    def __init__(
+        self, name: str, pretrained: bool = False, **kwargs,
+    ):
+        super().__init__()
+
+        # Protect import because it should be an optional dependency, one may
+        # only use `TorchvisionVisualStream`.
+        from detectron2 import model_zoo as d2mz
+
+        # If not pretrained, set MODEL.WEIGHTS key in config as empty string to
+        # avoid downloading backbone weights.
+        try:
+            if not pretrained:
+                d2config_path = pkg_resources.resource_filename(
+                    "detectron2.model_zoo",
+                    os.path.join("configs", self.MODEL_NAME_TO_CFG_PATH[name])
+                )
+                with open(d2config_path, "r") as d2config:
+                    contents = d2config.read()
+                    weights_cfg = re.search("WEIGHTS: \"(.*)\"\n", contents)[1]
+                    contents = contents.replace(weights_cfg, "")
+
+                with open(d2config_path, "w") as d2config:
+                    d2config.write(contents)
+        except FileNotFoundError as err:
+            raise RuntimeError(f"{name} is no available from D2 model zoo!")
+
+        try:
+            # trained=False is not the same as our ``pretrained`` argument.
+            d2_model = d2mz.get(
+                self.MODEL_NAME_TO_CFG_PATH[name], trained=False
+            )
+            self._cnn = d2_model.backbone
+        except Exception as e:
+            self._cnn = None
+            exception = e
+
+        # Revert back the changing of config file in case of any exception.
+        if not pretrained:
+            with open(d2config_path, "r") as d2config:
+                contents = d2config.read().replace(
+                    "WEIGHTS: \"\"", f"WEIGHTS: \"{weights_cfg}\""
+                )
+
+            with open(d2config_path, "w") as d2config:
+                d2config.write(contents)
+
+        if self._cnn is None:
+            raise(exception)
+
+    def forward(self, image: torch.Tensor):
+        spatial_features = self._cnn(image)
+        return spatial_features
 
 
 class BlindVisualStream(nn.Module):
