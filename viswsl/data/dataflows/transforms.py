@@ -153,24 +153,32 @@ class MaskSomeTokensRandomly(df.ProxyDataFlow):
             # At this point, caption tokens and masked labels are lists of
             # same length. Do whole word masking now.
             for i in range(len(caption_tokens)):
-                if masked_labels[i] == self._mask_index:
-                    t = self._vocabulary.get_token_from_index(masked_labels[i])
+                if caption_tokens[i] == self._mask_index:
                     # Mask all following tokens until getting one which starts
                     # with a space.
                     for j in range(i + 1, len(caption_tokens)):
                         tt = self._vocabulary.get_token_from_index(caption_tokens[j])
-                        if tt.startswith(self.SP_SPACE):
+                        if (
+                            tt.startswith(self.SP_SPACE)
+                            or tt in self._vocabulary.special_tokens
+                        ):
                             break
                         masked_labels[j] = caption_tokens[j]
                         caption_tokens[j] = self._mask_index
 
                     # Mask tokens before this one, if this one doesn't start
                     # with a space.
-                    if not t.startswith(self.SP_SPACE):
+                    t = self._vocabulary.get_token_from_index(masked_labels[i])
+                    if (
+                        not t.startswith(self.SP_SPACE)
+                        and t not in self._vocabulary.special_tokens
+                    ):
                         for j in range(i - 1, -1, -1):
                             tt = self._vocabulary.get_token_from_index(
                                 caption_tokens[j]
                             )
+                            if tt in self._vocabulary.special_tokens:
+                                break
                             if tt.startswith(self.SP_SPACE):
                                 masked_labels[j] = caption_tokens[j]
                                 caption_tokens[j] = self._mask_index
