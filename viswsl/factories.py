@@ -37,23 +37,23 @@ class VisualStreamFactory(Factory):
     PRODUCTS: Dict[str, Type[nn.Module]] = {
         "blind": vstream.BlindVisualStream,
         "torchvision": vstream.TorchvisionVisualStream,
+        "detectron2": vstream.D2BackboneVisualStream,
     }
 
     @classmethod
     def from_config(cls, config: Config) -> Type[nn.Module]:
-
         _C = config
-        if "torchvision" in _C.MODEL.VISUAL.NAME:
-            cnn_name = _C.MODEL.VISUAL.NAME.split("::")[-1]
-            kwargs = {
-                "pretrained": _C.MODEL.VISUAL.PRETRAINED,
-                "num_groups": _C.MODEL.VISUAL.NUM_GROUPS,
-                "norm_layer": nn.BatchNorm2d
-                if _C.MODEL.VISUAL.NORM_LAYER == "batchnorm"
-                else nn.GroupNorm,
-            }
-            return cls.create("torchvision", cnn_name, **kwargs)
+        if (
+            "torchvision" in _C.MODEL.VISUAL.NAME
+            or "detectron2" in _C.MODEL.VISUAL.NAME
+        ):
+            zoo_name, cnn_name = _C.MODEL.VISUAL.NAME.split("::")
+            kwargs = {"pretrained": _C.MODEL.VISUAL.PRETRAINED}
+            if "torchvision" in _C.MODEL.VISUAL.NAME:
+                kwargs["num_groups"] = _C.MODEL.VISUAL.NUM_GROUPS
+                kwargs["norm_layer"] = _C.MODEL.VISUAL.NORM_LAYER
 
+            return cls.create(zoo_name, cnn_name, **kwargs)
         return cls.create(_C.MODEL.VISUAL.NAME)
 
 
