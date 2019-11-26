@@ -46,24 +46,19 @@ class TorchvisionVisualStream(nn.Module):
         self, image: torch.Tensor, return_intermediate_outputs: bool = False
     ) -> Union[torch.Tensor, Dict[str, torch.Tensor]]:
 
-        if return_intermediate_outputs:
-            # Iterate through the modules in sequence and collect feature
-            # vectors for last layers in each stage.
-            intermediate_outputs: Dict[str, torch.Tensor] = {}
-            for idx, (name, layer) in enumerate(self._cnn.named_children()):
-                out = layer(image) if idx == 0 else layer(out)
-                if name in self._stage_names:
-                    intermediate_outputs[name] = out
+        # Iterate through the modules in sequence and collect feature
+        # vectors for last layers in each stage.
+        intermediate_outputs: Dict[str, torch.Tensor] = {}
+        for idx, (name, layer) in enumerate(self._cnn.named_children()):
+            out = layer(image) if idx == 0 else layer(out)
+            if name in self._stage_names:
+                intermediate_outputs[name] = out
 
+        if return_intermediate_outputs:
             return intermediate_outputs
         else:
-            # Get a flat feature vector, view it as spatial features.
-            # TODO (kd): Hardcoded values now, deal with them later.
-            flat_spatial_features = self._cnn(image)
-
-            # shape: (batch_size, 7, 7, 2048)
-            spatial_features = flat_spatial_features.view(-1, 49, 2048)
-            return spatial_features
+            # shape: (batch_size, 2048, 7, 7)
+            return intermediate_outputs["layer4"]
 
     def _batchnorm_to_groupnorm(self, module, num_groups: int):
         mod = module
@@ -134,9 +129,42 @@ class D2BackboneVisualStream(nn.Module):
         if self._cnn is None:
             raise (exception)
 
-    def forward(self, image: torch.Tensor):
-        spatial_features = self._cnn(image)
-        return spatial_features
+        # A ResNet-like backbone will only have three stages, the fourth one
+        # will be on the roi_head. Add that separately.
+        self._layer4 = d2_model.roi_heads.res5
+
+        # Keep a list of intermediate layer names.
+        # res2 (detectron2): layer1 (torchvision)
+        # res3 (detectron2): layer2 (torchvision), and so on...
+        self._stage_names = [f"res{i}" for i in range(2, 5)]
+
+    def forward(
+        self, image: torch.Tensor, return_intermediate_outputs: bool = False
+    ) -> Union[torch.Tensor, Dict[str, torch.Tensor]]:
+
+        # Iterate through the modules in sequence and collect feature
+        # vectors for last layers in each stage.
+        intermediate_outputs: Dict[str, torch.Tensor] = {}
+        for idx, (name, layer) in enumerate(self._cnn.named_children()):
+            out = layer(image) if idx == 0 else layer(out)
+            if name in self._stage_names:
+                intermediate_outputs[name] = out
+
+        intermediate_outputs["res5"] = self._layer4(out)
+
+        # Rename keys to be consistent with torchvision.
+        intermediate_outputs = {
+            "layer1": intermediate_outputs["res2"],
+            "layer2": intermediate_outputs["res3"],
+            "layer3": intermediate_outputs["res4"],
+            "layer4": intermediate_outputs["res5"],
+        }
+
+        if return_intermediate_outputs:
+            return intermediate_outputs
+        else:
+            # shape: (batch_size, 2048, 7, 7)
+            return intermediate_outputs["layer4"]
 
 
 class BlindVisualStream(nn.Module):
