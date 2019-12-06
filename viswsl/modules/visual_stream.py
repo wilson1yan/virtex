@@ -1,7 +1,7 @@
 import os
 import pkg_resources
 import re
-from typing import Dict
+from typing import Dict, Union
 
 import torch
 from torch import nn
@@ -21,42 +21,51 @@ class TorchvisionVisualStream(nn.Module):
         # Protect import because it should be an optional dependency, one may
         # only use `D2BackboneVisualStream`.
         from torchvision import models as tv_models
+
         try:
             model_creation_method = getattr(tv_models, name)
         except AttributeError as err:
             raise RuntimeError(f"{name} if not a torchvision model.")
 
         # Initialize with BatchNorm, convert all Batchnorm to GroupNorm if
-        # needed, later.
+        # needed.
         self._cnn = model_creation_method(
             pretrained, zero_init_residual=True, **kwargs
         )
+        if norm_layer == "groupnorm":
+            self._cnn = self._batchnorm_to_groupnorm(self._cnn, num_groups)
+
         # Do nothing after the final res stage.
         self._cnn.avgpool = nn.Identity()
         self._cnn.fc = nn.Identity()
 
-        if norm_layer == "groupnorm":
-            self._cnn = self._batchnorm_to_groupnorm(self._cnn, num_groups)
+        # Keep a list of intermediate layer names.
+        self._stage_names = [f"layer{i}" for i in range(1, 5)]
 
-    def forward(self, image: torch.Tensor):
-        # Get a flat feature vector, view it as spatial features.
-        # TODO (kd): Hardcoded values now, deal with them later.
-        flat_spatial_features = self._cnn(image)
+    def forward(
+        self, image: torch.Tensor, return_intermediate_outputs: bool = False
+    ) -> Union[torch.Tensor, Dict[str, torch.Tensor]]:
 
-        # shape: (batch_size, 7, 7, 2048)
-        spatial_features = flat_spatial_features.view(-1, 49, 2048)
-        return spatial_features
+        # Iterate through the modules in sequence and collect feature
+        # vectors for last layers in each stage.
+        intermediate_outputs: Dict[str, torch.Tensor] = {}
+        for idx, (name, layer) in enumerate(self._cnn.named_children()):
+            out = layer(image) if idx == 0 else layer(out)
+            if name in self._stage_names:
+                intermediate_outputs[name] = out
+
+        if return_intermediate_outputs:
+            return intermediate_outputs
+        else:
+            # shape: (batch_size, 2048, 7, 7)
+            return intermediate_outputs["layer4"]
 
     def _batchnorm_to_groupnorm(self, module, num_groups: int):
         mod = module
         if isinstance(module, torch.nn.modules.batchnorm._BatchNorm):
-            mod = nn.GroupNorm(
-                num_groups, module.num_features, affine=module.affine
-            )
+            mod = nn.GroupNorm(num_groups, module.num_features, affine=module.affine)
         for name, child in module.named_children():
-            mod.add_module(
-                name, self._batchnorm_to_groupnorm(child, num_groups)
-            )
+            mod.add_module(name, self._batchnorm_to_groupnorm(child, num_groups))
         return mod
 
 
@@ -68,16 +77,13 @@ class D2BackboneVisualStream(nn.Module):
         "coco_faster_rcnn_R_50_DC5": "COCO-Detection/faster_rcnn_R_50_DC5_3x.yaml",
         "coco_faster_rcnn_R_101_C4": "COCO-Detection/faster_rcnn_R_101_C4_3x.yaml",
         "coco_faster_rcnn_R_101_DC5": "COCO-Detection/faster_rcnn_R_101_DC5_3x.yaml",
-
         "coco_mask_rcnn_R_50_C4": "COCO-InstanceSegmentation/mask_rcnn_R_50_C4_3x.yaml",
         "coco_mask_rcnn_R_50_DC5": "COCO-InstanceSegmentation/mask_rcnn_R_50_DC5_3x.yaml",
         "coco_mask_rcnn_R_101_C4": "COCO-InstanceSegmentation/mask_rcnn_R_101_C4_3x.yaml",
         "coco_mask_rcnn_R_101_DC5": "COCO-InstanceSegmentation/mask_rcnn_R_101_DC5_3x.yaml",
     }
 
-    def __init__(
-        self, name: str, pretrained: bool = False, **kwargs,
-    ):
+    def __init__(self, name: str, pretrained: bool = False, **kwargs):
         super().__init__()
 
         # Protect import because it should be an optional dependency, one may
@@ -90,11 +96,11 @@ class D2BackboneVisualStream(nn.Module):
             if not pretrained:
                 d2config_path = pkg_resources.resource_filename(
                     "detectron2.model_zoo",
-                    os.path.join("configs", self.MODEL_NAME_TO_CFG_PATH[name])
+                    os.path.join("configs", self.MODEL_NAME_TO_CFG_PATH[name]),
                 )
                 with open(d2config_path, "r") as d2config:
                     contents = d2config.read()
-                    weights_cfg = re.search("WEIGHTS: \"(.*)\"\n", contents)[1]
+                    weights_cfg = re.search('WEIGHTS: "(.*)"\n', contents)[1]
                     contents = contents.replace(weights_cfg, "")
 
                 with open(d2config_path, "w") as d2config:
@@ -104,9 +110,7 @@ class D2BackboneVisualStream(nn.Module):
 
         try:
             # trained=False is not the same as our ``pretrained`` argument.
-            d2_model = d2mz.get(
-                self.MODEL_NAME_TO_CFG_PATH[name], trained=False
-            )
+            d2_model = d2mz.get(self.MODEL_NAME_TO_CFG_PATH[name], trained=False)
             self._cnn = d2_model.backbone
         except Exception as e:
             self._cnn = None
@@ -116,18 +120,51 @@ class D2BackboneVisualStream(nn.Module):
         if not pretrained:
             with open(d2config_path, "r") as d2config:
                 contents = d2config.read().replace(
-                    "WEIGHTS: \"\"", f"WEIGHTS: \"{weights_cfg}\""
+                    'WEIGHTS: ""', f'WEIGHTS: "{weights_cfg}"'
                 )
 
             with open(d2config_path, "w") as d2config:
                 d2config.write(contents)
 
         if self._cnn is None:
-            raise(exception)
+            raise (exception)
 
-    def forward(self, image: torch.Tensor):
-        spatial_features = self._cnn(image)
-        return spatial_features
+        # A ResNet-like backbone will only have three stages, the fourth one
+        # will be on the roi_head. Add that separately.
+        self._layer4 = d2_model.roi_heads.res5
+
+        # Keep a list of intermediate layer names.
+        # res2 (detectron2): layer1 (torchvision)
+        # res3 (detectron2): layer2 (torchvision), and so on...
+        self._stage_names = [f"res{i}" for i in range(2, 5)]
+
+    def forward(
+        self, image: torch.Tensor, return_intermediate_outputs: bool = False
+    ) -> Union[torch.Tensor, Dict[str, torch.Tensor]]:
+
+        # Iterate through the modules in sequence and collect feature
+        # vectors for last layers in each stage.
+        intermediate_outputs: Dict[str, torch.Tensor] = {}
+        for idx, (name, layer) in enumerate(self._cnn.named_children()):
+            out = layer(image) if idx == 0 else layer(out)
+            if name in self._stage_names:
+                intermediate_outputs[name] = out
+
+        intermediate_outputs["res5"] = self._layer4(out)
+
+        # Rename keys to be consistent with torchvision.
+        intermediate_outputs = {
+            "layer1": intermediate_outputs["res2"],
+            "layer2": intermediate_outputs["res3"],
+            "layer3": intermediate_outputs["res4"],
+            "layer4": intermediate_outputs["res5"],
+        }
+
+        if return_intermediate_outputs:
+            return intermediate_outputs
+        else:
+            # shape: (batch_size, 2048, 7, 7)
+            return intermediate_outputs["layer4"]
 
 
 class BlindVisualStream(nn.Module):
