@@ -8,9 +8,11 @@ from typing import Dict, List
 from loguru import logger
 import numpy as np
 from sklearn.svm import LinearSVC
+from sklearn.metrics import average_precision_score
 from sklearn.model_selection import cross_val_score
 import torch
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from viswsl.config import Config
@@ -73,7 +75,6 @@ if __name__ == "__main__":
     logger.add(
         sys.stdout, format="<g>{time}</g>: <lvl>{message}</lvl>", colorize=True
     )
-
     # Set up a serialization directory.
     if not _A.serialization_dir:
         _A.serialization_dir = os.path.dirname(_A.checkpoint_path)
@@ -82,6 +83,12 @@ if __name__ == "__main__":
     # Print config and args.
     for arg in vars(_A):
         logger.info("{:<20}: {}".format(arg, getattr(_A, arg)))
+
+    # Tensorboard writer for logging mAP scores.
+    tensorboard_writer = SummaryWriter(log_dir=_A.serialization_dir)
+    CHECKPOINT_ITERATION = int(
+        os.path.basename(_A.checkpoint_path).split("_")[-1][:-4]
+    )
 
     # -------------------------------------------------------------------------
     #   EXTRACT FEATURES FOR TRAINING SVMs
@@ -97,6 +104,8 @@ if __name__ == "__main__":
     test_dataloader = DataLoader(
         test_dataset, batch_size=_C_DOWNSTREAM.BATCH_SIZE, pin_memory=True
     )
+    NUM_CLASSES = len(train_dataset.class_names)
+
     # Initialize from a checkpoint, but only keep the visual module.
     visual_module = VisualStreamFactory.from_config(_C)
     linguistic_module = LinguisticStream.from_config(_C)
@@ -146,7 +155,6 @@ if __name__ == "__main__":
     features_test = {
         k: torch.cat(v, dim=0).numpy() for k, v in features_test.items()
     }
-
     targets_train = torch.cat(targets_train, dim=0).numpy()
     targets_test = torch.cat(targets_test, dim=0).numpy()
 
@@ -154,11 +162,15 @@ if __name__ == "__main__":
     #   TRAIN SVMs WITH EXTRACTED FEATURES
     # -------------------------------------------------------------------------
 
+    # Store test set AP for each class, for features from every layer.
+    # shape: (num_layers, num_classes)
+    test_ap = np.zeros((len(_C_DOWNSTREAM.LAYER_NAMES), NUM_CLASSES))
+
     # Possible keys: {"layer1", "layer2", "layer3", "layer4"}
-    for layer_name in _C_DOWNSTREAM.LAYER_NAMES:
+    for layer_idx, layer_name in enumerate(_C_DOWNSTREAM.LAYER_NAMES):
 
         # Iterate over all VOC classes and train one-vs-all linear SVMs.
-        for cls_idx in range(targets_train.shape[1]):
+        for cls_idx in range(NUM_CLASSES):
             cls_labels = targets_train[:, cls_idx].astype(dtype=np.int32, copy=True)
             # meaning of labels in VOC/COCO original loaded target files:
             # label 0 = not present, set it to -1 as svm train target
@@ -172,6 +184,11 @@ if __name__ == "__main__":
                     Negative Examples: {num_negatives}
                     Ratio: {num_positives / num_negatives}"""
             )
+
+            # See which cost maximizes the AP for this class.
+            max_crossval_ap: float = 0.0
+            best_crossval_clf = None
+
             for cost in _C_DOWNSTREAM.SVM_COSTS:
                 clf = LinearSVC(
                     C=cost,
@@ -188,7 +205,47 @@ if __name__ == "__main__":
                     scoring="average_precision",
                 )
                 clf.fit(features_train[layer_name], cls_labels)
+
+                # Keep track of best SVM (based on cost) for each (layer, cls).
+                if ap_scores.mean() > max_crossval_ap:
+                    max_ap = ap_scores.mean()
+                    best_crossval_clf = clf
+
                 logger.info(
-                    f"""Training SVM: class {train_dataset.class_names[cls_idx]},
-                    {layer_name}, cost {cost}, mAP {ap_scores.mean()}"""
+                    f"SVM for: {layer_name}, cost {cost}, mAP {ap_scores.mean()}"
                 )
+
+            # -----------------------------------------------------------------
+            #   TEST THE TRAINED SVM (PER LAYER, PER CLASS)
+            # -----------------------------------------------------------------
+
+            predictions = best_crossval_clf.decision_function(
+                features_test[layer_name]
+            )
+            # Meaning of labels in VOC/COCO original loaded target files:
+            # label 0 = not present, set it to -1 as SVM train target.
+            # label 1 = present. Make the SVM train target labels as -1, 1.
+            cls_labels = targets_test[:, cls_idx].astype(dtype=np.int32, copy=True)
+            evaluate_data_inds = targets_test[:, cls_idx] != -1
+            eval_preds = predictions[evaluate_data_inds]
+            eval_cls_labels = cls_labels[evaluate_data_inds]
+            eval_cls_labels[np.where(eval_cls_labels == 0)] = -1
+
+            # Binarize class labels to make AP targets.
+            targets = eval_cls_labels > 0
+            test_ap[layer_idx][cls_idx] = average_precision_score(
+                targets, eval_preds
+            )
+
+        layer_test_map = np.mean(test_ap, axis=-1)[layer_idx]
+        logger.info(f"mAP for {layer_name}: {layer_test_map}")
+        tensorboard_writer.add_scalars(
+            "metrics/voc07_clf",
+            {f"{layer_name}_mAP": layer_test_map},
+            CHECKPOINT_ITERATION,
+        )
+
+    best_test_map = max(np.mean(test_ap, axis=-1))
+    tensorboard_writer.add_scalars(
+        "metrics/voc07_clf", {"best_mAP": best_test_map}, CHECKPOINT_ITERATION
+    )

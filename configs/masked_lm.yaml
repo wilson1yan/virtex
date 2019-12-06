@@ -43,4 +43,4 @@ OPTIM:
       DATA_ROOT: data/VOC2007
       BATCH_SIZE: 256
       LAYER_NAMES: ["layer3", "layer4"]
-      SVM_COSTS: [0.01, 0.1, 1.0]
+      SVM_COSTS: [0.1, 1.0, 2.0]

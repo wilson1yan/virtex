@@ -182,7 +182,7 @@ class Config(object):
         _C.DOWNSTREAM.VOC07_CLF.DATA_ROOT = "data/VOC2007"
         _C.DOWNSTREAM.VOC07_CLF.BATCH_SIZE = 256
         _C.DOWNSTREAM.VOC07_CLF.LAYER_NAMES = ["layer3", "layer4"]
-        _C.DOWNSTREAM.VOC07_CLF.SVM_COSTS = [0.01, 0.1, 1.0]
+        _C.DOWNSTREAM.VOC07_CLF.SVM_COSTS = [0.1, 1.0, 2.0]
 
         # Override parameter values from YAML file first, then from override
         # list.
