@@ -1,7 +1,7 @@
 from collections import defaultdict
 import os
 import glob
-from typing import Dict, Iterator, List, Tuple
+from typing import Dict, List, Tuple
 
 import dataflow as df
 import numpy as np
@@ -60,6 +60,10 @@ class VOC07ClassificationDataset(IterableDataset):
         self._pipeline = TransformImageForResNetLikeModels(
             self._pipeline, index_or_key=0
         )
+
+    @property
+    def class_names(self):
+        return self._class_names
 
     def __len__(self):
         return len(self._pipeline)
