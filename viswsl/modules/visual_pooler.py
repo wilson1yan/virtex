@@ -18,11 +18,11 @@ class VisualIntermediateOutputPooler(nn.Module):
     https://arxiv.org/abs/1905.01235
     """
 
-    def __init__(self, mode: str = "avg", flatten: bool = True):
+    def __init__(self, mode: str = "avg", normalize: bool = True):
         super().__init__()
 
         layer = nn.AdaptiveAvgPool2d if mode == "avg" else nn.AdaptiveMaxPool2d
-        self._flatten = flatten
+        self._normalize = normalize
 
         # This spatial size will downsample features from ResNet-like models
         # so their size is ~9000 when flattened
@@ -46,8 +46,9 @@ class VisualIntermediateOutputPooler(nn.Module):
         # keys: {"layer1", "layer2", "layer3", "layer4"}
         for key in intermediate_outputs:
             pooled = self._pool[key](intermediate_outputs[key])
-            if self._flatten:
-                pooled = pooled.view(pooled.size(0), -1)
+            pooled = pooled.view(pooled.size(0), -1)
+            if self._normalize:
+                pooled = pooled / torch.norm(pooled, dim=-1).unsqueeze(-1)
             intermediate_outputs[key] = pooled
 
         return intermediate_outputs
