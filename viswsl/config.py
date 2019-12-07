@@ -193,12 +193,18 @@ class Config(object):
         _C.DOWNSTREAM.VOC07_CLF.LAYER_NAMES = ["layer3", "layer4"]
         _C.DOWNSTREAM.VOC07_CLF.SVM_COSTS = [0.1, 1.0, 2.0]
 
+        # Set these two values after mergining from file.
+        _C.OPTIM.BATCH_SIZE_PER_ITER = None
+        _C.OPTIM.TOTAL_BATCH_SIZE = None
+
         # Override parameter values from YAML file first, then from override
-        # list.
+        # list, then add derived params.
         self._C = _C
         if config_file is not None:
             self._C.merge_from_file(config_file)
         self._C.merge_from_list(override_list)
+
+        self.add_derived_params()
 
         # Make an instantiated object of this class immutable.
         self._C.freeze()
@@ -216,7 +222,7 @@ class Config(object):
     def add_derived_params(self):
         r"""Add parameters with values derived from existing parameters."""
         self._C.OPTIM.BATCH_SIZE_PER_ITER = (
-            self._C.OPTIM.BATCH_SIZE * dist.get_world_size()
+            self._C.OPTIM.BATCH_SIZE_PER_GPU * dist.get_world_size()
         )
         self._C.OPTIM.TOTAL_BATCH_SIZE = (
             self._C.OPTIM.BATCH_SIZE_PER_ITER * self._C.OPTIM.BATCH_SIZE_MULTIPLIER

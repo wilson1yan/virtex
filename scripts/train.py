@@ -80,6 +80,13 @@ if __name__ == "__main__":
     # -------------------------------------------------------------------------
     _A = parser.parse_args()
 
+    if _A.slurm:
+        device_id = dist.init_distributed_env(_A.dist_backend)
+    else:
+        # TODO (kd): Add an option to use `init_distributed_tcp`.
+        device_id = 0
+    device = torch.device(f"cuda:{device_id}" if device_id != -1 else "cpu")
+
     # Create a config with default values, then override from config file, and
     # _A. This object is immutable, nothing can be changed in this anymore.
     _C = Config(_A.config, _A.config_override)
@@ -90,13 +97,6 @@ if __name__ == "__main__":
     torch.manual_seed(_C.RANDOM_SEED)
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
-
-    if _A.slurm:
-        device_id = dist.init_distributed_env(_A.dist_backend)
-    else:
-        # TODO (kd): Add an option to use `init_distributed_tcp`.
-        device_id = 0
-    device = torch.device(f"cuda:{device_id}" if device_id != -1 else "cpu")
 
     # Create serialization directory and save config in it.
     os.makedirs(_A.serialization_dir, exist_ok=True)
