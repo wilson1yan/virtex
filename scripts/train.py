@@ -11,20 +11,21 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
+# fmt: off
 from viswsl.config import Config
 from viswsl.data.datasets import MaskedLanguageModelingDataset
 from viswsl.data.vocabulary import SentencePieceVocabulary
 from viswsl.data.tokenizers import SentencePieceTokenizer
-from viswsl.factories import VisualStreamFactory, OptimizerFactory
+from viswsl.factories import (
+    VisualStreamFactory, TextualStreamFactory, OptimizerFactory,
+    LRSchedulerFactory,
+)
 from viswsl.model import ViswslModel
-from viswsl.modules.linguistic_stream import LinguisticStream
-from viswsl.optim.lr_scheduler import LinearWarmupLinearDecayLR
 from viswsl.utils.checkpointing import CheckpointManager
 import viswsl.utils.distributed as dist
 from viswsl.utils.logging import Timer
 
 
-# fmt: off
 parser = argparse.ArgumentParser(
     description="Train a CNN+Transformer model on masked language modeling."
 )
@@ -139,10 +140,9 @@ if __name__ == "__main__":
         pin_memory=True,
     )
 
-    # TODO: Make a linguistic stream factory.
-    visual_module = VisualStreamFactory.from_config(_C)
-    linguistic_module = LinguisticStream.from_config(_C)
-    model = ViswslModel(visual_module, linguistic_module).to(device)
+    model = ViswslModel(
+        VisualStreamFactory.from_config(_C), TextualStreamFactory.from_config(_C)
+    ).to(device)
 
     if dist.get_world_size() > 1:
         dist.synchronize()
@@ -150,13 +150,8 @@ if __name__ == "__main__":
             model, device_ids=[device]
         )
 
-    # Weight decay will not be applied to norm layers and biases. Check defn.
     optimizer = OptimizerFactory.from_config(_C, model.named_parameters())
-    lr_scheduler = LinearWarmupLinearDecayLR(
-        optimizer,
-        total_steps=_C.OPTIM.NUM_ITERATIONS,
-        warmup_steps=_C.OPTIM.WARMUP_STEPS,
-    )
+    lr_scheduler = LRSchedulerFactory.from_config(_C, optimizer)
 
     # -------------------------------------------------------------------------
     #  BEFORE TRAINING STARTS
