@@ -236,15 +236,15 @@ class Config(object):
         # Set textual stream architecture if specified in string.
         # For example: "default::l6-d768-h12":
         #     l = layers, d = hidden_size, h = num_heads
-        textual_stream_name_parts = self._C.TEXTUAL.NAME.split("::")[-1].split("-")
         if len(textual_stream_name_parts) > 1:
             for name_part in textual_stream_name_parts[1:]:
                 if name_part[0] == "l":
-                    self._C.TEXTUAL.NUM_LAYERS = int(name_part[1:])
+                    self._C.MODEL.TEXTUAL.NUM_LAYERS = int(name_part[1:])
                 elif name_part == "d":
-                    self._C.TEXTUAL.HIDDEN_SIZE = int(name_part[1:])
+                    self._C.MODEL.TEXTUAL.HIDDEN_SIZE = int(name_part[1:])
                 elif name_part == "h":
-                    self._C.TEXTUAL.NUM_ATTENTION_HEADS = int(name_part[1:])
+                    self._C.MODEL.TEXTUAL.NUM_ATTENTION_HEADS = int(name_part[1:])
+
 
     def __getattr__(self, attr: str):
         return self._C.__getattr__(attr)
