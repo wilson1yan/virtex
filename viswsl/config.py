@@ -6,6 +6,7 @@ Parts of this class are adopted from several of my past projects:
 """
 from typing import Any, List, Optional
 
+from loguru import logger
 from yacs.config import CfgNode as CN
 import viswsl.utils.distributed as dist
 
@@ -231,6 +232,19 @@ class Config(object):
         self._C.OPTIM.TOTAL_BATCH_SIZE = (
             self._C.OPTIM.BATCH_SIZE_PER_ITER * self._C.OPTIM.BATCH_SIZE_MULTIPLIER
         )
+
+        # Set textual stream architecture if specified in string.
+        # For example: "default::l6-d768-h12":
+        #     l = layers, d = hidden_size, h = num_heads
+        textual_stream_name_parts = self._C.TEXTUAL.NAME.split("::")[-1].split("-")
+        if len(textual_stream_name_parts) > 1:
+            for name_part in textual_stream_name_parts[1:]:
+                if name_part[0] == "l":
+                    self._C.TEXTUAL.NUM_LAYERS = int(name_part[1:])
+                elif name_part == "d":
+                    self._C.TEXTUAL.HIDDEN_SIZE = int(name_part[1:])
+                elif name_part == "h":
+                    self._C.TEXTUAL.NUM_ATTENTION_HEADS = int(name_part[1:])
 
     def __getattr__(self, attr: str):
         return self._C.__getattr__(attr)

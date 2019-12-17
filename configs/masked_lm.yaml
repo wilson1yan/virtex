@@ -24,6 +24,7 @@ MODEL:
     PRETRAINED: false
 
   TEXTUAL:
+    NAME: default::l6-d768-h12
     HIDDEN_SIZE: 768
     NUM_ATTENTION_HEADS: 12
     NUM_LAYERS: 6
