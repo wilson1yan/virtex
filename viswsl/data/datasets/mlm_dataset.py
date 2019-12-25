@@ -6,8 +6,9 @@ from torch.utils.data import IterableDataset
 from viswsl.data.dataflows import (
     ReadDatapointsFromLmdb,
     TransformImageForResNetLikeModels,
-    TokenizeAndPadCaption,
+    TokenizeCaption,
     MaskSomeTokensRandomly,
+    PadSequence,
 )
 
 from viswsl.config import Config
@@ -34,7 +35,7 @@ class MaskedLanguageModelingDataset(IterableDataset):
         self._pipeline = TransformImageForResNetLikeModels(
             self._pipeline, normalize=normalize_image, index_or_key="image"
         )
-        self._pipeline = TokenizeAndPadCaption(
+        self._pipeline = TokenizeCaption(
             self._pipeline,
             vocabulary,
             tokenizer,
@@ -46,6 +47,18 @@ class MaskedLanguageModelingDataset(IterableDataset):
             mask_proportion=mask_proportion,
             mask_probability=mask_probability,
             replace_probability=replace_probability,
+        )
+        self._pipeline = PadSequence(
+            self._pipeline,
+            max_length=max_caption_length,
+            padding_value=vocabulary.pad_index,
+            input_key="caption_tokens",
+        )
+        self._pipeline = PadSequence(
+            self._pipeline,
+            max_length=max_caption_length,
+            padding_value=vocabulary.pad_index,
+            input_key="masked_labels",
         )
 
     @classmethod
