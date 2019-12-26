@@ -271,17 +271,37 @@ if __name__ == "__main__":
             model.eval()
 
             val_loss = torch.tensor(0.0, device=device)
+            image_query_loss = torch.tensor(0.0, device=device)
+            caption_query_loss = torch.tensor(0.0, device=device)
+
             for val_iteration, val_batch in enumerate(val_dataloader):
-                output_dict = model(
-                    batch["image"], batch["masked_tokens"], batch["masked_labels"]
-                )
+
+                # TODO (kd): Fix this hard-coding:
+                if _C.MODEL.NAME == "word_masking":
+                    output_dict = model(
+                        batch["image"],
+                        batch["masked_tokens"],
+                        batch["masked_labels"],
+                    )
+                else:
+                    output_dict = model(batch["image"], batch["caption_tokens"])
+
                 val_loss += output_dict["loss"].mean().item()
+
+                if _C.MODEL.NAME == "moco":
+                    image_query_loss += output_dict["image_query_loss"]
+                    caption_query_loss += output_dict["caption_query_loss"]
 
                 if val_iteration == _A.val_batches // dist.get_world_size():
                     val_loss /= _A.val_batches // dist.get_world_size()
+                    image_query_loss /= _A.val_batches // dist.get_world_size()
+                    caption_query_loss /= _A.val_batches // dist.get_world_size()
                     break
 
-            dist.average_across_processes(val_loss)
+            val_loss = dist.average_across_processes(val_loss)
+            image_query_loss = dist.average_across_processes(image_query_loss)
+            caption_query_loss = dist.average_across_processes(caption_query_loss)
+
             torch.set_grad_enabled(True)
             model.train()
 
@@ -289,40 +309,58 @@ if __name__ == "__main__":
         #   TENSORBOARD LOGGING
         # ---------------------------------------------------------------------
         if iteration % _A.checkpoint_every == 0 and dist.is_master_process():
-            # fmt: off
-            logger.info(
-                f"Iter: {iteration} | Val loss- masked_lm: {val_loss:.3f} "
-            )
-            tensorboard_writer.add_scalar(
-                "val/masked_lm_loss", val_loss, iteration
-            )
+            if _C.MODEL.NAME == "moco":
+                logger.info(
+                    f"Iter: {iteration} | Val loss- total_moco: {val_loss:.3f}, "
+                    f"visual_moco: {image_query_loss:.3f}, "
+                    f"textual_moco: {caption_query_loss:.3f}"
+                )
+                tensorboard_writer.add_scalars(
+                    "val",
+                    {
+                        "visual_moco": image_query_loss,
+                        "textual_moco": caption_query_loss,
+                        "total_moco": val_loss,
+                    },
+                    iteration,
+                )
 
-            examples_str = ""
-            for tokens, labels, predictions in zip(
-                batch["masked_tokens"], batch["masked_labels"],
-                output_dict["predictions"]
-            ):
-                # Keep predictions only from [MASK]ed positions.
-                predictions = [
-                    predictions[i] for i in range(len(predictions))
-                    if labels[i] != vocabulary.unk_index
-                ]
-                to_strtokens = lambda token_indices: [  # noqa: E731
-                    vocabulary.get_token_from_index(t.item())
-                    for t in token_indices if t.item() != vocabulary.unk_index
-                ]
-                tokens = to_strtokens(tokens)
-                labels = to_strtokens(labels)
-                predictions = to_strtokens(predictions)
+            else:
+                # fmt: off
+                logger.info(
+                    f"Iter: {iteration} | Val loss- word_masking: {val_loss:.3f} "
+                )
+                tensorboard_writer.add_scalars(
+                    "val", {"word_masking": val_loss}, iteration
+                )
 
-                examples_str += f"""
-                    Caption tokens      : {tokenizer.detokenize(tokens)}
-                    Masked Labels       : {" ".join(labels)}
-                    Predictions (normal): {" ".join(predictions)}
+                examples_str = ""
+                for tokens, labels, predictions in zip(
+                    batch["masked_tokens"], batch["masked_labels"],
+                    output_dict["predictions"]
+                ):
+                    # Keep predictions only from [MASK]ed positions.
+                    predictions = [
+                        predictions[i] for i in range(len(predictions))
+                        if labels[i] != vocabulary.unk_index
+                    ]
+                    to_strtokens = lambda token_indices: [  # noqa: E731
+                        vocabulary.get_token_from_index(t.item())
+                        for t in token_indices if t.item() != vocabulary.unk_index
+                    ]
+                    tokens = to_strtokens(tokens)
+                    labels = to_strtokens(labels)
+                    predictions = to_strtokens(predictions)
 
-                    """
-            # fmt: on
-            tensorboard_writer.add_text("predictions", examples_str, iteration)
+                    examples_str += f"""
+                        Caption tokens      : {tokenizer.detokenize(tokens)}
+                        Masked Labels       : {" ".join(labels)}
+                        Predictions (normal): {" ".join(predictions)}
+
+                        """
+                # fmt: on
+                tensorboard_writer.add_text("predictions", examples_str, iteration)
+
             checkpoint_manager.step(iteration)
 
         # All processes will wait till master process is done logging.
