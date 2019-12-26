@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import torch
 from torch import nn
@@ -7,14 +7,8 @@ from torch import nn
 from viswsl.modules.attention import ScaledDotProductAttention
 
 
-class ViswslModel(nn.Module):
-
-    def __init__(
-        self,
-        visual,
-        textual,
-        fused_normalize: bool = False,
-    ):
+class WordMaskingModel(nn.Module):
+    def __init__(self, visual, textual, fused_normalize: bool = False):
         super().__init__()
         self.visual = visual
         self.textual = textual
@@ -22,7 +16,8 @@ class ViswslModel(nn.Module):
 
         self._attention = ScaledDotProductAttention(2048, textual.hidden_size)
         self._layer_norm = (
-            nn.Identity() if not fused_normalize
+            nn.Identity()
+            if not fused_normalize
             else nn.LayerNorm(self._fused_projection_size, eps=1e-8)
         )
         self._linear = nn.Linear(self._fused_projection_size, textual.vocab_size)
@@ -65,6 +60,73 @@ class ViswslModel(nn.Module):
         return output_dict
 
 
+class VisualMoCoModel(nn.Module):
+    def __init__(
+        self,
+        visual,
+        textual,
+        momentum: float = 0.999,
+        queue_size: int = 4096,
+        temperature: float = 0.07,
+        fused_normalize: bool = False,
+    ):
+        super().__init__()
+        self.visual = visual
+        self.textual = textual
+
+        self._visual_projection = nn.Linear(2048, textual.hidden_size)
+        self._layer_norm = (
+            nn.Identity()
+            if not fused_normalize
+            else nn.LayerNorm(textual.hidden_size, eps=1e-8)
+        )
+        # Hold a copy for encoding keys.
+        self._momentum_encoder = visual
+        self._max_queue_size = queue_size
+
+        # Initialize an empty queue.
+        self._visual_queue = torch.zeros((0, textual.hidden_size))
+
+    def forward(self, image: torch.Tensor, caption_tokens: torch.Tensor):
+        # shape: (batch_size, 2048, 7, 7)
+        image_features = self.visual(image)
+
+        # shape: (batch_size, 49, 2048)
+        image_features = image_features.view(-1, 2048, 49).permute(0, 2, 1)
+
+        # Perform global average pooling and projection.
+        # shape: (batch_size, projected_image_feature_size)
+        # `projected_image_feature_size` is `textual.hidden_size`
+        image_features = image_features.mean(dim=1)
+        projected_image_features = self._visual_projection(image_features)
+
+        # If queue is not large enough, just add batch to queue and finish.
+        if self._visual_queue.size(0) < self._max_queue_size:
+            self._update_queue(projected_image_features)
+            return
+
+    def _update_queue(self, projected_image_features: torch.Tensor):
+        # Detach features to avoid gradient/memory leaks.
+        # shape: (batch_size, projected_image_feature_size)
+        projected_image_features = projected_image_features.detach()
+
+        batch_size = projected_image_features.size(0)
+        current_queue_size = self._visual_queue.size(0)
+
+        # Enqueue: insert current batch in the front.
+        # shape: (current_queue_size + batch_size, projected_image_feature_size)
+        self._visual_queue = torch.cat(
+            (projected_image_features, self._visual_queue), dim=0
+        )
+        # Dequeue: trim the oldest batch from the end.
+        self._visual_queue = self._visual_queue[: self._max_queue_size, :]
+
+    def to(self, *args, **kwargs):
+        r"""Override super class method to move queue to specified device."""
+        self._visual_queue = self._visual_queue.to(*args, **kwargs)
+        return super().to(*args, **kwargs)
+
+
 class VOC07ClassificationFeatureExtractor(nn.Module):
     r"""
     Pool intermediate layer outputs for ResNet-like visual streams such that
@@ -79,12 +141,7 @@ class VOC07ClassificationFeatureExtractor(nn.Module):
     https://arxiv.org/abs/1905.01235
     """
 
-    def __init__(
-        self,
-        pretrained_model: ViswslModel,
-        mode: str = "avg",
-        normalize: bool = True,
-    ):
+    def __init__(self, pretrained_model, mode: str = "avg", normalize: bool = True):
         super().__init__()
         self._cnn = pretrained_model.visual
 

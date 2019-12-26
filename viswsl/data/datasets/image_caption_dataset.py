@@ -16,7 +16,7 @@ from viswsl.data.tokenizers import SentencePieceTokenizer
 from viswsl.data.vocabulary import SentencePieceVocabulary
 
 
-class MaskedLanguageModelingDataset(IterableDataset):
+class ImageCaptionDataset(IterableDataset):
     def __init__(
         self,
         lmdb_path: str,
@@ -30,7 +30,6 @@ class MaskedLanguageModelingDataset(IterableDataset):
         shuffle: bool = False,
     ):
         self._vocabulary = vocabulary
-
         self._pipeline = ReadDatapointsFromLmdb(lmdb_path, shuffle=shuffle)
         self._pipeline = TransformImageForResNetLikeModels(
             self._pipeline, normalize=normalize_image, index_or_key="image"
@@ -77,9 +76,9 @@ class MaskedLanguageModelingDataset(IterableDataset):
             lmdb_path=_C.DATA.VAL_LMDB if split == "val" else _C.DATA.TRAIN_LMDB,
             vocabulary=vocabulary,
             tokenizer=tokenizer,
-            mask_proportion=_C.PRETEXT.MASKED_LM.MASK_PROPORTION,
-            mask_probability=_C.PRETEXT.MASKED_LM.MASK_PROBABILITY,
-            replace_probability=_C.PRETEXT.MASKED_LM.REPLACE_PROBABILITY,
+            mask_proportion=_C.PRETEXT.WORD_MASKING.MASK_PROPORTION,
+            mask_probability=_C.PRETEXT.WORD_MASKING.MASK_PROBABILITY,
+            replace_probability=_C.PRETEXT.WORD_MASKING.REPLACE_PROBABILITY,
             normalize_image=_C.DATA.NORMALIZE_IMAGE,
             max_caption_length=_C.DATA.MAX_CAPTION_LENGTH,
             shuffle=False if split == "val" else True,
@@ -98,9 +97,11 @@ class MaskedLanguageModelingDataset(IterableDataset):
             caption_tokens = torch.tensor(datapoint["caption_tokens"]).long()
             masked_labels = torch.tensor(datapoint["masked_labels"]).long()
 
-            yield {
+            instance = {
                 "image_id": image_id,
                 "image": image,
                 "caption_tokens": caption_tokens,
                 "masked_labels": masked_labels,
             }
+
+            yield instance

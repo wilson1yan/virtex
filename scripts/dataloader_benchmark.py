@@ -8,9 +8,9 @@ import torch
 from torch.utils.data import DataLoader
 
 from viswsl.config import Config
-from viswsl.data.datasets import MaskedLanguageModelingDataset
-from viswsl.data.vocabulary import SentencePieceVocabulary
-from viswsl.data.tokenizers import SentencePieceTokenizer
+from viswsl.data import (
+    ImageCaptionDataset, SentencePieceVocabulary, SentencePieceTokenizer
+)
 import viswsl.utils.distributed as dist
 from viswsl.utils.common import cycle, Timer
 
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     # -------------------------------------------------------------------------
     vocabulary = SentencePieceVocabulary(_C.DATA.VOCABULARY)
     tokenizer = SentencePieceTokenizer(_C.DATA.TOKENIZER)
-    train_dataset = MaskedLanguageModelingDataset.from_config(
+    train_dataset = ImageCaptionDataset.from_config(
         _C, vocabulary=vocabulary, tokenizer=tokenizer, split="train"
     )
     train_dataloader = DataLoader(

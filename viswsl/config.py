@@ -158,12 +158,20 @@ class Config(object):
         _C.DATA.MAX_CAPTION_LENGTH = 30
 
         _C.PRETEXT = CN()
-        _C.PRETEXT.MASKED_LM = CN()
-        _C.PRETEXT.MASKED_LM.MASK_PROPORTION = 0.15
-        _C.PRETEXT.MASKED_LM.MASK_PROBABILITY = 0.85
-        _C.PRETEXT.MASKED_LM.REPLACE_PROBABILITY = 0.10
+        _C.PRETEXT.WORD_MASKING = CN()
+        _C.PRETEXT.WORD_MASKING.MASK_PROPORTION = 0.15
+        _C.PRETEXT.WORD_MASKING.MASK_PROBABILITY = 0.85
+        _C.PRETEXT.WORD_MASKING.REPLACE_PROBABILITY = 0.10
+
+        _C.PRETEXT.VISUAL_MOCO = CN()
+        _C.PRETEXT.VISUAL_MOCO.MOMENTUM = 0.999
+        _C.PRETEXT.VISUAL_MOCO.QUEUE_SIZE = 4096
+        _C.PRETEXT.VISUAL_MOCO.TEMPERATURE = 0.07
 
         _C.MODEL = CN()
+        _C.MODEL.NAME = "word_masking"
+        _C.MODEL.FUSED_NORMALIZE = False
+
         _C.MODEL.VISUAL = CN()
         _C.MODEL.VISUAL.NAME = "torchvision::resnet50"
         _C.MODEL.VISUAL.NORM_LAYER = "groupnorm"
@@ -176,8 +184,6 @@ class Config(object):
         _C.MODEL.TEXTUAL.NUM_ATTENTION_HEADS = 12
         _C.MODEL.TEXTUAL.NUM_LAYERS = 6
         _C.MODEL.TEXTUAL.ACTIVATION = "gelu"
-
-        _C.MODEL.FUSED_NORMALIZE = False
 
         _C.OPTIM = CN()
         _C.OPTIM.OPTIMIZER_NAME = "adamw"
@@ -247,7 +253,7 @@ class Config(object):
             elif name_part[0] == "d":
                 self._C.MODEL.TEXTUAL.HIDDEN_SIZE = int(name_part[1:])
             elif name_part[0] == "h":
-                self._C.MODEL.TEXTUAL.NUM_ATTENTION_HEADS = int(name_part[1:]
+                self._C.MODEL.TEXTUAL.NUM_ATTENTION_HEADS = int(name_part[1:])
 
         if self._C.MIXED_PRECISION_OPT > 0 and self._C.MODEL.TEXTUAL.ACTIVATION == "gelu":
             logger.warning("Cannot use GELU with mixed precision, changing to RELU.")

@@ -12,14 +12,12 @@ from torch.utils.tensorboard import SummaryWriter
 
 # fmt: off
 from viswsl.config import Config
-from viswsl.data.datasets import MaskedLanguageModelingDataset
-from viswsl.data.vocabulary import SentencePieceVocabulary
-from viswsl.data.tokenizers import SentencePieceTokenizer
-from viswsl.factories import (
-    VisualStreamFactory, TextualStreamFactory, OptimizerFactory,
-    LRSchedulerFactory,
+from viswsl.data import (
+    ImageCaptionDataset, SentencePieceVocabulary, SentencePieceTokenizer
 )
-from viswsl.model import ViswslModel
+from viswsl.factories import (
+    PretrainingModelFactory, OptimizerFactory, LRSchedulerFactory,
+)
 from viswsl.utils.checkpointing import CheckpointManager
 from viswsl.utils.common import cycle, Timer
 import viswsl.utils.distributed as dist
@@ -120,7 +118,7 @@ if __name__ == "__main__":
     # -------------------------------------------------------------------------
     vocabulary = SentencePieceVocabulary(_C.DATA.VOCABULARY)
     tokenizer = SentencePieceTokenizer(_C.DATA.TOKENIZER)
-    train_dataset = MaskedLanguageModelingDataset.from_config(
+    train_dataset = ImageCaptionDataset.from_config(
         _C, vocabulary=vocabulary, tokenizer=tokenizer, split="train"
     )
     train_dataloader = DataLoader(
@@ -129,7 +127,7 @@ if __name__ == "__main__":
         num_workers=_A.cpu_workers,
         pin_memory=True,
     )
-    val_dataset = MaskedLanguageModelingDataset.from_config(
+    val_dataset = ImageCaptionDataset.from_config(
         _C, vocabulary=vocabulary, tokenizer=tokenizer, split="val"
     )
     val_dataloader = DataLoader(
@@ -138,13 +136,7 @@ if __name__ == "__main__":
         num_workers=_A.cpu_workers,
         pin_memory=True,
     )
-
-    model = ViswslModel(
-        visual=VisualStreamFactory.from_config(_C),
-        textual=TextualStreamFactory.from_config(_C),
-        fused_normalize=_C.MODEL.FUSED_NORMALIZE,
-    ).to(device)
-
+    model = PretrainingModelFactory.from_config(_C).to(device)
     optimizer = OptimizerFactory.from_config(_C, model.named_parameters())
     lr_scheduler = LRSchedulerFactory.from_config(_C, optimizer)
 
@@ -152,13 +144,14 @@ if __name__ == "__main__":
     # NOTE: Always do this before wrapping model with DistributedDataParallel.
     if _C.MIXED_PRECISION_OPT > 0:
         from apex import amp
+
         model, optimizer = amp.initialize(
             model, optimizer, opt_level=f"O{_C.MIXED_PRECISION_OPT}"
         )
 
     if dist.get_world_size() > 1:
         dist.synchronize()
-        model = nn.parallel.DistributedDataParallel(  # type: ignore
+        model = nn.parallel.DistributedDataParallel(
             model, device_ids=[device], find_unused_parameters=True
         )
 
@@ -259,10 +252,7 @@ if __name__ == "__main__":
         # ---------------------------------------------------------------------
         #   TENSORBOARD LOGGING
         # ---------------------------------------------------------------------
-        if (
-            iteration % _A.checkpoint_every == 0
-            and dist.is_master_process()
-        ):
+        if iteration % _A.checkpoint_every == 0 and dist.is_master_process():
             # fmt: off
             logger.info(
                 f"Iter: {iteration} | Val loss- masked_lm: {val_loss:.3f} "

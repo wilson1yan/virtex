@@ -4,6 +4,7 @@ from torch import nn, optim
 from viswsl.config import Config
 from viswsl.data.vocabulary import SentencePieceVocabulary
 from viswsl.modules import visual_stream as vstream, textual_stream as tstream
+from viswsl.model import WordMaskingModel, VisualMoCoModel
 from viswsl.optim import lr_scheduler
 
 
@@ -77,6 +78,30 @@ class TextualStreamFactory(Factory):
             activation=_C.MODEL.TEXTUAL.ACTIVATION,
             padding_idx=vocabulary.pad_index,
         )
+
+
+class PretrainingModelFactory(Factory):
+
+    PRODUCTS = {"word_masking": WordMaskingModel, "visual_moco": VisualMoCoModel}
+
+    @classmethod
+    def from_config(cls, config: Config) -> nn.Module:
+        _C = config
+        visual = VisualStreamFactory.from_config(_C)
+        textual = TextualStreamFactory.from_config(_C)
+
+        # Form kwargs according to the model name, different models require
+        # different sets of kwargs in their constructor, for example:
+        # `VisualMoCoModel` accepts "momentum" while `WordMaskingModel` doesn't.
+        kwargs = {"fused_normalize": _C.MODEL.FUSED_NORMALIZE}
+
+        if _C.MODEL.NAME == "visual_moco":
+            kwargs.update(
+                momentum=_C.PRETEXT.VISUAL_MOCO.MOMENTUM,
+                queue_size=_C.PRETEXT.VISUAL_MOCO.QUEUE_SIZE,
+                temperature=_C.PRETEXT.VISUAL_MOCO.TEMPERATURE,
+            )
+        return cls.create(_C.MODEL.NAME, visual, textual, **kwargs)
 
 
 class OptimizerFactory(Factory):
