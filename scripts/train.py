@@ -185,10 +185,19 @@ if __name__ == "__main__":
         for _ in range(_C.OPTIM.BATCH_SIZE_MULTIPLIER):
             batch = next(train_dataloader_iter)
 
-            # keys; {"predictions", "loss"}
-            output_dict = model(
-                batch["image"], batch["caption_tokens"], batch["masked_labels"]
-            )
+            # TODO (kd): Fix this hard-coding:
+            if _C.MODEL.NAME == "word_masking":
+                output_dict = model(
+                    batch["image"], batch["masked_tokens"], batch["masked_labels"]
+                )
+            else:
+                output_dict = model(batch["image"], batch["caption_tokens"])
+
+            # Initial few iterations for MoCo may require filling queue,
+            # continue till then.
+            if not output_dict:
+                continue
+
             # Normalize the loss, because gradients are being accumulated
             # (summed) while the loss is averaged across training instances.
             loss = output_dict["loss"].mean() / _C.OPTIM.BATCH_SIZE_MULTIPLIER
@@ -200,6 +209,9 @@ if __name__ == "__main__":
                     scaled_loss.backward()
             else:
                 loss.backward()
+
+        if not output_dict:
+            continue
 
         # Clip gradients before optimizer step.
         if _C.MIXED_PRECISION_OPT > 0:
@@ -218,13 +230,37 @@ if __name__ == "__main__":
         # Make the master process log loss, lr, time to tensorboard.
         if iteration % _A.log_every == 0:
             batch_loss = dist.average_across_processes(batch_loss)
+            if _C.MODEL.NAME == "moco":
+                image_query_loss = dist.average_across_processes(
+                    output_dict["image_query_loss"]
+                )
+                caption_query_loss = dist.average_across_processes(
+                    output_dict["caption_query_loss"]
+                )
 
             if dist.is_master_process():
-                logger.info(f"{timer.stats} | Loss: {batch_loss:.3f}")
-                tensorboard_writer.add_scalar("loss", batch_loss, iteration)
+                logger.info(
+                    f"{timer.stats} | Loss: {batch_loss:.3f} | "
+                    f"GPU mem: {torch.cuda.max_memory_allocated() / 1048576} MB"
+                )
                 tensorboard_writer.add_scalar(
                     "learning_rate", optimizer.param_groups[0]["lr"], iteration
                 )
+                if _C.MODEL.NAME == "moco":
+                    tensorboard_writer.add_scalars(
+                        "loss",
+                        {
+                            "visual_moco": image_query_loss,
+                            "textual_moco": caption_query_loss,
+                            "total_moco": batch_loss,
+                        },
+                        iteration,
+                    )
+                else:
+                    tensorboard_writer.add_scalars(
+                        "loss", {"word_masking": batch_loss}, iteration
+                    )
+
             dist.synchronize()
 
         # ---------------------------------------------------------------------
@@ -237,7 +273,7 @@ if __name__ == "__main__":
             val_loss = torch.tensor(0.0, device=device)
             for val_iteration, val_batch in enumerate(val_dataloader):
                 output_dict = model(
-                    batch["image"], batch["caption_tokens"], batch["masked_labels"]
+                    batch["image"], batch["masked_tokens"], batch["masked_labels"]
                 )
                 val_loss += output_dict["loss"].mean().item()
 
@@ -263,7 +299,7 @@ if __name__ == "__main__":
 
             examples_str = ""
             for tokens, labels, predictions in zip(
-                batch["caption_tokens"], batch["masked_labels"],
+                batch["masked_tokens"], batch["masked_labels"],
                 output_dict["predictions"]
             ):
                 # Keep predictions only from [MASK]ed positions.

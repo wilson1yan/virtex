@@ -3,7 +3,7 @@ from .transforms import (
     TransformImageForResNetLikeModels,
     TokenizeCaption,
     MaskSomeTokensRandomly,
-    PadSequence,
+    PadSequences,
 )
 
 __all__ = [
@@ -11,5 +11,5 @@ __all__ = [
     "TransformImageForResNetLikeModels",
     "TokenizeCaption",
     "MaskSomeTokensRandomly",
-    "PadSequence",
+    "PadSequences",
 ]

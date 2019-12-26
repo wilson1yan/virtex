@@ -4,7 +4,7 @@ from torch import nn, optim
 from viswsl.config import Config
 from viswsl.data.vocabulary import SentencePieceVocabulary
 from viswsl.modules import visual_stream as vstream, textual_stream as tstream
-from viswsl.model import WordMaskingModel, VisualMoCoModel
+from viswsl.model import WordMaskingModel, MomentumContrastModel
 from viswsl.optim import lr_scheduler
 
 
@@ -82,7 +82,7 @@ class TextualStreamFactory(Factory):
 
 class PretrainingModelFactory(Factory):
 
-    PRODUCTS = {"word_masking": WordMaskingModel, "visual_moco": VisualMoCoModel}
+    PRODUCTS = {"word_masking": WordMaskingModel, "moco": MomentumContrastModel}
 
     @classmethod
     def from_config(cls, config: Config) -> nn.Module:
@@ -91,15 +91,14 @@ class PretrainingModelFactory(Factory):
         textual = TextualStreamFactory.from_config(_C)
 
         # Form kwargs according to the model name, different models require
-        # different sets of kwargs in their constructor, for example:
-        # `VisualMoCoModel` accepts "momentum" while `WordMaskingModel` doesn't.
+        # different sets of kwargs in their constructor.
         kwargs = {"fused_normalize": _C.MODEL.FUSED_NORMALIZE}
 
-        if _C.MODEL.NAME == "visual_moco":
+        if _C.MODEL.NAME == "moco":
             kwargs.update(
-                momentum=_C.PRETEXT.VISUAL_MOCO.MOMENTUM,
-                queue_size=_C.PRETEXT.VISUAL_MOCO.QUEUE_SIZE,
-                temperature=_C.PRETEXT.VISUAL_MOCO.TEMPERATURE,
+                momentum=_C.PRETEXT.MOCO.MOMENTUM,
+                queue_size=_C.PRETEXT.MOCO.QUEUE_SIZE,
+                temperature=_C.PRETEXT.MOCO.TEMPERATURE,
             )
         return cls.create(_C.MODEL.NAME, visual, textual, **kwargs)
 

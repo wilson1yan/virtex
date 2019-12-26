@@ -1,3 +1,4 @@
+import copy
 from typing import Dict, List
 
 import torch
@@ -36,7 +37,7 @@ class WordMaskingModel(nn.Module):
         image_features = image_features.view(-1, 2048, 49).permute(0, 2, 1)
 
         # shape: (batch_size, max_caption_length, hidden_size)
-        output_hidden = self.textual(caption_tokens, masked_labels)
+        output_hidden = self.textual(caption_tokens)
 
         # shape: (batch_size, max_caption_length, 2048)
         attended_features = self._attention(image_features, output_hidden)
@@ -60,7 +61,7 @@ class WordMaskingModel(nn.Module):
         return output_dict
 
 
-class VisualMoCoModel(nn.Module):
+class MomentumContrastModel(nn.Module):
     def __init__(
         self,
         visual,
@@ -74,20 +75,37 @@ class VisualMoCoModel(nn.Module):
         self.visual = visual
         self.textual = textual
 
+        self._momentum = momentum
+        self._max_queue_size = queue_size
+        self._temperature = temperature
+
         self._visual_projection = nn.Linear(2048, textual.hidden_size)
         self._layer_norm = (
             nn.Identity()
             if not fused_normalize
             else nn.LayerNorm(textual.hidden_size, eps=1e-8)
         )
-        # Hold a copy for encoding keys.
-        self._momentum_encoder = visual
-        self._max_queue_size = queue_size
 
-        # Initialize an empty queue.
+        # Initialize empty queues for visual and textual features.
         self._visual_queue = torch.zeros((0, textual.hidden_size))
+        self._textual_queue = torch.zeros((0, textual.hidden_size))
+
+        # Instantiate key encoders for visual and textual streams.
+        self._visual_momentum_encoder = copy.deepcopy(visual)
+        self._visual_momentum_encoder.requires_grad = False
+
+        self._textual_momentum_encoder = copy.deepcopy(textual)
+        self._textual_momentum_encoder.requires_grad = False
+
+        self._loss = nn.CrossEntropyLoss()
 
     def forward(self, image: torch.Tensor, caption_tokens: torch.Tensor):
+
+        batch_size = image.size(0)
+
+        # ====================================================================
+        # Prepare query vectors for both images, and captions.
+        # --------------------------------------------------------------------
         # shape: (batch_size, 2048, 7, 7)
         image_features = self.visual(image)
 
@@ -95,35 +113,111 @@ class VisualMoCoModel(nn.Module):
         image_features = image_features.view(-1, 2048, 49).permute(0, 2, 1)
 
         # Perform global average pooling and projection.
-        # shape: (batch_size, projected_image_feature_size)
-        # `projected_image_feature_size` is `textual.hidden_size`
         image_features = image_features.mean(dim=1)
-        projected_image_features = self._visual_projection(image_features)
 
-        # If queue is not large enough, just add batch to queue and finish.
+        # shape: (batch_size, textual.hidden_size)
+        image_query = self._visual_projection(image_features)
+
+        # Collect features for each caption corresponding to [CLS] token.
+        # shape: (batch_size, textual.hidden_size)
+        caption_query = self.textual(caption_tokens)[:, 0]
+        # ====================================================================
+
+        # Fill queues completely before starting momentum contrast.
         if self._visual_queue.size(0) < self._max_queue_size:
-            self._update_queue(projected_image_features)
+            self._update_queues(image_query, caption_query)
             return
 
-    def _update_queue(self, projected_image_features: torch.Tensor):
-        # Detach features to avoid gradient/memory leaks.
-        # shape: (batch_size, projected_image_feature_size)
-        projected_image_features = projected_image_features.detach()
+        # Momentum update: update key encoders from prior iteration.
+        self._momentum_update(self.visual, self._visual_momentum_encoder)
+        self._momentum_update(self.textual, self._textual_momentum_encoder)
 
-        batch_size = projected_image_features.size(0)
+        with torch.no_grad():
+            # Compute keys like queries, just using the momentum encoder.
+            image_keys = self._visual_momentum_encoder(image)
+            image_keys = image_keys.view(-1, 2048, 49).permute(0, 2, 1)
+            image_keys = image_keys.mean(dim=1)
+
+            # shape: (batch_size, textual.hidden_size)
+            image_keys = self._visual_projection(image_keys)
+
+            # shape: (batch_size, textual.hidden_size)
+            caption_keys = self._textual_momentum_encoder(caption_tokens)[:, 0]
+
+        # Compute dot product similarity between image query and caption keys.
+        # shape: (batch_size, 1)
+        positive_logits = (image_query * caption_keys).sum(dim=1).unsqueeze(-1)
+
+        # shape: (batch_size, queue_size)
+        negative_logits = torch.mm(image_query, self._textual_queue.T)
+
+        # shape: (batch_size, 1 + queue_size)
+        logits = torch.cat((positive_logits, negative_logits), dim=1)
+
+        # Matching key (aligned caption) is always at index 0, prepare labels.
+        labels = torch.zeros(batch_size, device=logits.device).long()
+        image_query_loss = self._loss(logits / self._temperature, labels)
+
+        # Compute dot product similarity between caption query and image keys.
+       	# shape: (batch_size, 1)
+        positive_logits = (caption_query * image_keys).sum(dim=1).unsqueeze(-1)
+
+       	# shape: (batch_size, queue_size)
+        negative_logits = torch.mm(caption_query, self._visual_queue.T)
+
+       	# shape: (batch_size, 1	+ queue_size)
+        logits = torch.cat((positive_logits, negative_logits), dim=1)
+
+        # Matching key (aligned image) is always at index 0, prepare labels.
+        labels = torch.zeros(batch_size, device=logits.device).long()
+        caption_query_loss = self._loss(logits / self._temperature, labels)
+
+        # Add current batch (keys) to queues.
+        self._update_queues(image_keys, caption_keys)
+        # ====================================================================
+
+        return {
+            "loss": image_query_loss + caption_query_loss,
+            # Extra two keys only for logging purposes.
+            "image_query_loss": image_query_loss.detach().mean(),
+            "caption_query_loss": caption_query_loss.detach().mean(),
+        }
+
+    def _momentum_update(self, query_encoder, key_encoder):
+        r"""
+        Perform momentum update step on key encoders. We accept arguments
+        instead of accessing directly by `self.` to reduce memory usage.
+        """
+        key_parameters = key_encoder.state_dict()
+        for name, param in query_encoder.named_parameters():
+            if name in key_parameters:
+                key_parameters[name].data.copy_(
+                    self._momentum * key_parameters[name].data
+                    + (1 - self._momentum) * param.data
+                )
+        key_encoder.load_state_dict(key_parameters)
+
+    def _update_queues(self, image_keys: torch.Tensor, caption_keys: torch.Tensor):
+        # Detach features to avoid gradient/memory leaks.
+        image_keys = image_keys.detach()
+        caption_keys = caption_keys.detach()
+
+        # Both of these values will be same for both queues.
+        batch_size = image_keys.size(0)
         current_queue_size = self._visual_queue.size(0)
 
         # Enqueue: insert current batch in the front.
-        # shape: (current_queue_size + batch_size, projected_image_feature_size)
-        self._visual_queue = torch.cat(
-            (projected_image_features, self._visual_queue), dim=0
-        )
+        self._visual_queue = torch.cat((image_keys, self._visual_queue), dim=0)
+        self._textual_queue = torch.cat((caption_keys, self._textual_queue), dim=0)
+
         # Dequeue: trim the oldest batch from the end.
         self._visual_queue = self._visual_queue[: self._max_queue_size, :]
+        self._textual_queue = self._textual_queue[: self._max_queue_size, :]
 
     def to(self, *args, **kwargs):
         r"""Override super class method to move queue to specified device."""
         self._visual_queue = self._visual_queue.to(*args, **kwargs)
+        self._textual_queue = self._textual_queue.to(*args, **kwargs)
         return super().to(*args, **kwargs)
 
 
