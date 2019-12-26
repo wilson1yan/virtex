@@ -23,7 +23,6 @@ PRETEXT:
 
 MODEL:
   NAME: word_masking
-  FUSED_NORMALIZE: false
   VISUAL:
     NAME: torchvision::resnet50
     NORM_LAYER: groupnorm

@@ -170,7 +170,6 @@ class Config(object):
 
         _C.MODEL = CN()
         _C.MODEL.NAME = "word_masking"
-        _C.MODEL.FUSED_NORMALIZE = False
 
         _C.MODEL.VISUAL = CN()
         _C.MODEL.VISUAL.NAME = "torchvision::resnet50"

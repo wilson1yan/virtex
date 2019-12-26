@@ -3,8 +3,8 @@ from torch import nn, optim
 
 from viswsl.config import Config
 from viswsl.data.vocabulary import SentencePieceVocabulary
+from viswsl.models import WordMaskingModel, MomentumContrastModel
 from viswsl.modules import visual_stream as vstream, textual_stream as tstream
-from viswsl.model import WordMaskingModel, MomentumContrastModel
 from viswsl.optim import lr_scheduler
 
 
@@ -92,8 +92,7 @@ class PretrainingModelFactory(Factory):
 
         # Form kwargs according to the model name, different models require
         # different sets of kwargs in their constructor.
-        kwargs = {"fused_normalize": _C.MODEL.FUSED_NORMALIZE}
-
+        kwargs = {}
         if _C.MODEL.NAME == "moco":
             kwargs.update(
                 momentum=_C.PRETEXT.MOCO.MOMENTUM,

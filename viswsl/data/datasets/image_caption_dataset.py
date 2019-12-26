@@ -52,7 +52,7 @@ class ImageCaptionDataset(IterableDataset):
             # Create a copy of original caption, keys_added: {"masked_tokens"}
             self._pipeline = df.MapData(
                 self._pipeline,
-                lambda dp: dp.update(masked_tokens=dp["caption_tokens"]),
+                lambda dp: dp.update(masked_tokens=dp["caption_tokens"]) or dp,
             )
             # keys added: {"masked_labels"}
             self._pipeline = MaskSomeTokensRandomly(

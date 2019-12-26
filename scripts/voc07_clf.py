@@ -17,9 +17,9 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from viswsl.config import Config
-from viswsl.data.datasets import VOC07ClassificationDataset
+from viswsl.data import VOC07ClassificationDataset
 from viswsl.factories import PretrainingModelFactory
-from viswsl.model import WordMaskingModel, VOC07ClassificationFeatureExtractor
+from viswsl.models import VOC07ClassificationFeatureExtractor
 
 
 # fmt: off
