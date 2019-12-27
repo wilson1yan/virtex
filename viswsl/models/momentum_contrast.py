@@ -10,9 +10,10 @@ class MomentumContrastModel(nn.Module):
         self,
         visual,
         textual,
-        momentum: float = 0.999,
-        queue_size: int = 4096,
-        temperature: float = 0.07,
+        feature_size: int,
+        momentum: float,
+        queue_size: int,
+        temperature: float,
     ):
         super().__init__()
         self.visual = visual
@@ -22,11 +23,12 @@ class MomentumContrastModel(nn.Module):
         self._max_queue_size = queue_size
         self._temperature = temperature
 
-        self._visual_projection = nn.Linear(2048, textual.hidden_size)
+        self._visual_projection = nn.Linear(2048, feature_size)
+        self._textual_projection = nn.Linear(textual.hidden_size, feature_size)
 
         # Initialize empty queues for visual and textual features.
-        self._visual_queue = torch.zeros((0, textual.hidden_size))
-        self._textual_queue = torch.zeros((0, textual.hidden_size))
+        self._visual_queue = torch.zeros((0, feature_size))
+        self._textual_queue = torch.zeros((0, feature_size))
 
         # Instantiate key encoders for visual and textual streams.
         self._visual_key_encoder = copy.deepcopy(visual)
@@ -49,13 +51,14 @@ class MomentumContrastModel(nn.Module):
         # Perform global average pooling and projection.
         image_features = image_features.mean(dim=1)
 
-        # shape: (batch_size, textual.hidden_size)
+        # shape: (batch_size, feature_size)
         image_query = self._visual_projection(image_features)
         image_query = F.normalize(image_query, dim=1, p=2)
 
         # Collect features for each caption corresponding to [CLS] token.
-        # shape: (batch_size, textual.hidden_size)
+        # shape: (batch_size, feature_size)
         caption_query = self.textual(caption_tokens)[:, 0]
+        caption_query = self._textual_projection(caption_query)
         caption_query = F.normalize(caption_query, dim=1, p=2)
         # ====================================================================
 
@@ -69,12 +72,13 @@ class MomentumContrastModel(nn.Module):
             image_keys = image_keys.view(-1, 2048, 49).permute(0, 2, 1)
             image_keys = image_keys.mean(dim=1)
 
-            # shape: (batch_size, textual.hidden_size)
+            # shape: (batch_size, feature_size)
             image_keys = self._visual_projection(image_keys)
             image_keys = F.normalize(image_keys, dim=1, p=2)
 
-            # shape: (batch_size, textual.hidden_size)
+            # shape: (batch_size, feature_size)
             caption_keys = self._textual_key_encoder(caption_tokens)[:, 0]
+            caption_keys = self._textual_projection(image_keys)
             caption_keys = F.normalize(caption_keys, dim=1, p=2)
 
         # Compute dot product similarity between image query and caption keys.
@@ -128,14 +132,15 @@ class MomentumContrastModel(nn.Module):
             image_features = image_features.view(-1, 2048, 49).permute(0, 2, 1)
             image_features = image_features.mean(dim=1)
 
-            # shape: (batch_size, textual.hidden_size)
+            # shape: (batch_size, feature_size)
             image_keys = self._visual_projection(image_features)
-       	    image_keys = F.normalize(image_keys, dim=1, p=2)
+            image_keys = F.normalize(image_keys, dim=1, p=2)
 
             # Collect features for each caption corresponding to [CLS] token.
-            # shape: (batch_size, textual.hidden_size)
+            # shape: (batch_size, feature_size)
             caption_keys = self.textual(caption_tokens)[:, 0]
-       	    caption_keys = F.normalize(caption_keys, dim=1, p=2)
+            caption_keys = self._textual_projection(caption_keys)
+            caption_keys = F.normalize(caption_keys, dim=1, p=2)
 
         # Both queues will always be of same size, so check just one.
         if self._visual_queue.size(0) < self._max_queue_size:

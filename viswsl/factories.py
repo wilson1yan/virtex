@@ -95,6 +95,7 @@ class PretrainingModelFactory(Factory):
         kwargs = {}
         if _C.MODEL.NAME == "moco":
             kwargs.update(
+                feature_size=_C.PRETEXT.MOCO.FEATURE_SIZE,
                 momentum=_C.PRETEXT.MOCO.MOMENTUM,
                 queue_size=_C.PRETEXT.MOCO.QUEUE_SIZE,
                 temperature=_C.PRETEXT.MOCO.TEMPERATURE,
