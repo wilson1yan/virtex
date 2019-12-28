@@ -5,7 +5,7 @@ from viswsl.config import Config
 from viswsl.data.vocabulary import SentencePieceVocabulary
 from viswsl.models import WordMaskingModel, MomentumContrastModel
 from viswsl.modules import visual_stream as vstream, textual_stream as tstream
-from viswsl.optim import lr_scheduler
+from viswsl.optim import Lookahead, lr_scheduler
 
 
 class Factory(object):
@@ -145,7 +145,12 @@ class OptimizerFactory(Factory):
             kwargs["momentum"] = _C.OPTIM.SGD_MOMENTUM
             kwargs["nesterov"] = _C.OPTIM.SGD_NESTEROV
 
-        return cls.create(_C.OPTIM.OPTIMIZER_NAME, param_groups, **kwargs)
+        optimizer = cls.create(_C.OPTIM.OPTIMIZER_NAME, param_groups, **kwargs)
+        if _C.OPTIM.USE_LOOKAHEAD:
+            optimizer = Lookahead(
+                optimizer, k=_C.OPTIM.LOOKAHEAD_STEPS, alpha=_C.OPTIM.LOOKAHEAD_ALPHA
+            )
+        return optimizer
 
 
 class LRSchedulerFactory(Factory):

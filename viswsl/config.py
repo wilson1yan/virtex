@@ -187,6 +187,16 @@ class Config(object):
 
         _C.OPTIM = CN()
         _C.OPTIM.OPTIMIZER_NAME = "adamw"
+        _C.OPTIM.WEIGHT_DECAY = 1e-4
+        _C.OPTIM.NO_DECAY = [".bn", ".norm", ".bias"]
+        _C.OPTIM.CLAMP_GRADIENTS = 10
+
+        _C.OPTIM.SGD_MOMENTUM = 0.9
+        _C.OPTIM.SGD_NESTEROV = True
+        _C.OPTIM.USE_LOOKAHEAD = False
+        _C.OPTIM.LOOKAHEAD_STEPS = 5
+        _C.OPTIM.LOOKAHEAD_ALPHA = 0.5
+
         _C.OPTIM.BATCH_SIZE_PER_GPU = 64
         _C.OPTIM.BATCH_SIZE_MULTIPLIER = 1
 
@@ -194,12 +204,6 @@ class Config(object):
         _C.OPTIM.LR = 1e-5
         _C.OPTIM.WARMUP_STEPS = 10000
         _C.OPTIM.LR_DECAY_NAME = "cosine"
-
-        _C.OPTIM.WEIGHT_DECAY = 1e-4
-        _C.OPTIM.NO_DECAY = [".bn", ".norm", ".bias"]
-        _C.OPTIM.SGD_MOMENTUM = 0.9
-        _C.OPTIM.SGD_NESTEROV = True
-        _C.OPTIM.CLAMP_GRADIENTS = 10
 
         _C.DOWNSTREAM = CN()
         _C.DOWNSTREAM.VOC07_CLF = CN()
