@@ -17,6 +17,7 @@ class TorchvisionVisualStream(nn.Module):
         **kwargs,
     ):
         super().__init__()
+        self.visual_feature_size = 2048
 
         # Protect import because it should be an optional dependency, one may
         # only use `D2BackboneVisualStream`.
@@ -35,7 +36,7 @@ class TorchvisionVisualStream(nn.Module):
         if norm_layer == "groupnorm":
             self._cnn = self._batchnorm_to_groupnorm(self._cnn, num_groups)
 
-        # Do nothing after the final res stage.
+        # Do nothing after the final residual stage.
         self._cnn.avgpool = nn.Identity()
         self._cnn.fc = nn.Identity()
 
@@ -57,7 +58,7 @@ class TorchvisionVisualStream(nn.Module):
         if return_intermediate_outputs:
             return intermediate_outputs
         else:
-            # shape: (batch_size, 2048, 7, 7)
+            # shape: (batch_size, feature_size, ...)
             return intermediate_outputs["layer4"]
 
     def _batchnorm_to_groupnorm(self, module, num_groups: int):
@@ -85,6 +86,7 @@ class D2BackboneVisualStream(nn.Module):
 
     def __init__(self, name: str, pretrained: bool = False, **kwargs):
         super().__init__()
+        self.visual_feature_size = 2048
 
         # Protect import because it should be an optional dependency, one may
         # only use `TorchvisionVisualStream`.
@@ -163,7 +165,7 @@ class D2BackboneVisualStream(nn.Module):
         if return_intermediate_outputs:
             return intermediate_outputs
         else:
-            # shape: (batch_size, 2048, 7, 7)
+            # shape: (batch_size, feature_size, ...)
             return intermediate_outputs["layer4"]
 
 
@@ -172,6 +174,7 @@ class BlindVisualStream(nn.Module):
 
     def __init__(self, bias: torch.Tensor = torch.ones(49, 2048)):
         super().__init__()
+        self.visual_feature_size = 2048
 
         # We never update the bias because a blind model cannot learn anything
         # about the image.

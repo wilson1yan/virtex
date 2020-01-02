@@ -95,7 +95,7 @@ class Config(object):
 
     MODEL.TEXTUAL:
         Parameters defining the architecture of the textual stream.
-    MODEL.TEXTUAL.HIDDEN_SIZE: 768
+    MODEL.TEXTUAL.MODEL_DIM: 768
         Size of the hidden state for the transformer.
     MODEL.TEXTUAL.ATTENTION_HEADS: 12
         Number of attention heads for multi-headed attention.
@@ -174,6 +174,7 @@ class Config(object):
 
         _C.MODEL.VISUAL = CN()
         _C.MODEL.VISUAL.NAME = "torchvision::resnet50"
+        _C.MODEL.VISUAL.FEATURE_SIZE = 2048
         _C.MODEL.VISUAL.NORM_LAYER = "groupnorm"
         _C.MODEL.VISUAL.NUM_GROUPS = 32
         _C.MODEL.VISUAL.PRETRAINED = False
@@ -184,6 +185,13 @@ class Config(object):
         _C.MODEL.TEXTUAL.NUM_ATTENTION_HEADS = 12
         _C.MODEL.TEXTUAL.NUM_LAYERS = 6
         _C.MODEL.TEXTUAL.ACTIVATION = "gelu"
+        _C.MODEL.TEXTUAL.DROPOUT = 0.1
+
+        _C.MODEL.FUSION = CN()
+        _C.MODEL.FUSION.NAME = "multihead"
+        _C.MODEL.FUSION.PROJECTION_SIZE = 512
+        _C.MODEL.FUSION.NUM_ATTENTION_HEADS = 8
+        _C.MODEL.FUSION.DROPOUT = 0.1
 
         _C.OPTIM = CN()
         _C.OPTIM.OPTIMIZER_NAME = "adamw"
@@ -212,9 +220,10 @@ class Config(object):
         _C.DOWNSTREAM.VOC07_CLF.LAYER_NAMES = ["layer3", "layer4"]
         _C.DOWNSTREAM.VOC07_CLF.SVM_COSTS = [0.001, 0.01, 0.1, 1.0, 2.0]
 
-        # Placeholders, set these two values after merging from file.
+        # Placeholders, set these values after merging from file.
         _C.OPTIM.BATCH_SIZE_PER_ITER = 0
         _C.OPTIM.TOTAL_BATCH_SIZE = 0
+
 
         # Override parameter values from YAML file first, then from override
         # list, then add derived params.
@@ -248,15 +257,15 @@ class Config(object):
         )
 
         # Set textual stream architecture if specified in string.
-        # For example: "default::l6-d768-h12":
-        #     l = layers, d = hidden_size, h = num_heads
-        textual_stream_name_parts = self._C.MODEL.TEXTUAL.NAME.split("::")[-1].split("-")
-        for name_part in textual_stream_name_parts:
-            if name_part[0] == "l":
+        # For example: "default::L6_H768_A12":
+        #     L = layers, H = hidden_size, A = num_attention_heads
+        tstream_name_parts = self._C.MODEL.TEXTUAL.NAME.split("::")[-1].split("_")
+        for name_part in tstream_name_parts:
+            if name_part[0] == "L":
                 self._C.MODEL.TEXTUAL.NUM_LAYERS = int(name_part[1:])
-            elif name_part[0] == "d":
+            elif name_part[0] == "H":
                 self._C.MODEL.TEXTUAL.HIDDEN_SIZE = int(name_part[1:])
-            elif name_part[0] == "h":
+            elif name_part[0] == "A":
                 self._C.MODEL.TEXTUAL.NUM_ATTENTION_HEADS = int(name_part[1:])
 
         if self._C.MIXED_PRECISION_OPT > 0 and self._C.MODEL.TEXTUAL.ACTIVATION == "gelu":
