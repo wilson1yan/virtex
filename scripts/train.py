@@ -63,7 +63,7 @@ parser.add_argument(
     only master process logs averaged loss values across processes.""",
 )
 parser.add_argument(
-    "--checkpoint-every", type=int, default=2500,
+    "--checkpoint-every", type=int, default=2000,
     help="Serialize model to a checkpoint after every these many iterations.",
 )
 # fmt: on
@@ -204,7 +204,7 @@ if __name__ == "__main__":
 
             # Normalize the loss, because gradients are being accumulated
             # (summed) while the loss is averaged across training instances.
-            loss = output_dict["loss"].mean() / _C.OPTIM.BATCH_SIZE_MULTIPLIER
+            loss = output_dict["loss"] / _C.OPTIM.BATCH_SIZE_MULTIPLIER
             batch_loss += loss.item()
 
             # Perform dynamic scaling of loss to adjust for mixed precision.

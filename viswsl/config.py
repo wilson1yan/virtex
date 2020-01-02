@@ -268,6 +268,18 @@ class Config(object):
             elif name_part[0] == "A":
                 self._C.MODEL.TEXTUAL.NUM_ATTENTION_HEADS = int(name_part[1:])
 
+        # For simplicity, set size and number of heads for fusion to be same as transformer.
+        # This might be temporary, can possibly remove it later.
+        if (
+            self._C.MODEL.FUSION.PROJECTION_SIZE != self._C.MODEL.TEXTUAL.HIDDEN_SIZE or
+            self._C.MODEL.FUSION.NUM_ATTENTION_HEADS != self._C.MODEL.TEXTUAL.NUM_ATTENTION_HEADS
+        ):
+            logger.warning(
+                "Setting size and number of attention heads for fusion to be same as textual."
+            )
+        self._C.MODEL.FUSION.PROJECTION_SIZE = self._C.MODEL.TEXTUAL.HIDDEN_SIZE
+        self._C.MODEL.FUSION.NUM_ATTENTION_HEADS = self._C.MODEL.TEXTUAL.NUM_ATTENTION_HEADS
+
         if self._C.MIXED_PRECISION_OPT > 0 and self._C.MODEL.TEXTUAL.ACTIVATION == "gelu":
             logger.warning("Cannot use GELU with mixed precision, changing to RELU.")
             self._C.MODEL.TEXTUAL.ACTIVATION = "relu"

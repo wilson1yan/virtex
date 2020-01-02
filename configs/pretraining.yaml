@@ -30,7 +30,7 @@ MODEL:
     NUM_GROUPS: 32
     PRETRAINED: false
   TEXTUAL:
-    NAME: default::l1-d512-h8
+    NAME: default::L1_H512_A8
     HIDDEN_SIZE: 512
     NUM_ATTENTION_HEADS: 8
     NUM_LAYERS: 1
@@ -57,4 +57,4 @@ DOWNSTREAM:
     DATA_ROOT: data/VOC2007
     BATCH_SIZE: 256
     LAYER_NAMES: ["layer3", "layer4"]
-    SVM_COSTS: [0.0001, 0.001, 0.01, 0.1, 1.0, 2.0]
+    SVM_COSTS: [0.01, 0.1, 1.0, 10.0]

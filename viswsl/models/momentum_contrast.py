@@ -34,7 +34,7 @@ class MomentumContrastModel(nn.Module):
         self._visual_key_encoder = copy.deepcopy(visual)
         self._textual_key_encoder = copy.deepcopy(textual)
 
-        self._loss = nn.CrossEntropyLoss(reduction="none")
+        self._loss = nn.CrossEntropyLoss()
 
     def forward(self, image: torch.Tensor, caption_tokens: torch.Tensor):
         batch_size = image.size(0)
@@ -116,9 +116,9 @@ class MomentumContrastModel(nn.Module):
         return {
             "loss": visual_moco_loss + textual_moco_loss,
             "loss_components": {
-                "total_moco": (visual_moco_loss + textual_moco_loss).detach().mean(),
-                "visual_moco": visual_moco_loss.detach().mean(),
-                "textual_moco": textual_moco_loss.detach().mean(),
+                "total_moco": (visual_moco_loss + textual_moco_loss).detach(),
+                "visual_moco": visual_moco_loss.detach(),
+                "textual_moco": textual_moco_loss.detach(),
             },
         }
 

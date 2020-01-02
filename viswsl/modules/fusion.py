@@ -291,9 +291,16 @@ class _VisualAndTextualProjections(nn.Module):
         projection_size: int,
     ):
         super().__init__()
-        self._v_projection = nn.Linear(visual_feature_size, projection_size)
-        self._t_projection = nn.Linear(textual_feature_size, projection_size)
-
+        self._v_projection = (
+            nn.Linear(visual_feature_size, projection_size, bias=False)
+            if visual_feature_size != projection_size
+            else nn.Identity()
+        )
+        self._t_projection = (
+            nn.Linear(textual_feature_size, projection_size, bias=False)
+            if textual_feature_size != projection_size
+            else nn.Identity()
+        )
     def forward(
         self, visual_features: torch.Tensor, textual_features: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:

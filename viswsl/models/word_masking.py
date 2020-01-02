@@ -13,10 +13,29 @@ class WordMaskingModel(nn.Module):
         self.textual = textual
         self.fusion = fusion
 
-        self.output = nn.Linear(fusion.fused_feature_size, textual.vocab_size)
-        self.loss = nn.CrossEntropyLoss(
-            ignore_index=textual.padding_idx, reduction="none"
-        )
+        # Tie input and output word embeddings to reduce parameters.
+        # Output embedding layer will not learn its own biases.
+        if textual.textual_feature_size == fusion.fused_feature_size:
+            self.output = nn.Linear(
+                fusion.fused_feature_size, textual.vocab_size, bias=False
+            )
+            self.output.weight = self.textual.embedding.word_embedding.weight
+        else:
+            # Add an intermediate projection layer to `textual_feature_size`
+            # if fused features have different size than textual features.
+            self.output = nn.Sequential(
+                nn.Linear(
+                    fusion.fused_feature_size, textual.textual_feature_size
+                ),
+                nn.LayerNorm(textual.textual_feature_size, eps=1e-08),
+                nn.Linear(
+                    textual.textual_feature_size, textual.vocab_size, bias=False
+                )
+            )
+            self.output[0].weight.data.normal_(mean=0.0, std=0.02)
+            self.output[-1].weight = self.textual.embedding.word_embedding.weight
+
+        self.loss = nn.CrossEntropyLoss(ignore_index=textual.padding_idx)
 
     def forward(
         self,
@@ -56,6 +75,6 @@ class WordMaskingModel(nn.Module):
         }
         # Single scalar per batch for logging in training script.
         output_dict["loss_components"] = {
-            "word_masking": output_dict["loss"].detach().mean()
+            "word_masking": output_dict["loss"].detach()
         }
         return output_dict
