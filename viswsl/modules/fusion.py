@@ -217,7 +217,7 @@ class MultiheadAttentionFusion(Fusion):
         textual_feature_size: int,
         projection_size: Optional[int] = None,
         dropout: float = 0.1,
-        num_heads: int = 8,
+        attention_heads: int = 8,
     ):
         super().__init__(visual_feature_size, textual_feature_size, projection_size)
         # Fully connected layers for projecting both modalities to a common
@@ -226,7 +226,7 @@ class MultiheadAttentionFusion(Fusion):
             self.visual_feature_size, self.textual_feature_size, self.projection_size
         )
         self.attention = nn.MultiheadAttention(
-            self.projection_size, num_heads, dropout=0.1
+            self.projection_size, attention_heads, dropout=0.1
         )
         # Do normalization of fused features. This helps a bit.
         self.layer_norm = nn.LayerNorm(

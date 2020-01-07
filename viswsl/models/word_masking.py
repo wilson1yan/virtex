@@ -14,10 +14,10 @@ class WordMaskingModel(nn.Module):
         self.fusion = fusion
 
         # Tie input and output word embeddings to reduce parameters.
-        # Output embedding layer will not learn its own biases.
+        # Output embedding layer will also learn a bias.
         if textual.textual_feature_size == fusion.fused_feature_size:
             self.output = nn.Linear(
-                fusion.fused_feature_size, textual.vocab_size, bias=False
+                fusion.fused_feature_size, textual.vocab_size
             )
             self.output.weight = self.textual.embedding.word_embedding.weight
         else:
@@ -25,11 +25,10 @@ class WordMaskingModel(nn.Module):
             # if fused features have different size than textual features.
             self.output = nn.Sequential(
                 nn.Linear(
-                    fusion.fused_feature_size, textual.textual_feature_size
+                    fusion.fused_feature_size, textual.textual_feature_size, bias=False
                 ),
-                nn.LayerNorm(textual.textual_feature_size, eps=1e-08),
                 nn.Linear(
-                    textual.textual_feature_size, textual.vocab_size, bias=False
+                    textual.textual_feature_size, textual.vocab_size
                 )
             )
             self.output[0].weight.data.normal_(mean=0.0, std=0.02)

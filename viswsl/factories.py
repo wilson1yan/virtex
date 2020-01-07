@@ -5,7 +5,7 @@ from torch import nn, optim
 from viswsl.config import Config
 from viswsl.data.vocabulary import SentencePieceVocabulary
 from viswsl.models import WordMaskingModel, MomentumContrastModel
-from viswsl.modules import visual_stream as vstream, textual_stream as tstream
+from viswsl.modules import visual_stream as vs, textual_stream as ts
 from viswsl.modules import fusion
 from viswsl.optim import Lookahead, lr_scheduler
 
@@ -40,9 +40,9 @@ class Factory(object):
 class VisualStreamFactory(Factory):
 
     PRODUCTS = {
-        "blind": vstream.BlindVisualStream,
-        "torchvision": vstream.TorchvisionVisualStream,
-        "detectron2": vstream.D2BackboneVisualStream,
+        "blind": vs.BlindVisualStream,
+        "torchvision": vs.TorchvisionVisualStream,
+        "detectron2": vs.D2BackboneVisualStream,
     }
 
     @classmethod
@@ -64,7 +64,20 @@ class VisualStreamFactory(Factory):
 
 class TextualStreamFactory(Factory):
 
-    PRODUCTS = {"default": tstream.DefaultTextualStream}
+    PRODUCTS: Dict[str, Callable[..., ts.TransformerTextualStream]] = {
+        "postnorm_gelu": partial(
+            ts.TransformerTextualStream, norm_type="post", activation="gelu"
+        ),
+        "postnorm_relu": partial(
+            ts.TransformerTextualStream, norm_type="post", activation="relu"
+        ),
+        "prenorm_gelu": partial(
+            ts.TransformerTextualStream, norm_type="pre", activation="gelu"
+        ),
+        "prenorm_relu": partial(
+            ts.TransformerTextualStream, norm_type="pre", activation="relu"
+        ),
+    }
 
     @classmethod
     def from_config(cls, config: Config) -> nn.Module:
@@ -75,9 +88,9 @@ class TextualStreamFactory(Factory):
             _C.MODEL.TEXTUAL.NAME.split("::")[0],
             vocab_size=len(vocabulary),
             hidden_size=_C.MODEL.TEXTUAL.HIDDEN_SIZE,
-            num_attention_heads=_C.MODEL.TEXTUAL.NUM_ATTENTION_HEADS,
+            attention_heads=_C.MODEL.TEXTUAL.ATTENTION_HEADS,
+            feedforward_size=_C.MODEL.TEXTUAL.FEEDFORWARD_SIZE,
             num_layers=_C.MODEL.TEXTUAL.NUM_LAYERS,
-            activation=_C.MODEL.TEXTUAL.ACTIVATION,
             dropout=_C.MODEL.TEXTUAL.DROPOUT,
             padding_idx=vocabulary.pad_index,
         )
@@ -104,7 +117,7 @@ class FusionFactory(Factory):
             "dropout": _C.MODEL.FUSION.DROPOUT,
         }
         if _C.MODEL.FUSION.NAME == "multihead":
-            kwargs["num_heads"] = _C.MODEL.FUSION.NUM_ATTENTION_HEADS
+            kwargs["attention_heads"] = _C.MODEL.FUSION.ATTENTION_HEADS
 
         return cls.create(_C.MODEL.FUSION.NAME, **kwargs)
 

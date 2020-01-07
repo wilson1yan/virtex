@@ -21,32 +21,22 @@ class WordAndPositionalEmbedding(nn.Module):
         )
         # We provide no "padding index" for position embeddigs. We zero-out
         # the positional embeddings of padded positions as a post-processing,
-        self.position_embedding = nn.Embedding(
-            max_sequence_length, embedding_size
+        self.position_embedding = nn.Embedding(max_sequence_length, embedding_size)
+        self.layer_norm = nn.LayerNorm(
+            embedding_size, eps=1e-8, elementwise_affine=True
         )
-        self.layer_norm = nn.LayerNorm(embedding_size, eps=1e-8)
         self.dropout = nn.Dropout(p=dropout)
         self.padding_idx = padding_idx
 
-    def forward(
-        self,
-        tokens: torch.LongTensor,
-        positions: Optional[torch.LongTensor] = None,
-    ):
+    def forward(self, tokens: torch.LongTensor):
         batch_size, max_sequence_length = tokens.size()
-
-        if positions is None:
-            positions = self.make_positions(
-                batch_size, max_sequence_length, tokens.device
-            )
-        else:
-            assert tokens.size() == positions.size(), "Expected tokens and "
-            f"positions to have same size. Got {tokens.size()} and "
-            f"{positions.size()} instead."
 
         # shape: (batch_size, max_sequence_length, embedding_size)
         word_embeddings = self.word_embedding(tokens)
 
+        positions = self.make_positions(
+            batch_size, max_sequence_length, tokens.device
+        )
         # shape: (batch_size, max_sequence_length, embedding_size)
         position_embeddings = self.position_embedding(positions)
 
@@ -77,4 +67,3 @@ class WordAndPositionalEmbedding(nn.Module):
         # shape: (batch_size, max_sequence_length)
         positions = positions.unsqueeze(0).expand(batch_size, max_sequence_length)
         return positions
-

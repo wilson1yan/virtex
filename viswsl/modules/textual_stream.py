@@ -4,37 +4,50 @@ from torch import nn
 from viswsl.modules.embedding import WordAndPositionalEmbedding
 
 
-class DefaultTextualStream(nn.Module):
+class TransformerTextualStream(nn.Module):
     def __init__(
         self,
         vocab_size: int,
         hidden_size: int,
-        num_attention_heads: int,
+        feedforward_size: int,
+        attention_heads: int,
         num_layers: int,
-        activation: str = "gelu",
         dropout: float = 0.1,
+        norm_type: str = "pre",
+        activation: str = "gelu",
         padding_idx: int = 0,
     ):
         super().__init__()
         self.vocab_size = vocab_size
-        self.textual_feature_size = hidden_size
-        self.num_attention_heads = num_attention_heads
+        self.hidden_size = hidden_size
+        self.feedforward_size = feedforward_size
+        self.attention_heads = attention_heads
         self.num_layers = num_layers
+        self.padding_idx = padding_idx
 
         self.embedding = WordAndPositionalEmbedding(
             self.vocab_size, self.textual_feature_size, dropout=dropout
         )
 
-        _encoder_layer = nn.TransformerEncoderLayer(
+        # Make encoder layer depending on whether it's a Pre-Norm or Post-Norm.
+        _EncoderLayerClass = (
+            nn.TransformerEncoderLayer
+            if norm_type == "post"
+            else PreNormTransformerEncoderLayer
+        )
+        _encoder_layer = _EncoderLayerClass(
             self.textual_feature_size,
-            self.num_attention_heads,
+            self.attention_heads,
+            dim_feedforward=self.feedforward_size,
+            dropout=dropout,
             activation=activation,
-            dropout=dropout
         )
         self.encoder = nn.TransformerEncoder(_encoder_layer, self.num_layers)
-        self.padding_idx = padding_idx
-
         self.apply(self.init_weights)
+
+    @property
+    def textual_feature_size(self):
+        return self.hidden_size
 
     @staticmethod
     def init_weights(module):
@@ -73,3 +86,21 @@ class DefaultTextualStream(nn.Module):
         textual_features = textual_features.transpose(0, 1)
 
         return textual_features
+
+
+class PreNormTransformerEncoderLayer(nn.TransformerEncoderLayer):
+
+    def forward(self, src, src_mask=None, src_key_padding_mask=None):
+        # fmt: off
+        src2 = self.norm1(src)
+        src2, _ = self.self_attn(
+            src2, src2, src2, attn_mask=src_mask,
+            key_padding_mask=src_key_padding_mask,
+        )
+        src = src + self.dropout1(src2)
+
+        src2 = self.norm2(src)
+        src2 = self.linear2(self.dropout(self.activation(self.linear1(src2))))
+        src = src + self.dropout2(src2)
+        # fmt: on
+        return src
