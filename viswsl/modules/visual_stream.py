@@ -36,9 +36,9 @@ class TorchvisionVisualStream(nn.Module):
         if norm_layer == "groupnorm":
             self._cnn = self._batchnorm_to_groupnorm(self._cnn, num_groups)
 
-        # Do nothing after the final residual stage.
-        self._cnn.avgpool = nn.Identity()
-        self._cnn.fc = nn.Identity()
+        # Do nothing after the final residual stage.	
+        self._cnn.avgpool = nn.Identity()	
+        self._cnn.fc = nn.Identity()	
 
         # Keep a list of intermediate layer names.
         self._stage_names = [f"layer{i}" for i in range(1, 5)]
