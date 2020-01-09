@@ -4,7 +4,7 @@ from torch import nn, optim
 
 from viswsl.config import Config
 from viswsl.data.vocabulary import SentencePieceVocabulary
-from viswsl.models import WordMaskingModel, MomentumContrastModel
+from viswsl.models import WordMaskingModel, CaptioningModel, MomentumContrastModel
 from viswsl.modules import visual_stream as vs, textual_stream as ts
 from viswsl.modules import fusion
 from viswsl.optim import Lookahead, lr_scheduler
@@ -84,14 +84,20 @@ class TextualStreamFactory(Factory):
         _C = config
 
         vocabulary = SentencePieceVocabulary(_C.DATA.VOCABULARY)
+
+        # Transformer will be bidirectional for word masking, else forward
+        # for doing autoregressive captioning.
+        is_bidirectional = _C.MODEL.NAME == "word_masking"
+
         return cls.create(
             _C.MODEL.TEXTUAL.NAME.split("::")[0],
             vocab_size=len(vocabulary),
             hidden_size=_C.MODEL.TEXTUAL.HIDDEN_SIZE,
-            attention_heads=_C.MODEL.TEXTUAL.ATTENTION_HEADS,
             feedforward_size=_C.MODEL.TEXTUAL.FEEDFORWARD_SIZE,
+            attention_heads=_C.MODEL.TEXTUAL.ATTENTION_HEADS,
             num_layers=_C.MODEL.TEXTUAL.NUM_LAYERS,
             dropout=_C.MODEL.TEXTUAL.DROPOUT,
+            is_bidirectional=is_bidirectional,
             padding_idx=vocabulary.pad_index,
         )
 
@@ -124,7 +130,11 @@ class FusionFactory(Factory):
 
 class PretrainingModelFactory(Factory):
 
-    PRODUCTS = {"word_masking": WordMaskingModel, "moco": MomentumContrastModel}
+    PRODUCTS = {
+        "word_masking": WordMaskingModel,
+        "captioning": CaptioningModel,
+        "moco": MomentumContrastModel,
+    }
 
     @classmethod
     def from_config(cls, config: Config) -> nn.Module:

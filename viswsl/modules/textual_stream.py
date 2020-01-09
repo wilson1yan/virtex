@@ -2,6 +2,12 @@ import torch
 from torch import nn
 
 from viswsl.modules.embedding import WordAndPositionalEmbedding
+from viswsl.modules.transformer import (
+    PreNormTransformerEncoderLayer,
+    BidirectionalTansformerEncoder,
+    ForwardTransformerEncoder,
+    BackwardTransformerEncoder,
+)
 
 
 class TransformerTextualStream(nn.Module):
@@ -15,6 +21,7 @@ class TransformerTextualStream(nn.Module):
         dropout: float = 0.1,
         norm_type: str = "pre",
         activation: str = "gelu",
+        is_bidirectional: bool = True,
         padding_idx: int = 0,
     ):
         super().__init__()
@@ -28,21 +35,26 @@ class TransformerTextualStream(nn.Module):
         self.embedding = WordAndPositionalEmbedding(
             self.vocab_size, self.textual_feature_size, dropout=dropout
         )
-
         # Make encoder layer depending on whether it's a Pre-Norm or Post-Norm.
-        _EncoderLayerClass = (
+        EncoderLayerClass = (
             nn.TransformerEncoderLayer
             if norm_type == "post"
             else PreNormTransformerEncoderLayer
         )
-        _encoder_layer = _EncoderLayerClass(
+        _encoder_layer = EncoderLayerClass(
             self.textual_feature_size,
             self.attention_heads,
             dim_feedforward=self.feedforward_size,
             dropout=dropout,
             activation=activation,
         )
-        self.encoder = nn.TransformerEncoder(_encoder_layer, self.num_layers)
+        # Make encoder depending on the specified direction.
+        EncoderClass = (
+            BidirectionalTansformerEncoder
+            if is_bidirectional
+            else ForwardTransformerEncoder
+        )
+        self.encoder = EncoderClass(_encoder_layer, self.num_layers)
         self.apply(self.init_weights)
 
     @property
@@ -65,8 +77,8 @@ class TransformerTextualStream(nn.Module):
 
     def forward(self, caption_tokens: torch.LongTensor) -> torch.Tensor:
 
-        # Form a mask, it is True for positions with padding token.
-        # Transformer will ignore these positions for multi-headed attention.
+        # Form a binary mask: it is True for padding positions.
+        # These positions will be ignored for multi-headed attention.
         caption_mask = caption_tokens == self.padding_idx
 
         # shape: (batch_size, max_caption_length, embedding_size)
@@ -86,21 +98,3 @@ class TransformerTextualStream(nn.Module):
         textual_features = textual_features.transpose(0, 1)
 
         return textual_features
-
-
-class PreNormTransformerEncoderLayer(nn.TransformerEncoderLayer):
-
-    def forward(self, src, src_mask=None, src_key_padding_mask=None):
-        # fmt: off
-        src2 = self.norm1(src)
-        src2, _ = self.self_attn(
-            src2, src2, src2, attn_mask=src_mask,
-            key_padding_mask=src_key_padding_mask,
-        )
-        src = src + self.dropout1(src2)
-
-        src2 = self.norm2(src)
-        src2 = self.linear2(self.dropout(self.activation(self.linear1(src2))))
-        src = src + self.dropout2(src2)
-        # fmt: on
-        return src
