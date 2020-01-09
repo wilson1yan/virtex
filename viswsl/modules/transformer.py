@@ -74,21 +74,21 @@ class UnidirectionalTransformerEncoder(nn.TransformerEncoder):
         # Generate an additive mask based on direction of encoder: forward
         # encoder will mask the future, backward encoder will mask the past.
         # shape: (sequence_length, sequence_length)
-        direction_mask = self._generate_mask(sequence_length)
-
+        direction_mask = self._generate_mask(
+            sequence_length, token_embeddings.device
+        )
         # shape: (sequence_length, batch_size, hidden_size)
         outputs = super().forward(
             token_embeddings,
-            src_mask=direction_mask,
+            mask=direction_mask,
             src_key_padding_mask=token_mask,
         )
-
         # shape: (batch_size, sequence_length, hidden_size)
         outputs = outputs.transpose(0, 1)
         return outputs
 
     @functools.lru_cache(maxsize=10)
-    def _generate_mask(self, size: int) -> torch.Tensor:
+    def _generate_mask(self, size: int, device: torch.device) -> torch.Tensor:
         r"""
         Generate a mask for "future" positions, useful when using this module
         for language modeling.
@@ -98,10 +98,10 @@ class UnidirectionalTransformerEncoder(nn.TransformerEncoder):
         size: int
         """
         # Default mask is for forward direction. Flip for backward direction.
-        mask = torch.tril(torch.ones(size, size), diagonal=-1)
+        mask = torch.triu(torch.ones(size, size, device=device), diagonal=1)
         mask = mask.masked_fill(mask == 1, float("-inf"))
         if self.backward:
-            mask = mask.flip(0, 1)
+            mask = mask.flip(1)
 
         return mask
 

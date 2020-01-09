@@ -84,17 +84,8 @@ class TransformerTextualStream(nn.Module):
         # shape: (batch_size, max_caption_length, embedding_size)
         token_embeddings = self.embedding(caption_tokens)
 
-        # `TransformerEncoder` requires the sequence input as
-        # (max_caption_length, batch_size, hidden_size). So we transpose the
-        # first two dimensions of token embeddings, pass through encoder, and
-        # later undo the transpose.
-        token_embeddings = token_embeddings.transpose(0, 1)
-
-        # shape: (max_caption_length, batch_size, hidden_size)
-        textual_features = self.encoder(
-            token_embeddings, src_key_padding_mask=caption_mask
-        )
         # shape: (batch_size, max_caption_length, hidden_size)
-        textual_features = textual_features.transpose(0, 1)
-
+        textual_features = self.encoder(
+            token_embeddings, token_mask=caption_mask
+        )
         return textual_features

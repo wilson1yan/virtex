@@ -79,7 +79,7 @@ if __name__ == "__main__":
         device_id = dist.init_distributed_env(_A.dist_backend)
     else:
         # TODO (kd): Add an option to use `init_distributed_tcp`.
-        device_id = 0
+        device_id = -1
     device = torch.device(f"cuda:{device_id}" if device_id != -1 else "cpu")
 
     # Create a config with default values, then override from config file, and
@@ -194,12 +194,12 @@ if __name__ == "__main__":
 
         for _ in range(_C.OPTIM.BATCH_SIZE_MULTIPLIER):
             batch = next(train_dataloader_iter)
-            if _C.MODEL.NAME == "moco":
-                output_dict = model(batch["image"], batch["caption_tokens"])
-            else:
+            if _C.MODEL.NAME == "word_masking":
                 output_dict = model(
                     batch["image"], batch["masked_tokens"], batch["masked_labels"]
                 )
+            else:
+                output_dict = model(batch["image"], batch["caption_tokens"])
             train_loss_counter.update(output_dict["loss_components"])
 
             # Normalize the loss, because gradients are being accumulated
@@ -238,9 +238,9 @@ if __name__ == "__main__":
         # ---------------------------------------------------------------------
         if iteration % _A.log_every == 0 and dist.is_master_process():
             logger.info(
-                f"{timer.stats} | Loss: {batch_loss:.3f} | "
-                f"GPU mem: {torch.cuda.max_memory_allocated() / 1048576} MB"
-            )
+                f"{timer.stats} | Loss: {batch_loss:.3f} | ")
+#                f"GPU mem: {torch.cuda.max_memory_allocated() / 1048576} MB"
+#           )
             tensorboard_writer.add_scalar(
                 "learning_rate", optimizer.param_groups[0]["lr"], iteration
             )
@@ -267,17 +267,16 @@ if __name__ == "__main__":
 
             for val_iteration, val_batch in enumerate(val_dataloader, start=1):
                 if _C.MODEL.NAME == "word_masking":
-                    args = [
+                    output_dict = model(
                         batch["image"],
                         batch["masked_tokens"],
                         batch["masked_labels"],
-                    ]
+                    )
                 else:
-                    args = [batch["image"], batch["caption_tokens"]]
+                    output_dict = model(batch["image"], batch["caption_tokens"])
 
                 # This will have a key named "loss_components": these are
                 # scalar tensors (mean loss per batch) only for logging.
-                output_dict = model(*args)
                 val_loss_counter.update(output_dict["loss_components"])
 
             # Divide each loss component by number of val batches per GPU.
@@ -296,9 +295,15 @@ if __name__ == "__main__":
             logger.info(f"Iter: {iteration} | Val loss: {val_loss_dict}")
             tensorboard_writer.add_scalars("val", val_loss_dict, iteration)
 
+            to_strtokens = lambda token_indices: [  # noqa: E731
+                vocabulary.get_token_from_index(t.item())
+                for t in token_indices
+                if t.item() != vocabulary.unk_index
+            ]
+            examples_str = ""
+
+            # fmt: off
             if _C.MODEL.NAME == "word_masking":
-                # fmt: off
-                examples_str = ""
                 for tokens, labels, predictions in zip(
                     batch["masked_tokens"], batch["masked_labels"],
                     output_dict["predictions"]
@@ -307,10 +312,6 @@ if __name__ == "__main__":
                     predictions = [
                         predictions[i] for i in range(len(predictions))
                         if labels[i] != vocabulary.unk_index
-                    ]
-                    to_strtokens = lambda token_indices: [  # noqa: E731
-                        vocabulary.get_token_from_index(t.item())
-                        for t in token_indices if t.item() != vocabulary.unk_index
                     ]
                     tokens = to_strtokens(tokens)
                     labels = to_strtokens(labels)
@@ -322,8 +323,22 @@ if __name__ == "__main__":
                         Predictions    : {" ".join(predictions)}
 
                         """
-                # fmt: on
                 tensorboard_writer.add_text("predictions", examples_str, iteration)
+
+            elif _C.MODEL.NAME == "captioning":
+                for tokens, predictions in zip(
+                    batch["caption_tokens"], output_dict["predictions"]
+                ):
+                    tokens = to_strtokens(tokens)
+                    predictions = to_strtokens(predictions)
+
+                    examples_str += f"""
+                        Caption tokens : {tokenizer.detokenize(tokens)}
+                        Predictions    : {tokenizer.detokenize(predictions)}
+
+                        """
+                tensorboard_writer.add_text("predictions", examples_str, iteration)
+            # fmt: on
 
         # All processes will wait till master process is done logging.
         dist.synchronize()
