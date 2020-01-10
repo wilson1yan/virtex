@@ -4,9 +4,8 @@ from torch import nn
 from viswsl.modules.embedding import WordAndPositionalEmbedding
 from viswsl.modules.transformer import (
     PreNormTransformerEncoderLayer,
-    BidirectionalTansformerEncoder,
-    ForwardTransformerEncoder,
-    BackwardTransformerEncoder,
+    BidirectionalTransformerEncoder,
+    UnidirectionalTransformerEncoder,
 )
 
 
@@ -48,11 +47,10 @@ class TransformerTextualStream(nn.Module):
             dropout=dropout,
             activation=activation,
         )
-        # Make encoder depending on the specified direction.
         EncoderClass = (
-            BidirectionalTansformerEncoder
+            BidirectionalTransformerEncoder
             if is_bidirectional
-            else ForwardTransformerEncoder
+            else UnidirectionalTransformerEncoder
         )
         self.encoder = EncoderClass(_encoder_layer, self.num_layers)
         self.apply(self.init_weights)
@@ -75,17 +73,19 @@ class TransformerTextualStream(nn.Module):
             if module.padding_idx is not None:
                 module.weight.data[module.padding_idx].zero_()
 
-    def forward(self, caption_tokens: torch.LongTensor) -> torch.Tensor:
+    def forward(
+        self, caption_tokens: torch.Tensor, caption_lengths: torch.Tensor
+    ) -> torch.Tensor:
 
+        # Create a mask based on caption lengths, shape: (batch_size, )
         # Form a binary mask: it is True for padding positions.
         # These positions will be ignored for multi-headed attention.
-        caption_mask = caption_tokens == self.padding_idx
+        ones = torch.ones_like(caption_tokens)
+        caption_mask = caption_lengths.unsqueeze(1) < ones.cumsum(dim=1)
 
         # shape: (batch_size, max_caption_length, embedding_size)
         token_embeddings = self.embedding(caption_tokens)
 
         # shape: (batch_size, max_caption_length, hidden_size)
-        textual_features = self.encoder(
-            token_embeddings, token_mask=caption_mask
-        )
+        textual_features = self.encoder(token_embeddings, token_mask=caption_mask)
         return textual_features
