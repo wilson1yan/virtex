@@ -12,7 +12,7 @@ class TorchvisionVisualStream(nn.Module):
         self,
         name: str,
         pretrained: bool = False,
-        norm_layer: str = "groupnorm",
+        norm_layer: str = "GN",
         num_groups: int = 32,
         **kwargs,
     ):
@@ -33,7 +33,7 @@ class TorchvisionVisualStream(nn.Module):
         self._cnn = model_creation_method(
             pretrained, zero_init_residual=True, **kwargs
         )
-        if norm_layer == "groupnorm":
+        if norm_layer in {"groupnorm", "GN"}:
             self._cnn = self._batchnorm_to_groupnorm(self._cnn, num_groups)
 
         # Do nothing after the final residual stage.
@@ -101,7 +101,11 @@ class TorchvisionVisualStream(nn.Module):
 
             d2_backbone_dict[name] = param
 
-        return d2_backbone_dict
+        return {
+            "model": d2_backbone_dict,
+            "__author__": "Karan Desai",
+            "matching_heuristics": True,
+        }
 
 
 class D2BackboneVisualStream(nn.Module):
