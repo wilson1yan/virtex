@@ -60,9 +60,6 @@ class DatasetFactory(Factory):
             "lmdb_path": _C.DATA.VAL_LMDB if split == "val" else _C.DATA.TRAIN_LMDB,
             "vocabulary": vocabulary,
             "tokenizer": tokenizer,
-            "normalize_image": _C.DATA.NORMALIZE_IMAGE,
-            "image_resize_size": _C.DATA.IMAGE_RESIZE_SIZE,
-            "image_crop_size": _C.DATA.IMAGE_CROP_SIZE,
             "max_caption_length": _C.DATA.MAX_CAPTION_LENGTH,
             "shuffle": False if split == "val" else True,
         }
