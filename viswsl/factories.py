@@ -135,6 +135,7 @@ class VisualStreamFactory(Factory):
 class TextualStreamFactory(Factory):
 
     PRODUCTS: Dict[str, Callable[..., ts.TransformerTextualStream]] = {
+        "embedding": ts.EmbeddingTextualStream,
         "postnorm_gelu": partial(
             ts.TransformerTextualStream, norm_type="post", activation="gelu"
         ),
@@ -154,21 +155,23 @@ class TextualStreamFactory(Factory):
         _C = config
 
         vocabulary = vdata.SentencePieceVocabulary(_C.DATA.VOCABULARY)
+        kwargs = {
+            "vocab_size": len(vocabulary),
+            "hidden_size": _C.MODEL.TEXTUAL.HIDDEN_SIZE,
+            "dropout": _C.MODEL.TEXTUAL.DROPOUT,
+            "padding_idx": vocabulary.pad_index,
+        }
+        if _C.MODEL.TEXTUAL.NAME != "embedding":
+            # Transformer will be bidirectional only for word masking pretext.
+            is_bidirectional = _C.MODEL.NAME == "word_masking"
+            kwargs.update(
+                feedforward_size=_C.MODEL.TEXTUAL.FEEDFORWARD_SIZE,
+                attention_heads=_C.MODEL.TEXTUAL.ATTENTION_HEADS,
+                num_layers=_C.MODEL.TEXTUAL.NUM_LAYERS,
+                is_bidirectional=is_bidirectional,
+            )
 
-        # Transformer will be bidirectional only for word masking pretext.
-        is_bidirectional = _C.MODEL.NAME == "word_masking"
-
-        return cls.create(
-            _C.MODEL.TEXTUAL.NAME.split("::")[0],
-            vocab_size=len(vocabulary),
-            hidden_size=_C.MODEL.TEXTUAL.HIDDEN_SIZE,
-            feedforward_size=_C.MODEL.TEXTUAL.FEEDFORWARD_SIZE,
-            attention_heads=_C.MODEL.TEXTUAL.ATTENTION_HEADS,
-            num_layers=_C.MODEL.TEXTUAL.NUM_LAYERS,
-            dropout=_C.MODEL.TEXTUAL.DROPOUT,
-            is_bidirectional=is_bidirectional,
-            padding_idx=vocabulary.pad_index,
-        )
+        return cls.create(_C.MODEL.TEXTUAL.NAME.split("::")[0], **kwargs)
 
 
 class FusionFactory(Factory):

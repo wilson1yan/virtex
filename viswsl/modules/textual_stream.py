@@ -83,9 +83,51 @@ class TransformerTextualStream(nn.Module):
         ones = torch.ones_like(caption_tokens)
         caption_mask = caption_lengths.unsqueeze(1) < ones.cumsum(dim=1)
 
-        # shape: (batch_size, max_caption_length, embedding_size)
+        # shape: (batch_size, max_caption_length, textual_feature_size)
         token_embeddings = self.embedding(caption_tokens)
 
-        # shape: (batch_size, max_caption_length, hidden_size)
+        # shape: (batch_size, max_caption_length, textual_feature_size)
         textual_features = self.encoder(token_embeddings, token_mask=caption_mask)
+        return textual_features
+
+
+class EmbeddingTextualStream(nn.Module):
+    def __init__(
+        self,
+        vocab_size: int,
+        hidden_size: int,
+        dropout: float = 0.1,
+        padding_idx: int = 0,
+    ):
+        super().__init__()
+        self.vocab_size = vocab_size
+        self.hidden_size = hidden_size
+        self.padding_idx = padding_idx
+
+        self.embedding = WordAndPositionalEmbedding(
+            self.vocab_size, self.textual_feature_size, dropout=dropout
+        )
+        self.apply(self.init_weights)
+
+    @property
+    def textual_feature_size(self):
+        return self.hidden_size
+
+    @staticmethod
+    def init_weights(module):
+        r"""Initialize weights like BERT - N(0.0, 0.02), bias = 0."""
+
+        if isinstance(module, nn.Linear):
+            module.weight.data.normal_(mean=0.0, std=0.02)
+        elif isinstance(module, nn.Embedding):
+            module.weight.data.normal_(mean=0.0, std=0.02)
+            if module.padding_idx is not None:
+                module.weight.data[module.padding_idx].zero_()
+
+    def forward(
+        self, caption_tokens: torch.Tensor, caption_lengths: torch.Tensor
+    ) -> torch.Tensor:
+
+        # shape: (batch_size, max_caption_length, textual_feature_size)
+        textual_features = self.embedding(caption_tokens)
         return textual_features
