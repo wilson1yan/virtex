@@ -71,9 +71,7 @@ class CaptioningDataset(IterableDataset):
             caption_tokens = datapoint["caption_tokens"]
             caption_tokens = caption_tokens[: self.max_caption_length]
 
-            yield CaptioningInstance(
-                datapoint["image_id"], image, caption_tokens
-            )
+            yield CaptioningInstance(datapoint["image_id"], image, caption_tokens)
 
     def collate_fn(self, instances: List[CaptioningInstance]) -> CaptioningBatch:
         return CaptioningBatch(instances, padding_value=self.padding_idx)

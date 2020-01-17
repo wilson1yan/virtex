@@ -18,8 +18,7 @@ class VOC07ClassificationDataset(IterableDataset):
         split: str = "train",
         image_transform: Callable = alb.Compose(
             [
-                alb.SmallestMaxSize(max_size=256),
-                alb.RandomCrop(224, 224),
+                alb.Resize(224, 224),
                 alb.ToFloat(max_value=255.0),
                 alb.Normalize(
                     mean=(0.485, 0.456, 0.406),
