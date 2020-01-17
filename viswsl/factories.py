@@ -238,15 +238,16 @@ class OptimizerFactory(Factory):
 
         # Form param groups on two criterions:
         #   1. no weight decay for some parameters (usually norm and bias)
-        #   2. different LR for visual stream.
+        #   2. different LR and weight decay for CNN and rest of model.
         # fmt: off
         param_groups: List[Dict[str, Any]] = []
         for name, param in named_parameters:
-            lr = _C.OPTIM.VISUAL_LR if "visual" in name else _C.OPTIM.LR
+            lr = _C.OPTIM.CNN_LR if "cnn" in name else _C.OPTIM.LR
             wd = (
-                _C.OPTIM.WEIGHT_DECAY
-                if not any(n in name for n in _C.OPTIM.NO_DECAY) else 0.0
+                _C.OPTIM.CNN_WEIGHT_DECAY if "cnn" in name else _C.OPTIM.WEIGHT_DECAY
             )
+            if any(n in name for n in _C.OPTIM.NO_DECAY):
+                wd = 0.0
             param_groups.append({"params": [param], "lr": lr, "weight_decay": wd})
         # fmt: on
 
