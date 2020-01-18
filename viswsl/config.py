@@ -151,9 +151,6 @@ class Config(object):
         _C.DATA.TOKENIZER = "data/coco_vocabulary.model"
         _C.DATA.TRAIN_LMDB = "data/serialized/coco_train2017.lmdb"
         _C.DATA.VAL_LMDB = "data/serialized/coco_val2017.lmdb"
-        _C.DATA.NORMALIZE_IMAGE = True
-        _C.DATA.IMAGE_RESIZE_SIZE = 256
-        _C.DATA.IMAGE_CROP_SIZE = 224
         _C.DATA.MAX_CAPTION_LENGTH = 30
 
         _C.DATA.IMAGE = CN()
