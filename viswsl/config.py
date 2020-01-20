@@ -76,12 +76,6 @@ class Config(object):
         Parameters defining the architecture of the visual stream.
     MODEL.VISUAL.NAME: "torchvision::resnet50"
         Name of the visual stream model. Torchvision models supported for now.
-    MODEL.VISUAL.NORM_LAYER: GN
-        One of ``["BN", "GN"]``. Instance Norm and Layer Norm are special cases
-        of Group Norm.
-    MODEL.VISUAL.NUM_GROUPS: 32
-        Number of groups for Group Norm. Ignored if ``MODEL.VISUAL.NORM_LAYER``
-        is ``BN``.
     MODEL.VISUAL.PRETRAINED:
         Whether to initialize model from ImageNet pre-trained weights.
     _____
@@ -168,8 +162,6 @@ class Config(object):
         _C.MODEL.VISUAL = CN()
         _C.MODEL.VISUAL.NAME = "torchvision::resnet50"
         _C.MODEL.VISUAL.FEATURE_SIZE = 2048
-        _C.MODEL.VISUAL.NORM_LAYER = "GN"
-        _C.MODEL.VISUAL.NUM_GROUPS = 32
         _C.MODEL.VISUAL.PRETRAINED = False
 
         _C.MODEL.TEXTUAL = CN()

@@ -5,40 +5,58 @@ from typing import Dict, Union
 
 import torch
 from torch import nn
+import torchvision
 
 
-class TorchvisionVisualStream(nn.Module):
+class VisualStream(nn.Module):
+    r"""
+    A simple base class for all visual streams. We mainly add it for uniformity
+    in type annotations. All child classes can simply inherit from
+    :class:`~torch.nn.Module` otherwise.
+    """
+
+    def __init__(self, visual_feature_size: int):
+        super().__init__()
+        self._visual_feature_size = visual_feature_size
+
+    @property
+    def visual_feature_size(self) -> int:
+        return self._visual_feature_size
+
+
+class BlindVisualStream(VisualStream):
+    r"""A visual stream which cannot see the image."""
+
+    def __init__(self, visual_feature_size: int = 2048, bias_value: float = 1.0):
+        super().__init__(visual_feature_size)
+
+        # We never update the bias because a blind model cannot learn anything
+        # about the image. Add an axis for proper broadcasting.
+        self._bias = nn.Parameter(
+            torch.full((1, self.visual_feature_size), fill_value=bias_value),
+            requires_grad=False,
+        )
+
+    def forward(self, image: torch.Tensor):
+        batch_size = image.size(0)
+        return self._bias.unsqueeze(0).repeat(batch_size, 1, 1)
+
+
+class TorchvisionVisualStream(VisualStream):
     def __init__(
         self,
         name: str,
+        visual_feature_size: int = 2048,
         pretrained: bool = False,
-        norm_layer: str = "GN",
-        num_groups: int = 32,
         **kwargs,
     ):
-        super().__init__()
-        self.visual_feature_size = 2048
+        super().__init__(visual_feature_size)
 
-        # Protect import because it should be an optional dependency, one may
-        # only use `D2BackboneVisualStream`.
-        from torchvision import models as tv_models
-
-        try:
-            model_creation_method = getattr(tv_models, name)
-        except AttributeError as err:
-            raise RuntimeError(f"{name} if not a torchvision model.")
-
-        # Initialize with BatchNorm, convert all Batchnorm to GroupNorm if
-        # needed.
-        self._cnn = model_creation_method(
+        self.cnn = getattr(torchvision.models, name)(
             pretrained, zero_init_residual=True, **kwargs
         )
-        if norm_layer in {"groupnorm", "GN"}:
-            self._cnn = self._batchnorm_to_groupnorm(self._cnn, num_groups)
-
         # Do nothing after the final residual stage.
-        self._cnn.avgpool = nn.Identity()
-        self._cnn.fc = nn.Identity()
+        self.cnn.fc = nn.Identity()
 
         # Keep a list of intermediate layer names.
         self._stage_names = [f"layer{i}" for i in range(1, 5)]
@@ -50,7 +68,7 @@ class TorchvisionVisualStream(nn.Module):
         # Iterate through the modules in sequence and collect feature
         # vectors for last layers in each stage.
         intermediate_outputs: Dict[str, torch.Tensor] = {}
-        for idx, (name, layer) in enumerate(self._cnn.named_children()):
+        for idx, (name, layer) in enumerate(self.cnn.named_children()):
             out = layer(image) if idx == 0 else layer(out)
             if name in self._stage_names:
                 intermediate_outputs[name] = out
@@ -60,14 +78,6 @@ class TorchvisionVisualStream(nn.Module):
         else:
             # shape: (batch_size, feature_size, ...)
             return intermediate_outputs["layer4"]
-
-    def _batchnorm_to_groupnorm(self, module, num_groups: int):
-        mod = module
-        if isinstance(module, torch.nn.modules.batchnorm._BatchNorm):
-            mod = nn.GroupNorm(num_groups, module.num_features, affine=module.affine)
-        for name, child in module.named_children():
-            mod.add_module(name, self._batchnorm_to_groupnorm(child, num_groups))
-        return mod
 
     def detectron2_backbone_state_dict(self):
         r"""
@@ -91,7 +101,7 @@ class TorchvisionVisualStream(nn.Module):
         # Populate this dict by renaming module names.
         d2_backbone_dict: Dict[str, torch.Tensor] = {}
 
-        for name, param in self._cnn.state_dict().items():
+        for name, param in self.cnn.state_dict().items():
             for old, new in DETECTRON2_RENAME_MAPPING.items():
                 name = name.replace(old, new)
 
@@ -108,9 +118,8 @@ class TorchvisionVisualStream(nn.Module):
         }
 
 
-class D2BackboneVisualStream(nn.Module):
+class D2BackboneVisualStream(VisualStream):
 
-    # TODO: (add more later). Think about FPNs.
     MODEL_NAME_TO_CFG_PATH: Dict[str, str] = {
         "coco_faster_rcnn_R_50_C4": "COCO-Detection/faster_rcnn_R_50_C4_3x.yaml",
         "coco_faster_rcnn_R_50_DC5": "COCO-Detection/faster_rcnn_R_50_DC5_3x.yaml",
@@ -122,9 +131,14 @@ class D2BackboneVisualStream(nn.Module):
         "coco_mask_rcnn_R_101_DC5": "COCO-InstanceSegmentation/mask_rcnn_R_101_DC5_3x.yaml",
     }
 
-    def __init__(self, name: str, pretrained: bool = False, **kwargs):
-        super().__init__()
-        self.visual_feature_size = 2048
+    def __init__(
+        self,
+        name: str,
+        visual_feature_size: int = 2048,
+        pretrained: bool = False,
+        **kwargs,
+    ):
+        super().__init__(visual_feature_size)
 
         # Protect import because it should be an optional dependency, one may
         # only use `TorchvisionVisualStream`.
@@ -151,9 +165,9 @@ class D2BackboneVisualStream(nn.Module):
         try:
             # trained=False is not the same as our ``pretrained`` argument.
             d2_model = d2mz.get(self.MODEL_NAME_TO_CFG_PATH[name], trained=False)
-            self._cnn = d2_model.backbone
+            self.cnn = d2_model.backbone
         except Exception as e:
-            self._cnn = None
+            self.cnn = None
             exception = e
 
         # Revert back the changing of config file in case of any exception.
@@ -166,7 +180,7 @@ class D2BackboneVisualStream(nn.Module):
             with open(d2config_path, "w") as d2config:
                 d2config.write(contents)
 
-        if self._cnn is None:
+        if self.cnn is None:
             raise (exception)
 
         # A ResNet-like backbone will only have three stages, the fourth one
@@ -185,7 +199,7 @@ class D2BackboneVisualStream(nn.Module):
         # Iterate through the modules in sequence and collect feature
         # vectors for last layers in each stage.
         intermediate_outputs: Dict[str, torch.Tensor] = {}
-        for idx, (name, layer) in enumerate(self._cnn.named_children()):
+        for idx, (name, layer) in enumerate(self.cnn.named_children()):
             out = layer(image) if idx == 0 else layer(out)
             if name in self._stage_names:
                 intermediate_outputs[name] = out
@@ -205,19 +219,3 @@ class D2BackboneVisualStream(nn.Module):
         else:
             # shape: (batch_size, feature_size, ...)
             return intermediate_outputs["layer4"]
-
-
-class BlindVisualStream(nn.Module):
-    r"""A visual stream which cannot see the image."""
-
-    def __init__(self, bias: torch.Tensor = torch.ones(49, 2048)):
-        super().__init__()
-        self.visual_feature_size = 2048
-
-        # We never update the bias because a blind model cannot learn anything
-        # about the image.
-        self._bias = nn.Parameter(bias, requires_grad=False)
-
-    def forward(self, image: torch.Tensor):
-        batch_size = image.size(0)
-        return self._bias.unsqueeze(0).repeat(batch_size, 1, 1)

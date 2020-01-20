@@ -149,20 +149,18 @@ class VisualStreamFactory(Factory):
     }
 
     @classmethod
-    def from_config(cls, config: Config) -> nn.Module:
+    def from_config(cls, config: Config) -> vs.VisualStream:
         _C = config
+        kwargs = {"visual_feature_size": _C.MODEL.VISUAL.FEATURE_SIZE}
         if (
             "torchvision" in _C.MODEL.VISUAL.NAME
             or "detectron2" in _C.MODEL.VISUAL.NAME
         ):
             zoo_name, cnn_name = _C.MODEL.VISUAL.NAME.split("::")
-            kwargs = {"pretrained": _C.MODEL.VISUAL.PRETRAINED}
-            if "torchvision" in _C.MODEL.VISUAL.NAME:
-                kwargs["num_groups"] = _C.MODEL.VISUAL.NUM_GROUPS
-                kwargs["norm_layer"] = _C.MODEL.VISUAL.NORM_LAYER
+            kwargs["pretrained"] = _C.MODEL.VISUAL.PRETRAINED
 
             return cls.create(zoo_name, cnn_name, **kwargs)
-        return cls.create(_C.MODEL.VISUAL.NAME)
+        return cls.create(_C.MODEL.VISUAL.NAME, **kwargs)
 
 
 class TextualStreamFactory(Factory):
@@ -253,10 +251,7 @@ class PretrainingModelFactory(Factory):
         textual = TextualStreamFactory.from_config(_C)
         fusion = FusionFactory.from_config(_C)
 
-        # Form kwargs according to the model name, different models require
-        # different sets of kwargs in their constructor.
-        kwargs = {"tie_embeddings": _C.MODEL.TIE_EMBEDDINGS}
-        return cls.create(_C.MODEL.NAME, visual, textual, fusion, **kwargs)
+        return cls.create(_C.MODEL.NAME, visual, textual, fusion)
 
 
 class OptimizerFactory(Factory):

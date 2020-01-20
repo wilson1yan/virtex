@@ -16,7 +16,6 @@ class CaptioningModel(nn.Module):
         textual,
         fusion: Fusion,
         bidirectional: bool = False,
-        tie_embeddings: bool = True,
     ):
         super().__init__()
         self.visual = visual
@@ -24,9 +23,8 @@ class CaptioningModel(nn.Module):
         self.fusion = fusion
 
         self.bidirectional = bidirectional
-        self.tie_embeddings = tie_embeddings
 
-        # Clone the textual and fusion modules for backward direction if
+        # Clone the textual and late fusion modules for backward direction if
         # doing captioning in both directions (separately).
         if self.bidirectional:
             self.backward_textual = copy.deepcopy(self.textual)
@@ -51,21 +49,31 @@ class CaptioningModel(nn.Module):
 
         # Tie input and output word embeddings to reduce parameters.
         # However, output embedding layer will learn its own bias.
-        if (
-            self.tie_embeddings
-            and self.textual.textual_feature_size == self.fusion.fused_feature_size
-        ):
+        if self.textual.textual_feature_size == self.fusion.fused_feature_size:
             self.output.weight = self.textual.embedding.word_embedding.weight
         else:
-            raise ValueError(
-                "Expect input and output embeddings to be of same size for "
-                f"tying weights, found {self.textual.textual_feature_size} and"
-                f" {self.fusion.fused_feature_size} respectively."
+            # Add an intermediate projection layer to `textual_feature_size`
+            # if fused features have different size than textual features.
+            self.output = nn.Sequential(
+                nn.Linear(
+                    self.fusion.fused_feature_size,
+                    self.textual.textual_feature_size,
+                    bias=False,
+                ),
+                nn.Linear(self.textual.textual_feature_size, self.textual.vocab_size),
             )
+            self.output[0].weight.data.normal_(mean=0.0, std=0.02)
+            self.output[-1].weight = self.textual.embedding.word_embedding.weight
+
 
         if self.bidirectional:
-            # Tie the visual projection for forward and backward directions.
-            self.fusion.projections.visual = self.backward_fusion.projections.visual
+            # Tie the visual projection in fusion for both directions.
+            # DO NOT tie textual projection, because the feature space is
+            # different for different directions.
+            if hasattr(self.fusion, "projections"):
+                self.fusion.projections.visual = (
+                    self.backward_fusion.projections.visual
+                )
 
             # Tie word and position embeddings for both directions.
             self.backward_textual.embedding = self.textual.embedding

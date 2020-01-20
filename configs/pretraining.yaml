@@ -29,8 +29,6 @@ MODEL:
   TIE_EMBEDDINGS: True
   VISUAL:
     NAME: torchvision::resnet50
-    NORM_LAYER: BN
-    NUM_GROUPS: 32
     PRETRAINED: false
   TEXTUAL:
     NAME: postnorm_gelu::L1_H512_A8_F2048
