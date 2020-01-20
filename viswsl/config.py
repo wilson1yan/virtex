@@ -4,7 +4,6 @@ Parts of this class are adopted from several of my past projects:
 - `https://github.com/kdexd/probnmn-clevr/blob/master/probnmn/config.py`_
 - `https://github.com/nocaps-org/updown-baseline/blob/master/updown/config.py`_
 """
-import re
 from typing import Any, List, Optional
 
 from loguru import logger
@@ -162,14 +161,9 @@ class Config(object):
         _C.PRETEXT.WORD_MASKING.MASK_PROBABILITY = 0.85
         _C.PRETEXT.WORD_MASKING.REPLACE_PROBABILITY = 0.10
 
-        _C.PRETEXT.MOCO = CN()
-        _C.PRETEXT.MOCO.FEATURE_SIZE = 128
-        _C.PRETEXT.MOCO.MOMENTUM = 0.999
-        _C.PRETEXT.MOCO.QUEUE_SIZE = 4096
-        _C.PRETEXT.MOCO.TEMPERATURE = 0.07
-
         _C.MODEL = CN()
         _C.MODEL.NAME = "word_masking"
+        _C.MODEL.TIE_EMBEDDINGS = True
 
         _C.MODEL.VISUAL = CN()
         _C.MODEL.VISUAL.NAME = "torchvision::resnet50"

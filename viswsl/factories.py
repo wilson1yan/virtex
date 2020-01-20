@@ -214,6 +214,7 @@ class TextualStreamFactory(Factory):
 class FusionFactory(Factory):
 
     PRODUCTS: Dict[str, Callable[..., fusion.Fusion]] = {
+        "none": fusion.NoFusion,
         "concatenate": fusion.ConcatenateFusion,
         "additive": partial(fusion.ElementwiseFusion, operation="additive"),
         "multiplicative": partial(
@@ -243,7 +244,6 @@ class PretrainingModelFactory(Factory):
         "word_masking": vmodels.WordMaskingModel,
         "captioning": partial(vmodels.CaptioningModel, bidirectional=False),
         "bicaptioning": partial(vmodels.CaptioningModel, bidirectional=True),
-        "moco": vmodels.MomentumContrastModel,
     }
 
     @classmethod
@@ -255,14 +255,7 @@ class PretrainingModelFactory(Factory):
 
         # Form kwargs according to the model name, different models require
         # different sets of kwargs in their constructor.
-        kwargs = {}
-        if _C.MODEL.NAME == "moco":
-            kwargs.update(
-                feature_size=_C.PRETEXT.MOCO.FEATURE_SIZE,
-                momentum=_C.PRETEXT.MOCO.MOMENTUM,
-                queue_size=_C.PRETEXT.MOCO.QUEUE_SIZE,
-                temperature=_C.PRETEXT.MOCO.TEMPERATURE,
-            )
+        kwargs = {"tie_embeddings": _C.MODEL.TIE_EMBEDDINGS}
         return cls.create(_C.MODEL.NAME, visual, textual, fusion, **kwargs)
 
 
