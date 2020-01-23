@@ -57,6 +57,11 @@ parser.add_argument(
 
 parser.add_argument_group("Checkpointing and Logging")
 parser.add_argument(
+    "--imagenet-backbone", action="store_true",
+    help="""Whether to load ImageNet pre-trained weights. This flag will ignore
+    weights from `--checkpoint-path`."""
+)
+parser.add_argument(
     "--checkpoint-path", required=True,
     help="""Path to load checkpoint and run downstream task evaluation. The
     name of checkpoint file is required to be `checkpoint_*.pth`, where * is
@@ -94,14 +99,23 @@ def get_d2_config(_C: Config, _A: argparse.Namespace):
     _D2C.DATALOADER.NUM_WORKERS = _A.cpu_workers
     _D2C.SOLVER.EVAL_PERIOD = _A.checkpoint_every
     _D2C.SOLVER.CHECKPOINT_PERIOD = _A.checkpoint_every
+    _D2C.OUTPUT_DIR = _A.serialization_dir
 
     _D2C.SOLVER.BASE_LR = 0.0025 * dist.get_world_size()
     _D2C.SOLVER.IMS_PER_BATCH = 2 * dist.get_world_size()
 
-    # Set ImageNet pixel mean and std for normalization (BGR).
-    _D2C.MODEL.PIXEL_MEAN = [123.675, 116.280, 103.530]
-    _D2C.MODEL.PIXEL_STD = [58.395, 57.120, 57.375]
-    _D2C.INPUT.FORMAT = "RGB"
+    # Set ImageNet pixel mean and std for normalization.
+    if _A.imagenet_backbone:
+        _D2C.MODEL.WEIGHTS = (
+            f"detectron2://ImageNetPretrained/MSRA/R-{_D2C.MODEL.RESNETS.DEPTH}.pkl"
+        )
+        _D2C.MODEL.PIXEL_MEAN = [103.530, 116.280, 123.675]
+        _D2C.MODEL.PIXEL_STD = [1.0, 1.0, 1.0]
+        _D2C.INPUT.FORMAT = "BGR"
+    else:
+        _D2C.MODEL.PIXEL_MEAN = [123.675, 116.280, 103.530]
+        _D2C.MODEL.PIXEL_STD = [58.395, 57.120, 57.375]
+        _D2C.INPUT.FORMAT = "RGB"
 
     return _D2C
 
@@ -147,16 +161,17 @@ if __name__ == "__main__":
     for arg in vars(_A):
         logger.info("{:<20}: {}".format(arg, getattr(_A, arg)))
 
-    CHECKPOINT_ITERATION = int(
-        os.path.basename(_A.checkpoint_path).split("_")[-1][:-4]
-    )
     # Set up a serialization directory.
-    if not _A.serialization_dir:
-        _A.serialization_dir = os.path.dirname(_A.checkpoint_path)
-    os.makedirs(
-        os.path.join(_A.serialization_dir, f"lvis_{CHECKPOINT_ITERATION}"),
-        exist_ok=True
-    )
+    if not _A.imagenet_backbone and not _A.serialization_dir:
+        CHECKPOINT_ITERATION = int(
+            os.path.basename(_A.checkpoint_path).split("_")[-1][:-4]
+        )
+        _A.serialization_dir = os.path.join(
+            os.path.dirname(_A.checkpoint_path), f"lvis_{CHECKPOINT_ITERATION}"
+        )
+
+    os.makedirs(_A.serialization_dir, exist_ok=True)
+
     # Tensorboard writer for logging mAP scores.
     tensorboard_writer = SummaryWriter(log_dir=_A.serialization_dir)
 
@@ -164,18 +179,21 @@ if __name__ == "__main__":
     #   DETECTRON2 CONFIG AND TRAINER
     # -------------------------------------------------------------------------
     _D2C = get_d2_config(_C, _A)
-    _D2C.OUTPUT_DIR = os.path.join(
-        _A.serialization_dir, f"lvis_{CHECKPOINT_ITERATION}"
-    )
     _D2C.freeze()
     logger.info(_D2C)
 
-    # Initialize from a checkpoint, but only keep the visual module.
-    model = PretrainingModelFactory.from_config(_C).to(device)
-    model.load_state_dict(torch.load(_A.checkpoint_path))
-    d2_weights = model.visual.detectron2_backbone_state_dict()
-    del model
-
     trainer = LvisFinetuneTrainer(_D2C)
-    trainer.checkpointer._load_model(d2_weights)
+
+    # Load either imagenet weights or our pretrained weights.
+    if _A.imagenet_backbone:
+        trainer.checkpointer.load(_D2C.MODEL.WEIGHTS)
+    else:
+        # Initialize from a checkpoint, but only keep the visual module.
+        model = PretrainingModelFactory.from_config(_C).to(device)
+        model.load_state_dict(torch.load(_A.checkpoint_path))
+        d2_weights = model.visual.detectron2_backbone_state_dict()
+        del model
+
+        trainer.checkpointer._load_model(d2_weights)
+
     trainer.train()
