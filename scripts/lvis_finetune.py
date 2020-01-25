@@ -26,7 +26,7 @@ import torch
 from torch.utils.tensorboard import SummaryWriter
 
 import detectron2 as d2
-from detectron2.engine import DefaultTrainer
+from detectron2.engine import DefaultTrainer, EvalHook
 from detectron2.evaluation import LVISEvaluator
 
 from viswsl.config import Config
@@ -40,6 +40,11 @@ parser.add_argument(
     "--config", required=True,
     help="""Path to a config file used to train the model whose checkpoint will
     be loaded (not Detectron2 config)."""
+)
+parser.add_argument(
+    "--config-override", nargs="*", default=[],
+    help="""A sequence of key-value pairs specifying certain config arguments
+    (with dict-like nesting) using a dot operator.""",
 )
 parser.add_argument(
     "--cpu-workers", type=int, default=2, help="Number of CPU workers."
@@ -62,7 +67,7 @@ parser.add_argument(
     weights from `--checkpoint-path`."""
 )
 parser.add_argument(
-    "--checkpoint-path", required=True,
+    "--checkpoint-path",
     help="""Path to load checkpoint and run downstream task evaluation. The
     name of checkpoint file is required to be `checkpoint_*.pth`, where * is
     iteration number from which the checkpoint was serialized."""
@@ -99,10 +104,19 @@ def get_d2_config(_C: Config, _A: argparse.Namespace):
     _D2C.DATALOADER.NUM_WORKERS = _A.cpu_workers
     _D2C.SOLVER.EVAL_PERIOD = _A.checkpoint_every
     _D2C.SOLVER.CHECKPOINT_PERIOD = _A.checkpoint_every
+    _D2C.TEST.EVAL_PERIOD = _A.checkpoint_every
     _D2C.OUTPUT_DIR = _A.serialization_dir
 
     _D2C.SOLVER.BASE_LR = 0.0025 * dist.get_world_size()
     _D2C.SOLVER.IMS_PER_BATCH = 2 * dist.get_world_size()
+
+    # Set max iters and decay steps according to schedule: 1X or 2X.
+    if _C.DOWNSTREAM.LVIS.SCHEDULE_X == 1:
+        _D2C.SOLVER.MAX_ITER = 90000
+        _D2C.SOLVER.STEPS = (60000, 80000)
+    elif _C.DOWNSTREAM.LVIS.SCHEDULE_X == 2:
+        _D2C.SOLVER.MAX_ITER = 180000
+        _D2C.SOLVER.STEPS = (120000, 160000)
 
     # Set ImageNet pixel mean and std for normalization.
     if _A.imagenet_backbone:
@@ -120,12 +134,52 @@ def get_d2_config(_C: Config, _A: argparse.Namespace):
     return _D2C
 
 
+class DeadTimeEvalHook(EvalHook):
+    def __init__(self, start_after, eval_period, eval_function):
+        self._start_after = start_after
+        super().__init__(eval_period, eval_function)
+
+    def after_step(self):
+        next_iter = self.trainer.iter + 1
+        if next_iter >= self._start_after:
+            super().after_step()
+
+
 class LvisFinetuneTrainer(DefaultTrainer):
     @classmethod
     def build_evaluator(cls, cfg, dataset_name, output_folder=None):
         if output_folder is None:
             output_folder = os.path.join(cfg.OUTPUT_DIR, "inference")
         return LVISEvaluator(dataset_name, cfg, True, output_folder)
+
+    def build_hooks(self):
+        cfg = self.cfg.clone()
+        cfg.defrost()
+
+        ret = [
+            d2.engine.hooks.IterationTimer(),
+            d2.engine.hooks.LRScheduler(self.optimizer, self.scheduler),
+        ]
+
+        if dist.is_master_process():
+            ret.append(
+                d2.engine.hooks.PeriodicCheckpointer(
+                    self.checkpointer, cfg.SOLVER.CHECKPOINT_PERIOD
+                )
+            )
+
+        def test_and_save_results():
+            self._last_eval_results = self.test(self.cfg, self.model)
+            return self._last_eval_results
+
+        ret.append(
+            DeadTimeEvalHook(
+                cfg.SOLVER.STEPS[0] - 1, cfg.TEST.EVAL_PERIOD, test_and_save_results
+            )
+        )
+        if dist.is_master_process():
+            ret.append(d2.engine.hooks.PeriodicWriter(self.build_writers()))
+        return ret
 
 
 if __name__ == "__main__":
@@ -143,7 +197,7 @@ if __name__ == "__main__":
         )
 
     # Create config with default values, then override from config file.
-    _C = Config(_A.config)
+    _C = Config(_A.config, _A.config_override)
 
     # For reproducibility - refer https://pytorch.org/docs/stable/notes/randomness.html
     random.seed(_C.RANDOM_SEED)
