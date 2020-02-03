@@ -120,10 +120,15 @@ def build_detectron2_config(_C: Config, _A: argparse.Namespace):
 
     # Task-specific adjustments in config.
     if _A.task == "lvis":
+        _D2C.MODEL.RESNETS.NORM = _C.DOWNSTREAM.LVIS.NORM_LAYER
+        _D2C.MODEL.FPN.NORM = _C.DOWNSTREAM.LVIS.NORM_LAYER
         # If using LVIS and ImageNet backbone, use FrozenBN and no BN in FPN.
         if _A.imagenet_backbone:
             _D2C.MODEL.RESNETS.NORM = "FrozenBN"
             _D2C.MODEL.FPN.NORM = ""
+    elif _A.task == "voc":
+        _D2C.MODEL.RESNETS.NORM = _C.DOWNSTREAM.VOC.NORM_LAYER
+        _D2C.MODEL.RESNETS.RES5_DILATION = _C.DOWNSTREAM.VOC.RES5_DILATION
 
     return _D2C
 
@@ -152,12 +157,13 @@ class DownstreamTrainer(DefaultTrainer):
         data_loader = self.build_train_loader(cfg)
 
         # Initialize model and optimizer for mixed precision training.
-        model, optimizer = amp.initialize(model, optimizer, opt_level=f"O2")
-
+        # model.backbone, optimizer = amp.initialize(
+        #     model.backbone, optimizer, opt_level=f"O2"
+        # )
         # Enable distributed training if we have multiple GPUs.
         if dist.get_world_size() > 1:
             model = nn.parallel.DistributedDataParallel(
-                model, device_ids=[dist.get_rank()], broadcast_buffers=False
+                model, device_ids=[dist.get_rank()], broadcast_buffers=False,
             )
 
         # Call `__init__` from grandparent class: `SimpleTrainer`.
@@ -225,8 +231,9 @@ class DownstreamTrainer(DefaultTrainer):
         self._write_metrics(metrics_dict)
 
         self.optimizer.zero_grad()
-        with amp.scale_loss(losses, self.optimizer) as scaled_losses:
-            scaled_losses.backward()
+        losses.backward()
+        # with amp.scale_loss(losses, self.optimizer) as scaled_losses:
+        #     scaled_losses.backward()
 
         self.optimizer.step()
 

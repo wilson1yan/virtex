@@ -200,9 +200,11 @@ class Config(object):
 
         _C.DOWNSTREAM.LVIS = CN()
         _C.DOWNSTREAM.LVIS.D2_CONFIG = "configs/detectron2/lvis.yaml"
+        _C.DOWNSTREAM.LVIS.NORM_LAYER = "SyncBN"
 
         _C.DOWNSTREAM.VOC = CN()
         _C.DOWNSTREAM.VOC.D2_CONFIG = "configs/detectron2/voc.yaml"
+        _C.DOWNSTREAM.VOC.NORM_LAYER = "SyncBN"
         _C.DOWNSTREAM.VOC.RES5_DILATION = 1
 
         # Placeholders, set these values after merging from file.
