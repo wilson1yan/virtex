@@ -1,0 +1,66 @@
+RANDOM_SEED: 0
+FP16_OPT: 0
+
+DATA:
+  TRAIN_LMDB: data/serialized/coco_train2017.lmdb
+  VAL_LMDB: data/serialized/coco_val2017.lmdb
+  CAPTION_CORPUS: data/coco_train2017_corpus.txt
+
+  IMAGE:
+    RESIZE_SIZE: 256
+    CROP_SIZE: 224
+    COLOR_NORMALIZE: true
+    RANDOM_FLIP: true
+    PHOTOMETRIC_AUG: true
+
+  CAPTION:
+    VOCAB_SIZE: 10000
+    MAX_LENGTH: 30
+    TOKENIZER: SentencePieceBPETokenizer
+
+PRETEXT:
+  WORD_MASKING:
+    MASK_PROPORTION: 0.15
+    MASK_PROBABILITY: 1.0
+    REPLACE_PROBABILITY: 0.0
+
+MODEL:
+  NAME: bicaptioning
+  VISUAL:
+    NAME: torchvision::resnet50
+    PRETRAINED: false
+  TEXTUAL:
+    NAME: vismem_prenorm::L1_H512_A8_F2048
+    DO_EARLY_FUSION: False
+    HIDDEN_SIZE: 512
+    ATTENTION_HEADS: 8
+    FEEDFORWARD_SIZE: 2048
+    NUM_LAYERS: 1
+  LATE_FUSION:
+    NAME: multihead
+    ATTENTION_HEADS: 8
+  DROPOUT: 0.1
+
+OPTIM:
+  NUM_ITERATIONS: 800000
+  OPTIMIZER_NAME: adamw
+  ADAM_BETAS: [0.9, 0.98]
+  USE_LOOKAHEAD: True
+
+  BATCH_SIZE_PER_GPU: 64
+  BATCH_SIZE_MULTIPLIER: 1
+
+  LR: 2e-4
+  CNN_LR: 8e-3
+  WEIGHT_DECAY: 1e-2
+  CNN_WEIGHT_DECAY: 1e-2
+  LR_DECAY_NAME: cosine
+  WARMUP_STEPS: 10000
+  CLIP_GRAD_NORM: 10
+
+DOWNSTREAM:
+  VOC07_CLF:
+    DATA_ROOT: data/VOC2007
+    BATCH_SIZE: 64
+    LAYER_NAMES: ["layer4"]
+    SVM_COSTS: [0.01, 0.1, 1.0, 10.0]
