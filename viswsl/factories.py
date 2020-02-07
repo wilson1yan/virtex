@@ -194,6 +194,8 @@ class TextualStreamFactory(Factory):
             "dropout": _C.MODEL.DROPOUT,
             "is_bidirectional": _C.MODEL.NAME == "word_masking",
             "padding_idx": tokenizer.token_to_id("[UNK]"),
+            "sos_index": tokenizer.token_to_id("[SOS]"),
+            "eos_index": tokenizer.token_to_id("[EOS]"),
         }
         if _C.MODEL.TEXTUAL.NAME != "embedding":
             kwargs.update(
@@ -219,7 +221,11 @@ class PretrainingModelFactory(Factory):
 
         visual = VisualStreamFactory.from_config(_C)
         textual = TextualStreamFactory.from_config(_C)
-        return cls.create(_C.MODEL.NAME, visual, textual)
+        if _C.MODEL.NAME == "captioning":
+            kwargs = {"max_decoding_steps": _C.DATA.CAPTION.MAX_LENGTH}
+        else:
+            kwargs = {}
+        return cls.create(_C.MODEL.NAME, visual, textual, **kwargs)
 
 
 class OptimizerFactory(Factory):

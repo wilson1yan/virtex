@@ -18,12 +18,16 @@ class TextualStream(nn.Module):
         hidden_size: int,
         is_bidirectional: bool = True,
         padding_idx: int = 0,
+        sos_index: int = 1,
+        eos_index: int = 2,
     ):
         super().__init__()
         self.vocab_size = vocab_size
         self.hidden_size = hidden_size
         self.is_bidirectional = is_bidirectional
         self.padding_idx = padding_idx
+        self.sos_index = sos_index
+        self.eos_index = eos_index
 
     @property
     def textual_feature_size(self):
@@ -77,12 +81,16 @@ class EmbeddingTextualStream(TextualStream):
         dropout: float = 0.1,
         is_bidirectional: bool = True,
         padding_idx: int = 0,
+        sos_index: int = 1,
+        eos_index: int = 2,
     ):
         super().__init__(
             vocab_size,
             hidden_size,
             is_bidirectional=is_bidirectional,
             padding_idx=padding_idx,
+            sos_index=sos_index,
+            eos_index=eos_index,
         )
         self.embedding = WordAndPositionalEmbedding(
             self.vocab_size, self.textual_feature_size, dropout=dropout
@@ -112,12 +120,16 @@ class AllLayersFusionTextualStream(TextualStream):
         is_bidirectional: bool = True,
         norm_type: str = "pre",
         padding_idx: int = 0,
+        sos_index: int = 1,
+        eos_index: int = 2,
     ):
         super().__init__(
             vocab_size,
             hidden_size,
             is_bidirectional=is_bidirectional,
             padding_idx=padding_idx,
+            sos_index=sos_index,
+            eos_index=eos_index,
         )
         self.feedforward_size = feedforward_size
         self.attention_heads = attention_heads
@@ -200,12 +212,16 @@ class LastLayerFusionTextualStream(TextualStream):
         is_bidirectional: bool = True,
         norm_type: str = "pre",
         padding_idx: int = 0,
+        sos_index: int = 1,
+        eos_index: int = 2,
     ):
         super().__init__(
             vocab_size,
             hidden_size,
             is_bidirectional=is_bidirectional,
             padding_idx=padding_idx,
+            sos_index=sos_index,
+            eos_index=eos_index,
         )
         self.feedforward_size = feedforward_size
         self.attention_heads = attention_heads

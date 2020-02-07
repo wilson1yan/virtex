@@ -1,13 +1,16 @@
 import copy
+import functools
 from typing import Any, Dict
 
 import tokenizers as tkz
 import torch
 from torch import nn
+from torch.nn import functional as F
 
 from viswsl.data.structures import CaptioningBatch
 from viswsl.modules.textual_stream import TextualStream
 from viswsl.modules.visual_stream import VisualStream
+from viswsl.utils.beam_search import AutoRegressiveBeamSearch
 
 
 class CaptioningModel(nn.Module):
@@ -16,6 +19,8 @@ class CaptioningModel(nn.Module):
         visual: VisualStream,
         textual: TextualStream,
         is_bidirectional: bool = False,
+        beam_size: int = 5,
+        max_decoding_steps: int = 30,
     ):
         super().__init__()
         self.visual = visual
@@ -45,10 +50,18 @@ class CaptioningModel(nn.Module):
         # However, output embedding layer will learn its own bias.
         self.output.weight = self.textual.embedding.words.weight
 
+        # These boundary indices are needed for beam search.
+        self.sos_index = textual.sos_index
+        self.eos_index = textual.eos_index
+        self.beam_search = AutoRegressiveBeamSearch(
+            self.eos_index, beam_size=5, max_steps=max_decoding_steps
+        )
+
     def forward(self, batch: CaptioningBatch):
 
         # shape: (batch_size, visual_feature_size, ...)
         visual_features = self.visual(batch["image"])
+        batch_size = visual_features.size(0)
 
         # shape: (batch_size, ..., visual_feature_size)
         visual_features = visual_features.view(
@@ -100,23 +113,84 @@ class CaptioningModel(nn.Module):
                 captioning_backward=backward_loss.clone().detach()
             )
 
-        # During evaluation, get predictions from logits. Useful for logging.
+        # During evaluation, get beam search predictions for forward model.
         # Predictions from forward transformer will be shifted right by one
-        # time-step, and vice-versa.
+        # time-step.
         if not self.training:
-            predictions = torch.argmax(output_logits, dim=-1)[:, :-1]
-            redundant_positions = caption_tokens[:, 1:] == self.padding_idx
-            predictions[redundant_positions] = self.padding_idx
-            output_dict["predictions"] = {"forward": predictions}
-
-            if self.is_bidirectional:
-                backward_predictions = backward_predictions = torch.argmax(
-                    backward_output_logits, dim=-1
-                )[:, :-1]
-                backward_predictions[redundant_positions] = self.padding_idx
-                output_dict["predictions"]["backward"] = backward_predictions
+            start_predictions = projected_visual_features.new_full(
+                (batch_size,), self.sos_index
+            ).long()
+            # Add image features as a default argument to match callable
+            # signature accepted by beam search class (partial captions only).
+            beam_search_step = functools.partial(
+                self.beam_search_step, projected_visual_features
+            )
+            all_top_k_predictions, _ = self.beam_search.search(
+                start_predictions, beam_search_step
+            )
+            best_beam = all_top_k_predictions[:, 0, :]
+            output_dict["predictions"] = best_beam
 
         return output_dict
+
+    def beam_search_step(
+        self, projected_visual_features: torch.Tensor, partial_captions: torch.Tensor
+    ) -> torch.Tensor:
+        r"""
+        Given visual features and a batch of (assumed) partial captions, predict
+        the distribution over vocabulary tokens for next time-step. This method
+        is used by :class:`~viswsl.utils.beam_search.AutoRegressiveBeamSearch`.
+
+        Parameters
+        ----------
+        projected_visual_features: torch.Tensor
+            A tensor of shape ``(batch_size, ..., textual_feature_size)``
+            with visual features already projected to ``textual_feature_size``.
+        partial_captions: torch.Tensor
+            A tensor of shape ``(batch_size * beam_size, timesteps)``
+            containing tokens predicted so far -- one for each beam. We need all
+            prior predictions because our model is auto-regressive.
+
+        Returns
+        -------
+        torch.Tensor
+            A tensor of shape ``(batch_size * beam_size, vocab_size)`` -- output
+            distribution over tokens for next time-step.
+        """
+
+        batch_size, num_features, textual_feature_size = projected_visual_features.size()
+
+        # Expand and repeat image features while doing beam search.
+        beam_size = int(partial_captions.size(0) / batch_size)
+        if beam_size > 1:
+            projected_visual_features = projected_visual_features.unsqueeze(1).repeat(
+                1, beam_size, 1, 1
+            )
+            projected_visual_features = projected_visual_features.view(
+                batch_size * beam_size, num_features, textual_feature_size
+            )
+
+        # Provide caption lengths as current length (irrespective of predicted
+        # EOS/padding tokens). shape: (batch_size, )
+        caption_lengths = torch.ones_like(partial_captions)
+        if len(caption_lengths.size()) == 2:
+            caption_lengths = caption_lengths.sum(1)
+        else:
+            # Add a time-step. shape: (batch_size, 1)
+            partial_captions = partial_captions.unsqueeze(1)
+
+        # shape: (batch_size * beam_size, partial_caption_length, textual_feature_size)
+        textual_features = self.textual(
+            partial_captions, caption_lengths, projected_visual_features
+        )
+        # Keep features for last time-step only, we only care about those.
+        # shape: (batch_size * beam_size, vocab_size)
+        output_logits = self.output(textual_features[:, -1, :])
+
+        # Return logprobs as required by `AutoRegressiveBeamSearch`.
+        # shape: (batch_size * beam_size, vocab_size)
+        next_logprobs = F.log_softmax(output_logits, dim=1)
+        return next_logprobs
 
     def log_predictions(
         self, batch: CaptioningBatch, tokenizer: tkz.implementations.BaseTokenizer
@@ -128,20 +202,10 @@ class CaptioningModel(nn.Module):
         self.train()
 
         predictions_str = ""
-        for tokens, preds in zip(batch["caption_tokens"], predictions["forward"]):
+        for tokens, preds in zip(batch["caption_tokens"], predictions):
             predictions_str += f"""
                 Caption tokens : {tokenizer.decode(tokens.tolist())}
                 Predictions (f): {tokenizer.decode(preds.tolist())}
 
                 """
-
-        if self.is_bidirectional:
-            for tokens, preds in zip(
-                batch["noitpac_tokens"], predictions["backward"]
-            ):
-                predictions_str += f"""
-                Noitpac tokens : {tokenizer.decode(tokens.tolist())}
-                Predictions (b): {tokenizer.decode(preds.tolist())}
-
-                    """
         return predictions_str
