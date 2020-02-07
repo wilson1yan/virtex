@@ -24,15 +24,11 @@ MODEL:
     NAME: torchvision::resnet50
     PRETRAINED: false
   TEXTUAL:
-    NAME: vismem_prenorm::L2_H512_A8_F2048
-    DO_EARLY_FUSION: False
+    NAME: allfuse_prenorm::L2_H512_A8_F2048
     HIDDEN_SIZE: 512
     ATTENTION_HEADS: 8
     FEEDFORWARD_SIZE: 2048
     NUM_LAYERS: 2
-  LATE_FUSION:
-    NAME: none
-    ATTENTION_HEADS: 8
   DROPOUT: 0.1
 
 OPTIM:
