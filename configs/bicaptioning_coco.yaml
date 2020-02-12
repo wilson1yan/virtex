@@ -2,9 +2,9 @@ RANDOM_SEED: 0
 FP16_OPT: 0
 
 DATA:
-  TRAIN_LMDB: data/serialized/coco_train2017.lmdb
-  VAL_LMDB: data/serialized/coco_val2017.lmdb
-  CAPTION_CORPUS: data/coco_train2017_corpus.txt
+  TRAIN_LMDB: datasets/serialized/coco_train2017.lmdb
+  VAL_LMDB: datasets/serialized/coco_val2017.lmdb
+  CAPTION_CORPUS: datasets/coco_train2017_corpus.txt
 
   IMAGE:
     RESIZE_SIZE: 256
@@ -56,7 +56,7 @@ OPTIM:
 
 DOWNSTREAM:
   VOC07_CLF:
-    DATA_ROOT: data/VOC2007
+    DATA_ROOT: datasets/VOC2007
     BATCH_SIZE: 64
     LAYER_NAMES: ["layer4"]
     SVM_COSTS: [0.01, 0.1, 1.0, 10.0]
