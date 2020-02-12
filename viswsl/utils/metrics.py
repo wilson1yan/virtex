@@ -60,7 +60,7 @@ class CocoCaptionsEvaluator(object):
         cider_score = cider(self.ground_truth, res)
         spice_score = spice(self.ground_truth, res)
 
-        return {"CIDEr": cider_score, "SPICE": spice_score}
+        return {"CIDEr": 100 * cider_score, "SPICE": 100 * spice_score}
 
 
 def tokenize(
