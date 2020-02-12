@@ -14,7 +14,7 @@ from torch.utils.tensorboard import SummaryWriter
 # fmt: off
 from viswsl.config import Config
 from viswsl.factories import (
-    TokenizerFactory, DatasetFactory, PretrainingModelFactory,
+    TokenizerFactory, PretextDatasetFactory, PretrainingModelFactory,
     OptimizerFactory, LRSchedulerFactory,
 )
 from viswsl.utils.checkpointing import CheckpointManager
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     #   INSTANTIATE DATALOADER, MODEL, OPTIMIZER
     # -------------------------------------------------------------------------
     tokenizer = TokenizerFactory.from_config(_C)
-    train_dataset = DatasetFactory.from_config(_C, tokenizer, split="train")
+    train_dataset = PretextDatasetFactory.from_config(_C, tokenizer, split="train")
     train_dataloader = DataLoader(
         train_dataset,
         batch_size=_C.OPTIM.BATCH_SIZE_PER_GPU,
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         pin_memory=True,
         collate_fn=train_dataset.collate_fn,
     )
-    val_dataset = DatasetFactory.from_config(_C, tokenizer, split="val")
+    val_dataset = PretextDatasetFactory.from_config(_C, tokenizer, split="val")
     val_dataloader = DataLoader(
         val_dataset,
         batch_size=_C.OPTIM.BATCH_SIZE_PER_GPU,
@@ -259,7 +259,7 @@ if __name__ == "__main__":
             val_loss_counter: Counter = Counter()
 
             for val_iteration, val_batch in enumerate(val_dataloader, start=1):
-                for key in batch:
+                for key in val_batch:
                     val_batch[key] = val_batch[key].to(device)
                 output_dict = model(val_batch)
 

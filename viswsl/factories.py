@@ -71,11 +71,11 @@ class TokenizerFactory(Factory):
         return tokenizer
 
 
-class DatasetFactory(Factory):
+class PretextDatasetFactory(Factory):
     PRODUCTS = {
-        "word_masking": vdata.WordMaskingDataset,
-        "captioning": vdata.CaptioningDataset,
-        "bicaptioning": vdata.CaptioningDataset,
+        "word_masking": vdata.WordMaskingPretextDataset,
+        "captioning": vdata.CaptioningPretextDataset,
+        "bicaptioning": vdata.CaptioningPretextDataset,
     }
 
     @classmethod
