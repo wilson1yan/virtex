@@ -15,7 +15,7 @@ from viswsl.data.dataflows import (
 from viswsl.data.structures import WordMaskingInstance, WordMaskingBatch
 
 
-class WordMaskingDataset(IterableDataset):
+class WordMaskingPretextDataset(IterableDataset):
 
     # TODO (kd) :document it later properly.
     # List of augmentations to be applied on each image after reading

@@ -7,13 +7,13 @@ SPICELIB=SPICE-1.0/lib
 DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 cd $DIR
 
-echo "Downloading..."
-
 wget https://panderson.me/images/SPICE-1.0.zip
 wget http://nlp.stanford.edu/software/$CORENLP.zip
+ 
+# PTBTokenizer for CIDEr.
 wget http://nlp.stanford.edu/software/stanford-corenlp-full-2014-08-27.zip
-
-echo "Unzipping..."
+unzip stanford-corenlp-full-2014-08-27.zip
+rm stanford-corenlp-full-2014-08-27.zip
 
 unzip SPICE-1.0.zip
 

@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from viswsl.config import Config
-from viswsl.factories import TokenizerFactory, DatasetFactory
+from viswsl.factories import TokenizerFactory, PretextDatasetFactory
 import viswsl.utils.distributed as dist
 from viswsl.utils.common import cycle, Timer
 
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     #   INSTANTIATE VOCABULARY, TOKENIZER, DATALOADER
     # -------------------------------------------------------------------------
     tokenizer = TokenizerFactory.from_config(_C)
-    train_dataset = DatasetFactory.from_config(_C, tokenizer, split="train")
+    train_dataset = PretextDatasetFactory.from_config(_C, tokenizer, split="train")
     train_dataloader = DataLoader(
         train_dataset,
         batch_size=_C.OPTIM.BATCH_SIZE_PER_GPU,

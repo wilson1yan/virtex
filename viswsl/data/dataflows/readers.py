@@ -8,7 +8,7 @@ import lmdb
 import torch
 from torch.utils.data import get_worker_info
 
-from viswsl.utils.distributed import dist
+import viswsl.utils.distributed as dist
 
 
 class ReadDatapointsFromLmdb(df.DataFlow):

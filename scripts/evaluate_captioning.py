@@ -9,11 +9,13 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+from tqdm import tqdm
 
 # fmt: off
 from viswsl.config import Config
+from viswsl.data import CocoCaptionsEvalDataset
 from viswsl.factories import (
-    TokenizerFactory, DatasetFactory, PretrainingModelFactory,
+    TokenizerFactory, PretrainingModelFactory,
 )
 from viswsl.utils.metrics import CocoCaptionsEvaluator
 
@@ -28,6 +30,11 @@ parser.add_argument(
     "--config-override", nargs="*", default=[],
     help="""A sequence of key-value pairs specifying certain config arguments
     (with dict-like nesting) using a dot operator.""",
+)
+parser.add_argument(
+    "--images",
+    default="datasets/coco/val2017",
+    help="Path to a directory containing images of a dataset split.",
 )
 parser.add_argument(
     "--captions",
@@ -92,7 +99,7 @@ if __name__ == "__main__":
     #   INSTANTIATE DATALOADER, MODEL, OPTIMIZER
     # -------------------------------------------------------------------------
     tokenizer = TokenizerFactory.from_config(_C)
-    val_dataset = DatasetFactory.from_config(_C, tokenizer, split="val")
+    val_dataset = CocoCaptionsEvalDataset(_A.images)
     val_dataloader = DataLoader(
         val_dataset,
         batch_size=_C.OPTIM.BATCH_SIZE_PER_GPU,
@@ -111,9 +118,10 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------
 
     predictions: List[Dict[str, Any]] = []
-    for val_iteration, val_batch in enumerate(val_dataloader, start=1):
+    for val_iteration, val_batch in tqdm(enumerate(val_dataloader, start=1)):
         for key in val_batch:
             val_batch[key] = val_batch[key].to(device)
+
         output_dict = model(val_batch)
 
         # Make a dictionary of predictions in COCO format.
@@ -123,7 +131,7 @@ if __name__ == "__main__":
             predictions.append(
                 {
                     "image_id": image_id.item(),
-                    "caption": tokenizer.decode(caption.tolist),
+                    "caption": tokenizer.decode(caption.tolist()),
                 }
             )
 
@@ -132,4 +140,9 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------
     metrics = CocoCaptionsEvaluator(_A.captions).evaluate(predictions)
     logger.info(f"Iter: {CHECKPOINT_ITERATION} | Metrics: {metrics}")
-    tensorboard_writer.add_scalars("val", metrics, CHECKPOINT_ITERATION)
+    tensorboard_writer.add_scalar(
+        "metrics/cider", metrics["CIDEr"], CHECKPOINT_ITERATION
+    )
+    tensorboard_writer.add_scalar(
+        "metrics/spice", metrics["SPICE"], CHECKPOINT_ITERATION 
+    )

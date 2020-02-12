@@ -1,5 +1,5 @@
 import copy
-from typing import Iterable, List
+from typing import Iterable, List, Optional
 
 import torch
 
@@ -146,15 +146,26 @@ class CaptioningInstance(Instance):
     ]
 
     def __init__(
-        self, image_id: int, image: Iterable[float], caption_tokens: List[int]
+        self,
+        image_id: int,
+        image: Iterable[float],
+        caption_tokens: Optional[List[int]] = None,
     ):
-        super().__init__(
-            image_id=torch.tensor(image_id, dtype=torch.long),
-            image=torch.tensor(image, dtype=torch.float),
-            caption_tokens=torch.tensor(caption_tokens, dtype=torch.long),
-            noitpac_tokens=torch.tensor(caption_tokens, dtype=torch.long).flip(0),
-            caption_lengths=torch.tensor(len(caption_tokens), dtype=torch.long),
-        )
+        if caption_tokens is not None:
+            super().__init__(
+                image_id=torch.tensor(image_id, dtype=torch.long),
+                image=torch.tensor(image, dtype=torch.float),
+                caption_tokens=torch.tensor(caption_tokens, dtype=torch.long),
+                noitpac_tokens=torch.tensor(caption_tokens, dtype=torch.long).flip(
+                    0
+                ),
+                caption_lengths=torch.tensor(len(caption_tokens), dtype=torch.long),
+            )
+        else:
+            super().__init__(
+                image_id=torch.tensor(image_id, dtype=torch.long),
+                image=torch.tensor(image, dtype=torch.float),
+            )
 
 
 class CaptioningBatch(Batch):
@@ -173,26 +184,31 @@ class CaptioningBatch(Batch):
         image_id = torch.stack([ins["image_id"] for ins in instances], dim=0)
         image = torch.stack([ins["image"] for ins in instances], dim=0)
 
-        # Find maximum caption length in this batch.
-        max_caption_length = max([ins["caption_lengths"] for ins in instances])
+        if "caption_tokens" in instances[0]:
+            # Find maximum caption length in this batch.
+            max_caption_length = max([ins["caption_lengths"] for ins in instances])
 
-        # Pad `caption_tokens` and `masked_labels` up to this length.
-        caption_tokens = torch.nn.utils.rnn.pad_sequence(
-            [ins["caption_tokens"] for ins in instances],
-            batch_first=True,
-            padding_value=padding_value,
-        )
-        noitpac_tokens = torch.nn.utils.rnn.pad_sequence(
-            [ins["noitpac_tokens"] for ins in instances],
-            batch_first=True,
-            padding_value=padding_value,
-        )
-        caption_lengths = torch.stack([ins["caption_lengths"] for ins in instances])
+            # Pad `caption_tokens` and `masked_labels` up to this length.
+            caption_tokens = torch.nn.utils.rnn.pad_sequence(
+                [ins["caption_tokens"] for ins in instances],
+                batch_first=True,
+                padding_value=padding_value,
+            )
+            noitpac_tokens = torch.nn.utils.rnn.pad_sequence(
+                [ins["noitpac_tokens"] for ins in instances],
+                batch_first=True,
+                padding_value=padding_value,
+            )
+            caption_lengths = torch.stack(
+                [ins["caption_lengths"] for ins in instances]
+            )
 
-        super().__init__(
-            image_id=image_id,
-            image=image,
-            caption_tokens=caption_tokens,
-            noitpac_tokens=noitpac_tokens,
-            caption_lengths=caption_lengths,
-        )
+            super().__init__(
+                image_id=image_id,
+                image=image,
+                caption_tokens=caption_tokens,
+                noitpac_tokens=noitpac_tokens,
+                caption_lengths=caption_lengths,
+            )
+        else:
+            super().__init__(image_id=image_id, image=image)

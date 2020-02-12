@@ -72,46 +72,51 @@ class CaptioningModel(nn.Module):
         # shape: (batch_size, ..., textual_feature_size)
         projected_visual_features = self.visual_projection(visual_features)
 
-        caption_tokens = batch["caption_tokens"]
-        caption_lengths = batch["caption_lengths"]
+        if "caption_tokens" in batch:
+            caption_tokens = batch["caption_tokens"]
+            caption_lengths = batch["caption_lengths"]
 
-        # shape: (batch_size, max_caption_length, textual_feature_size)
-        textual_features = self.textual(
-            caption_tokens, caption_lengths, projected_visual_features
-        )
-        # shape: (batch_size, max_caption_length, vocab_size)
-        output_logits = self.output(textual_features)
-
-        loss = self.loss(
-            output_logits[:, :-1].contiguous().view(-1, self.textual.vocab_size),
-            caption_tokens[:, 1:].contiguous().view(-1),
-        )
-        output_dict: Dict[str, Any] = {
-            "loss": loss,
-            # Single scalar per batch for logging in training script.
-            "loss_components": {"captioning_forward": loss.clone().detach()},
-        }
-        # Do captioning in backward direction.
-        if self.is_bidirectional:
-            backward_caption_tokens = batch["noitpac_tokens"]
-
-            backward_textual_features = self.backward_textual(
-                backward_caption_tokens, caption_lengths, projected_visual_features
+            # shape: (batch_size, max_caption_length, textual_feature_size)
+            textual_features = self.textual(
+                caption_tokens, caption_lengths, projected_visual_features
             )
-            backward_output_logits = self.output(backward_textual_features)
+            # shape: (batch_size, max_caption_length, vocab_size)
+            output_logits = self.output(textual_features)
 
-            backward_loss = self.loss(
-                backward_output_logits[:, :-1]
-                .contiguous()
-                .view(-1, self.textual.vocab_size),
-                backward_caption_tokens[:, 1:].contiguous().view(-1),
+            loss = self.loss(
+                output_logits[:, :-1].contiguous().view(-1, self.textual.vocab_size),
+                caption_tokens[:, 1:].contiguous().view(-1),
             )
-            output_dict["loss"] += backward_loss
+            output_dict: Dict[str, Any] = {
+                "loss": loss,
+                # Single scalar per batch for logging in training script.
+                "loss_components": {"captioning_forward": loss.clone().detach()},
+            }
+            # Do captioning in backward direction.
+            if self.is_bidirectional:
+                backward_caption_tokens = batch["noitpac_tokens"]
 
-            # Single scalar per batch for logging in training script.
-            output_dict["loss_components"].update(
-                captioning_backward=backward_loss.clone().detach()
-            )
+                backward_textual_features = self.backward_textual(
+                    backward_caption_tokens,
+                    caption_lengths,
+                    projected_visual_features,
+                )
+                backward_output_logits = self.output(backward_textual_features)
+
+                backward_loss = self.loss(
+                    backward_output_logits[:, :-1]
+                    .contiguous()
+                    .view(-1, self.textual.vocab_size),
+                    backward_caption_tokens[:, 1:].contiguous().view(-1),
+                )
+                output_dict["loss"] += backward_loss
+
+                # Single scalar per batch for logging in training script.
+                output_dict["loss_components"].update(
+                    captioning_backward=backward_loss.clone().detach()
+                )
+        else:
+            output_dict = {}
 
         # During evaluation, get beam search predictions for forward model.
         # Predictions from forward transformer will be shifted right by one
@@ -158,14 +163,16 @@ class CaptioningModel(nn.Module):
             distribution over tokens for next time-step.
         """
 
-        batch_size, num_features, textual_feature_size = projected_visual_features.size()
+        batch_size, num_features, textual_feature_size = (
+            projected_visual_features.size()
+        )
 
         # Expand and repeat image features while doing beam search.
         beam_size = int(partial_captions.size(0) / batch_size)
         if beam_size > 1:
-            projected_visual_features = projected_visual_features.unsqueeze(1).repeat(
-                1, beam_size, 1, 1
-            )
+            projected_visual_features = projected_visual_features.unsqueeze(
+                1
+            ).repeat(1, beam_size, 1, 1)
             projected_visual_features = projected_visual_features.view(
                 batch_size * beam_size, num_features, textual_feature_size
             )
