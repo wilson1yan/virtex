@@ -196,6 +196,7 @@ class TextualStreamFactory(Factory):
             "padding_idx": tokenizer.token_to_id("[UNK]"),
             "sos_index": tokenizer.token_to_id("[SOS]"),
             "eos_index": tokenizer.token_to_id("[EOS]"),
+            "max_caption_length": _C.DATA.CAPTION.MAX_LENGTH,
         }
         if _C.MODEL.TEXTUAL.NAME != "embedding":
             kwargs.update(

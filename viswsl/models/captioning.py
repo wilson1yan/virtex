@@ -115,26 +115,33 @@ class CaptioningModel(nn.Module):
                 output_dict["loss_components"].update(
                     captioning_backward=backward_loss.clone().detach()
                 )
+
+            # During evaluation, get predictions from logits. Useful for logging.
+            if not self.training:
+                predictions = torch.argmax(output_logits, dim=-1)[:, :-1]
+                redundant_positions = caption_tokens[:, 1:] == self.padding_idx
+                predictions[redundant_positions] = self.padding_idx
+                output_dict["predictions"] = predictions
         else:
             output_dict = {}
 
-        # During evaluation, get beam search predictions for forward model.
-        # Predictions from forward transformer will be shifted right by one
-        # time-step.
-        if not self.training:
-            start_predictions = projected_visual_features.new_full(
-                (batch_size,), self.sos_index
-            ).long()
-            # Add image features as a default argument to match callable
-            # signature accepted by beam search class (partial captions only).
-            beam_search_step = functools.partial(
-                self.beam_search_step, projected_visual_features
-            )
-            all_top_k_predictions, _ = self.beam_search.search(
-                start_predictions, beam_search_step
-            )
-            best_beam = all_top_k_predictions[:, 0, :]
-            output_dict["predictions"] = best_beam
+            # During evaluation, get beam search predictions for forward model.
+            # Predictions from forward transformer will be shifted right by one
+            # time-step.
+            if not self.training:
+                start_predictions = projected_visual_features.new_full(
+                    (batch_size,), self.sos_index
+                ).long()
+                # Add image features as a default argument to match callable
+                # signature accepted by beam search class (partial captions only).
+                beam_search_step = functools.partial(
+                    self.beam_search_step, projected_visual_features
+                )
+                all_top_k_predictions, _ = self.beam_search.search(
+                    start_predictions, beam_search_step
+                )
+                best_beam = all_top_k_predictions[:, 0, :]
+                output_dict["predictions"] = best_beam
 
         return output_dict
 

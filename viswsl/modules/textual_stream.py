@@ -57,7 +57,7 @@ class TextualStream(nn.Module):
 
     @functools.lru_cache(maxsize=10)
     def _generate_square_subsequent_mask(
-        self, size: int, device: torch.device
+        self, size: int, dtype: torch.dtype, device: torch.device
     ) -> torch.Tensor:
         r"""
         Generate a mask for "future" positions, useful when using this module
@@ -68,7 +68,9 @@ class TextualStream(nn.Module):
         size: int
         """
         # Default mask is for forward direction. Flip for backward direction.
-        mask = torch.triu(torch.ones(size, size, device=device), diagonal=1)
+        mask = torch.triu(
+            torch.ones(size, size, device=device, dtype=dtype), diagonal=1
+        )
         mask = mask.masked_fill(mask == 1, float("-inf"))
         return mask
 
@@ -83,6 +85,7 @@ class EmbeddingTextualStream(TextualStream):
         padding_idx: int = 0,
         sos_index: int = 1,
         eos_index: int = 2,
+        max_caption_length: int = 30,
     ):
         super().__init__(
             vocab_size,
@@ -93,7 +96,10 @@ class EmbeddingTextualStream(TextualStream):
             eos_index=eos_index,
         )
         self.embedding = WordAndPositionalEmbedding(
-            self.vocab_size, self.textual_feature_size, dropout=dropout
+            self.vocab_size,
+            self.textual_feature_size,
+            max_caption_length=max_caption_length,
+            dropout=dropout,
         )
         self.apply(self._init_weights)
 
@@ -122,6 +128,7 @@ class AllLayersFusionTextualStream(TextualStream):
         padding_idx: int = 0,
         sos_index: int = 1,
         eos_index: int = 2,
+        max_caption_length: int = 30,
     ):
         super().__init__(
             vocab_size,
@@ -130,14 +137,17 @@ class AllLayersFusionTextualStream(TextualStream):
             padding_idx=padding_idx,
             sos_index=sos_index,
             eos_index=eos_index,
+	)
+        self.embedding = WordAndPositionalEmbedding(
+            self.vocab_size,
+            self.textual_feature_size,
+       	    max_caption_length=max_caption_length,
+            dropout=dropout,
         )
         self.feedforward_size = feedforward_size
         self.attention_heads = attention_heads
         self.num_layers = num_layers
 
-        self.embedding = WordAndPositionalEmbedding(
-            self.vocab_size, self.textual_feature_size, dropout=dropout
-        )
         # Make encoder layer depending on whether it's a Pre-Norm or Post-Norm.
         LayerClass = (
             nn.TransformerDecoderLayer
@@ -179,7 +189,7 @@ class AllLayersFusionTextualStream(TextualStream):
             None
             if self.is_bidirectional
             else self._generate_square_subsequent_mask(
-                max_caption_length, caption_embeddings.device
+                max_caption_length, caption_embeddings.dtype, caption_embeddings.device
             )
         )
         # We transpose the first two dimensions of tokens embeddings and visual
@@ -214,6 +224,7 @@ class LastLayerFusionTextualStream(TextualStream):
         padding_idx: int = 0,
         sos_index: int = 1,
         eos_index: int = 2,
+        max_caption_length: int = 30,
     ):
         super().__init__(
             vocab_size,
@@ -222,14 +233,17 @@ class LastLayerFusionTextualStream(TextualStream):
             padding_idx=padding_idx,
             sos_index=sos_index,
             eos_index=eos_index,
+	)
+        self.embedding = WordAndPositionalEmbedding(
+            self.vocab_size,
+            self.textual_feature_size,
+       	    max_caption_length=max_caption_length,
+            dropout=dropout,
         )
         self.feedforward_size = feedforward_size
         self.attention_heads = attention_heads
         self.num_layers = num_layers
 
-        self.embedding = WordAndPositionalEmbedding(
-            self.vocab_size, self.textual_feature_size, dropout=dropout
-        )
         # Make encoder layer depending on whether it's a Pre-Norm or Post-Norm.
         NonLastLayerClass = (
             nn.TransformerEncoderLayer
@@ -284,7 +298,7 @@ class LastLayerFusionTextualStream(TextualStream):
             None
             if self.is_bidirectional
             else self._generate_square_subsequent_mask(
-                max_caption_length, caption_embeddings.device
+                max_caption_length, caption_embeddings.dtype, caption_embeddings.device
             )
         )
         # We transpose the first two dimensions of tokens embeddings and visual
