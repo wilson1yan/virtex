@@ -5,6 +5,7 @@ DATA:
   TRAIN_LMDB: datasets/serialized/coco_train2017.lmdb
   VAL_LMDB: datasets/serialized/coco_val2017.lmdb
   CAPTION_CORPUS: datasets/coco_train2017_corpus.txt
+  SHUFFLE_TRAIN: True
 
   IMAGE:
     RESIZE_SIZE: 256

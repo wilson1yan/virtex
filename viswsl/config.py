@@ -130,6 +130,7 @@ class Config(object):
         _C.DATA.TRAIN_LMDB = "datasets/serialized/coco_train2017.lmdb"
         _C.DATA.VAL_LMDB = "datasets/serialized/coco_val2017.lmdb"
         _C.DATA.CAPTION_CORPUS = "datasets/coco_train2017_corpus.txt"
+        _C.DATA.SHUFFLE_TRAIN = True
 
         _C.DATA.IMAGE = CN()
         _C.DATA.IMAGE.RESIZE_SIZE = 256

@@ -93,7 +93,7 @@ class PretextDatasetFactory(Factory):
             "tokenizer": tokenizer,
             "random_horizontal_flip": _C.DATA.IMAGE.RANDOM_FLIP,
             "max_caption_length": _C.DATA.CAPTION.MAX_LENGTH,
-            "shuffle": False if split == "val" else True,
+            "shuffle": _C.DATA.SHUFFLE_TRAIN if split == "train" else False,
         }
         if _C.MODEL.NAME == "word_masking":
             kwargs.update(
