@@ -18,6 +18,7 @@ class CaptioningModel(nn.Module):
         self,
         visual: VisualStream,
         textual: TextualStream,
+        visual_projection: str = "linear",
         is_bidirectional: bool = False,
         beam_size: int = 5,
         max_decoding_steps: int = 30,
@@ -25,12 +26,25 @@ class CaptioningModel(nn.Module):
         super().__init__()
         self.visual = visual
         self.textual = textual
+        self._visual_projection_name = visual_projection
 
-        # Linear layer to project image features to `textual_feature_size` to
-        # facilitate decoder multi-head attention etc.
-        self.visual_projection = nn.Linear(
-            self.visual.visual_feature_size, self.textual.textual_feature_size
-        )
+        # Build a visual projection module.
+        # fmt: off
+        if self._visual_projection_name == "linear":
+            self.visual_projection = nn.Linear(
+                self.visual.visual_feature_size, self.textual.textual_feature_size
+            )
+        elif self._visual_projection_name == "conv":
+            self.visual_projection = nn.Sequential(  # type: ignore
+                nn.Conv2d(
+                    self.visual.visual_feature_size, self.textual.textual_feature_size,
+                    kernel_size=3, stride=1, padding=1, bias=False, dilation=1,
+                ),
+                nn.BatchNorm2d(self.textual.textual_feature_size),
+                nn.ReLU(inplace=True),
+            )
+        # fmt: on
+
         self.output = nn.Linear(
             self.textual.textual_feature_size, self.textual.vocab_size
         )
@@ -63,14 +77,25 @@ class CaptioningModel(nn.Module):
         visual_features = self.visual(batch["image"])
         batch_size = visual_features.size(0)
 
-        # shape: (batch_size, ..., visual_feature_size)
-        visual_features = visual_features.view(
-            batch["image"].size(0), self.visual.visual_feature_size, -1
-        ).permute(0, 2, 1)
+        # Project visual features for fusion with textual features.
+        if self._visual_projection_name == "linear":
+            # For linear layer: reshape first, project later.
+            # shape: (batch_size, ..., visual_feature_size)
+            visual_features = visual_features.view(
+                batch_size, self.visual.visual_feature_size, -1
+            ).permute(0, 2, 1)
 
-        # Now visual and textual features are of same size.
-        # shape: (batch_size, ..., textual_feature_size)
-        projected_visual_features = self.visual_projection(visual_features)
+            # shape: (batch_size, ..., textual_feature_size)
+            projected_visual_features = self.visual_projection(visual_features)
+        else:
+            # For conv layer: project first, reshape later.
+            # shape: (batch_size, textual_feature_size, ...)
+            projected_visual_features = self.visual_projection(visual_features)
+
+            # shape: (batch_size, ..., textual_feature_size)
+            projected_visual_features = projected_visual_features.view(
+                batch_size, self.textual.textual_feature_size, -1
+            ).permute(0, 2, 1)
 
         if "caption_tokens" in batch:
             caption_tokens = batch["caption_tokens"]

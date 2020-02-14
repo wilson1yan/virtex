@@ -220,12 +220,15 @@ class PretrainingModelFactory(Factory):
     def from_config(cls, config: Config) -> nn.Module:
         _C = config
 
+        # Build visual and textual streams based on config.
         visual = VisualStreamFactory.from_config(_C)
         textual = TextualStreamFactory.from_config(_C)
+
+        # Add model specific kwargs.
+        kwargs = {"visual_projection": _C.MODEL.VISUAL_PROJECTION}
         if _C.MODEL.NAME == "captioning":
-            kwargs = {"max_decoding_steps": _C.DATA.CAPTION.MAX_LENGTH}
-        else:
-            kwargs = {}
+            kwargs.update(max_decoding_steps=_C.DATA.CAPTION.MAX_LENGTH)
+
         return cls.create(_C.MODEL.NAME, visual, textual, **kwargs)
 
 
