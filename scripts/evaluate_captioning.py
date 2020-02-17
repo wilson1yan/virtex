@@ -140,9 +140,9 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------
     metrics = CocoCaptionsEvaluator(_A.captions).evaluate(predictions)
     logger.info(f"Iter: {CHECKPOINT_ITERATION} | Metrics: {metrics}")
-    tensorboard_writer.add_scalar(
-        "metrics/cider", metrics["CIDEr"], CHECKPOINT_ITERATION
+    tensorboard_writer.add_scalars(
+        "metrics/cider", {"forward": metrics["CIDEr"]}, CHECKPOINT_ITERATION
     )
-    tensorboard_writer.add_scalar(
-        "metrics/spice", metrics["SPICE"], CHECKPOINT_ITERATION 
+    tensorboard_writer.add_scalars(
+        "metrics/spice", {"forward": metrics["SPICE"]}, CHECKPOINT_ITERATION 
     )

@@ -7,7 +7,7 @@ import dataflow as df
 import numpy as np
 from PIL import Image
 import tokenizers as tkz
-from torch.utils.data import IterableDataset
+from torch.utils.data import Dataset, IterableDataset
 
 from viswsl.data.dataflows import (
     ReadDatapointsFromLmdb,
@@ -75,7 +75,7 @@ class CaptioningPretextDataset(IterableDataset):
         return CaptioningBatch(instances, padding_value=self.padding_idx)
 
 
-class CocoCaptionsEvalDataset(IterableDataset):
+class CocoCaptionsEvalDataset(Dataset):
     def __init__(
         self,
         image_dir: str,
@@ -96,28 +96,22 @@ class CocoCaptionsEvalDataset(IterableDataset):
 
         # Make a tuple of image id and its filename, get image_id from its
         # filename (assuming directory has images with names in COCO 2017 format).
-        id_to_filename: Tuple[int, str] = [
+        self.id_filename: Tuple[int, str] = [
             (int(os.path.basename(name)[:-4]), name) for name in image_filenames
         ]
-        # Read image from file path.
-        self._pipeline = df.DataFromList(id_to_filename, shuffle=False)
-        self._pipeline = df.MapDataComponent(
-            self._pipeline, lambda path: Image.open(path).convert("RGB"), index=1
-        )
-        self._pipeline = df.MapDataComponent(self._pipeline, np.array, index=1)
 
-    def __iter__(self):
+    def __len__(self):
+        return len(self.id_filename)
 
-        self._pipeline.reset_state()
+    def __getitem__(self, idx: int):
+        image_id, filename = self.id_filename[idx]
 
-        for datapoint in self._pipeline:
-            image_id, image = datapoint
+        # Open image from path and apply transformation, convert to CHW format.
+        image = np.array(Image.open(filename).convert("RGB"))
+        image = self.image_transform(image=image)["image"]
+        image = np.transpose(image, (2, 0, 1))
 
-            # Transform and convert image from HWC to CHW format.
-            image = self.image_transform(image=image)["image"]
-            image = np.transpose(image, (2, 0, 1))
-
-            yield CaptioningInstance(image_id, image)
+        return CaptioningInstance(image_id, image)
 
     def collate_fn(self, instances: List[CaptioningInstance]) -> CaptioningBatch:
         return CaptioningBatch(instances)
