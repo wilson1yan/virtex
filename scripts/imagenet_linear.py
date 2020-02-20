@@ -137,7 +137,9 @@ if __name__ == "__main__":
     model = PretrainingModelFactory.from_config(_C).to(device)
 
     if _A.weight_init == "checkpoint":
-        model.load_state_dict(torch.load(_A.checkpoint_path))
+        model.load_state_dict(
+            torch.load(_A.checkpoint_path, map_location=torch.device("cpu"))
+        )
 
     # Backup pretext config and model checkpoint.
     if dist.is_master_process():
@@ -209,7 +211,10 @@ if __name__ == "__main__":
             dist.average_across_processes(train_loss)
 
             if dist.is_master_process():
-                logger.info(f"{timer.stats} | Loss: {train_loss:.3f}")
+                logger.info(
+                    f"{timer.stats} | Loss: {train_loss:.3f} | GPU mem: "
+                    f"{torch.cuda.max_memory_allocated() / 1048576} MB"
+                )
                 tensorboard_writer.add_scalars(
                     "loss", {"train": train_loss}, iteration
                 )
