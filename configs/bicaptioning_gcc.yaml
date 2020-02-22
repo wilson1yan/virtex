@@ -7,11 +7,9 @@ DATA:
   CAPTION_CORPUS: datasets/gcc_train1.1.0_corpus.txt
 
   IMAGE:
-    RESIZE_SIZE: 256
     CROP_SIZE: 224
     COLOR_NORMALIZE: true
     RANDOM_FLIP: true
-    PHOTOMETRIC_AUG: true
 
   CAPTION:
     VOCAB_SIZE: 12000
@@ -38,8 +36,6 @@ OPTIM:
   USE_LOOKAHEAD: True
 
   BATCH_SIZE_PER_GPU: 64
-  BATCH_SIZE_MULTIPLIER: 1
-
   LR: 0.002
   CNN_LR: 0.2
   WEIGHT_DECAY: 1e-4
