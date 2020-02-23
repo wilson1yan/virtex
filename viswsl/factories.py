@@ -76,6 +76,7 @@ class PretextDatasetFactory(Factory):
         "word_masking": vdata.WordMaskingPretextDataset,
         "captioning": vdata.CaptioningPretextDataset,
         "bicaptioning": vdata.CaptioningPretextDataset,
+        "token_classification": vdata.CaptioningPretextDataset,
     }
 
     @classmethod
@@ -213,6 +214,7 @@ class PretrainingModelFactory(Factory):
         "word_masking": vmodels.WordMaskingModel,
         "captioning": partial(vmodels.CaptioningModel, is_bidirectional=False),
         "bicaptioning": partial(vmodels.CaptioningModel, is_bidirectional=True),
+        "token_classification": vmodels.TokenClassificationModel,
     }
 
     @classmethod
@@ -229,13 +231,25 @@ class PretrainingModelFactory(Factory):
         visual = VisualStreamFactory.from_config(_C)
         textual = TextualStreamFactory.from_config(_C, tokenizer)
 
-        # Add model specific kwargs.
+        # Add model specific kwargs. Refer call signatures of specific models
+        # for matching kwargs here.
         kwargs = {"visual_projection": _C.MODEL.VISUAL_PROJECTION}
         if _C.MODEL.NAME == "captioning":
             kwargs.update(
                 max_decoding_steps=_C.DATA.CAPTION.MAX_LENGTH,
                 sos_index=tokenizer.token_to_id("[SOS]"),
                 eos_index=tokenizer.token_to_id("[EOS]"),
+            )
+
+        elif _C.MODEL.NAME == "token_classification":
+            kwargs.update(
+                vocab_size=_C.DATA.CAPTION.VOCAB_SIZE,
+                ignore_indices=[
+                    tokenizer.token_to_id("[UNK]"),
+                    tokenizer.token_to_id("[SOS]"),
+                    tokenizer.token_to_id("[EOS]"),
+                    tokenizer.token_to_id("[MASK]"),
+                ]
             )
 
         return cls.create(_C.MODEL.NAME, visual, textual, **kwargs)

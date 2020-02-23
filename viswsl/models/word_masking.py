@@ -19,15 +19,14 @@ class WordMaskingModel(nn.Module):
         super().__init__()
         self.visual = visual
         self.textual = textual
-        self._visual_projection_name = visual_projection
 
         # Build a visual projection module.
         # fmt: off
-        if self._visual_projection_name == "linear":
+        if visual_projection == "linear":
             self.visual_projection = nn.Linear(
                 self.visual.visual_feature_size, self.textual.textual_feature_size
             )
-        elif self._visual_projection_name == "mlp":
+        elif visual_projection == "mlp":
             self.visual_projection = nn.Sequential(  # type: ignore
                 nn.Linear(
                     self.visual.visual_feature_size,
