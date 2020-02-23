@@ -212,3 +212,26 @@ class CaptioningBatch(Batch):
             )
         else:
             super().__init__(image_id=image_id, image=image)
+
+
+class LinearClassificationInstance(Instance):
+
+    __slots__ = ["image", "label"]
+
+    def __init__(self, image: Iterable[float], label: int):
+        super().__init__(
+            image=torch.tensor(image, dtype=torch.float),
+            label=torch.tensor(label, dtype=torch.long),
+        )
+
+
+class LinearClassificationBatch(Batch):
+
+    __slots__ = ["image", "label"]
+
+    def __init__(self, instances: List[LinearClassificationInstance]):
+
+        # Stack `image` and `label` from instances to create batch at dim 0.
+        image = torch.stack([ins["image"] for ins in instances], dim=0)
+        label = torch.stack([ins["label"] for ins in instances], dim=0)
+        super().__init__(image=image, label=label)
