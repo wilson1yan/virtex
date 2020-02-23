@@ -174,12 +174,6 @@ class TextualStreamFactory(Factory):
 
     # fmt: off
     PRODUCTS: Dict[str, Callable] = {
-        "embedding": ts.EmbeddingTextualStream,
-
-        # TODO: For backward compat, remove it later.
-        "vismem_prenorm": partial(ts.AllLayersFusionTextualStream, norm_type="pre"),
-        "vismem_postnorm": partial(ts.AllLayersFusionTextualStream, norm_type="post"),
-
         "allfuse_prenorm": partial(ts.AllLayersFusionTextualStream, norm_type="post"),
         "allfuse_postnorm": partial(ts.AllLayersFusionTextualStream, norm_type="post"),
         "lastfuse_prenorm": partial(ts.LastLayerFusionTextualStream, norm_type="post"),
@@ -205,17 +199,11 @@ class TextualStreamFactory(Factory):
             "dropout": _C.MODEL.DROPOUT,
             "is_bidirectional": _C.MODEL.NAME == "word_masking",
             "padding_idx": tokenizer.token_to_id("[UNK]"),
-            "sos_index": tokenizer.token_to_id("[SOS]"),
-            "eos_index": tokenizer.token_to_id("[EOS]"),
             "max_caption_length": _C.DATA.CAPTION.MAX_LENGTH,
+            "feedforward_size": _C.MODEL.TEXTUAL.FEEDFORWARD_SIZE,
+            "attention_heads": _C.MODEL.TEXTUAL.ATTENTION_HEADS,
+            "num_layers": _C.MODEL.TEXTUAL.NUM_LAYERS,
         }
-        if _C.MODEL.TEXTUAL.NAME != "embedding":
-            kwargs.update(
-                feedforward_size=_C.MODEL.TEXTUAL.FEEDFORWARD_SIZE,
-                attention_heads=_C.MODEL.TEXTUAL.ATTENTION_HEADS,
-                num_layers=_C.MODEL.TEXTUAL.NUM_LAYERS,
-            )
-
         return cls.create(name, **kwargs)
 
 
@@ -228,17 +216,27 @@ class PretrainingModelFactory(Factory):
     }
 
     @classmethod
-    def from_config(cls, config: Config) -> nn.Module:
+    def from_config(
+        cls,
+        config: Config,
+        tokenizer: Optional[tkz.implementations.BaseTokenizer] = None,
+    ) -> nn.Module:
+
         _C = config
+        tokenizer = tokenizer or TokenizerFactory.from_config(_C)
 
         # Build visual and textual streams based on config.
         visual = VisualStreamFactory.from_config(_C)
-        textual = TextualStreamFactory.from_config(_C)
+        textual = TextualStreamFactory.from_config(_C, tokenizer)
 
         # Add model specific kwargs.
         kwargs = {"visual_projection": _C.MODEL.VISUAL_PROJECTION}
         if _C.MODEL.NAME == "captioning":
-            kwargs.update(max_decoding_steps=_C.DATA.CAPTION.MAX_LENGTH)
+            kwargs.update(
+                max_decoding_steps=_C.DATA.CAPTION.MAX_LENGTH,
+                sos_index=tokenizer.token_to_id("[SOS]"),
+                eos_index=tokenizer.token_to_id("[EOS]"),
+            )
 
         return cls.create(_C.MODEL.NAME, visual, textual, **kwargs)
 
