@@ -18,7 +18,6 @@ class CaptioningModel(nn.Module):
         self,
         visual: VisualStream,
         textual: TextualStream,
-        visual_projection: str = "linear",
         is_bidirectional: bool = False,
         beam_size: int = 5,
         max_decoding_steps: int = 30,
@@ -29,26 +28,9 @@ class CaptioningModel(nn.Module):
         self.visual = visual
         self.textual = textual
 
-        # Build a visual projection module.
-        # fmt: off
-        if visual_projection == "linear":
-            self.visual_projection = nn.Linear(
-                self.visual.visual_feature_size, self.textual.textual_feature_size
-            )
-        elif visual_projection == "mlp":
-            self.visual_projection = nn.Sequential(  # type: ignore
-                nn.Linear(
-                    self.visual.visual_feature_size,
-                    self.textual.textual_feature_size
-                ),
-                nn.ReLU(inplace=True),
-                nn.Linear(
-                    self.textual.textual_feature_size,
-                    self.textual.textual_feature_size
-                ),
-            )
-        # fmt: on
-
+        self.visual_projection = nn.Linear(
+            self.visual.visual_feature_size, self.textual.textual_feature_size
+        )
         self.output = nn.Linear(
             self.textual.textual_feature_size, self.textual.vocab_size
         )

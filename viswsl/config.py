@@ -153,8 +153,6 @@ class Config(object):
         _C.MODEL.VISUAL.FEATURE_SIZE = 2048
         _C.MODEL.VISUAL.PRETRAINED = False
 
-        _C.MODEL.VISUAL_PROJECTION = "linear"
-
         _C.MODEL.TEXTUAL = CN()
         _C.MODEL.TEXTUAL.NAME = "allfuse_prenorm"
         _C.MODEL.TEXTUAL.HIDDEN_SIZE = 512

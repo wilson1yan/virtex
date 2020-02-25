@@ -10,36 +10,15 @@ from viswsl.modules.visual_stream import VisualStream
 
 
 class WordMaskingModel(nn.Module):
-    def __init__(
-        self,
-        visual: VisualStream,
-        textual: TextualStream,
-        visual_projection: str = "linear",
-    ):
+    def __init__(self, visual: VisualStream, textual: TextualStream):
         super().__init__()
         self.visual = visual
         self.textual = textual
 
         # Build a visual projection module.
-        # fmt: off
-        if visual_projection == "linear":
-            self.visual_projection = nn.Linear(
-                self.visual.visual_feature_size, self.textual.textual_feature_size
-            )
-        elif visual_projection == "mlp":
-            self.visual_projection = nn.Sequential(  # type: ignore
-                nn.Linear(
-                    self.visual.visual_feature_size,
-                    self.textual.textual_feature_size
-                ),
-                nn.ReLU(inplace=True),
-                nn.Linear(
-                    self.textual.textual_feature_size,
-                    self.textual.textual_feature_size
-                ),
-            )
-        # fmt: on
-
+        self.visual_projection = nn.Linear(
+            self.visual.visual_feature_size, self.textual.textual_feature_size
+        )
         self.output = nn.Linear(
             self.textual.textual_feature_size, self.textual.vocab_size
         )

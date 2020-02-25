@@ -233,7 +233,7 @@ class PretrainingModelFactory(Factory):
 
         # Add model specific kwargs. Refer call signatures of specific models
         # for matching kwargs here.
-        kwargs = {"visual_projection": _C.MODEL.VISUAL_PROJECTION}
+        kwargs = {}
         if _C.MODEL.NAME == "captioning":
             kwargs.update(
                 max_decoding_steps=_C.DATA.CAPTION.MAX_LENGTH,
