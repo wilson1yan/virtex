@@ -13,7 +13,7 @@ from tqdm import tqdm
 
 # fmt: off
 from viswsl.config import Config
-from viswsl.data import CocoCaptionsEvalDataset
+from viswsl.data.readers import SimpleCocoCaptionsReader
 from viswsl.factories import (
     TokenizerFactory, PretrainingModelFactory,
 )
@@ -32,14 +32,8 @@ parser.add_argument(
     (with dict-like nesting) using a dot operator.""",
 )
 parser.add_argument(
-    "--images",
-    default="datasets/coco/val2017",
-    help="Path to a directory containing images of a dataset split.",
-)
-parser.add_argument(
-    "--captions",
-    default="datasets/coco/annotations/captions_val2017.json",
-    help="Path to annotations file with ground truth captions.",
+    "--data-root", default="datasets/coco",
+    help="Path to the root directory of COCO dataset.",
 )
 parser.add_argument(
     "--gpu-id", type=int, default=0, help="ID of GPU to use (-1 for CPU)."
@@ -99,10 +93,10 @@ if __name__ == "__main__":
     #   INSTANTIATE DATALOADER, MODEL, OPTIMIZER
     # -------------------------------------------------------------------------
     tokenizer = TokenizerFactory.from_config(_C)
-    val_dataset = CocoCaptionsEvalDataset(_A.images)
+    val_dataset = SimpleCocoCaptionsReader(_A.data_root, "val")
     val_dataloader = DataLoader(
         val_dataset,
-        batch_size=_C.OPTIM.BATCH_SIZE_PER_GPU,
+        batch_size=_C.OPTIM.BATCH_SIZE,
         num_workers=_A.cpu_workers,
         pin_memory=True,
         collate_fn=val_dataset.collate_fn,
@@ -117,8 +111,11 @@ if __name__ == "__main__":
     #   VALIDATION
     # ---------------------------------------------------------------------
 
+    # TODO : fix this later.
+
     predictions: List[Dict[str, Any]] = []
     for val_iteration, val_batch in tqdm(enumerate(val_dataloader, start=1)):
+
         for key in val_batch:
             val_batch[key] = val_batch[key].to(device)
 
@@ -144,5 +141,5 @@ if __name__ == "__main__":
         "metrics/cider", {"forward": metrics["CIDEr"]}, CHECKPOINT_ITERATION
     )
     tensorboard_writer.add_scalars(
-        "metrics/spice", {"forward": metrics["SPICE"]}, CHECKPOINT_ITERATION 
+        "metrics/spice", {"forward": metrics["SPICE"]}, CHECKPOINT_ITERATION
     )
