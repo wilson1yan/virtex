@@ -70,17 +70,12 @@ class ImageTransformsFactory(Factory):
         "smallest_resize": partial(alb.SmallestMaxSize, p=1.0),
         "global_resize": partial(T.SquareResize, p=1.0),
 
-        # Data augmentations: whenever selected, these are applied with 50%
-        # probability, one exception being ColorJitter.
-        "horizontal_flip": partial(T.HorizontalFlip, p=0.5),
-
         # Keep hue limits small in color jitter because it changes color drastically
         # and captions often mention colors. Apply with higher probability.
         "color_jitter": partial(
             T.ColorJitter, brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1, p=0.8
         ),
-        "lighting_noise": partial(T.LightingNoise, alpha=0.2, p=0.5),
-        "gaussian_blur": partial(alb.GaussianBlur, blur_limit=7, p=0.5),
+        "horizontal_flip": partial(T.HorizontalFlip, p=0.5),
 
         # Color normalization: whenever selected, always applied.
         "normalize": partial(
@@ -175,9 +170,9 @@ class TextualStreamFactory(Factory):
 
     # fmt: off
     PRODUCTS: Dict[str, Callable] = {
-        "allfuse_prenorm": partial(ts.AllLayersFusionTextualStream, norm_type="post"),
+        "allfuse_prenorm": partial(ts.AllLayersFusionTextualStream, norm_type="pre"),
         "allfuse_postnorm": partial(ts.AllLayersFusionTextualStream, norm_type="post"),
-        "lastfuse_prenorm": partial(ts.LastLayerFusionTextualStream, norm_type="post"),
+        "lastfuse_prenorm": partial(ts.LastLayerFusionTextualStream, norm_type="pre"),
         "lastfuse_postnorm": partial(ts.LastLayerFusionTextualStream, norm_type="post"),
     }
     # fmt: on
@@ -226,7 +221,11 @@ class PretrainingModelFactory(Factory):
 
         # Build visual and textual streams based on config.
         visual = VisualStreamFactory.from_config(_C)
-        textual = TextualStreamFactory.from_config(_C, tokenizer)
+
+        if _C.MODEL.NAME not in {"token_classification", "instance_classification"}:
+            textual = TextualStreamFactory.from_config(_C, tokenizer)
+        else:
+            textual = None
 
         # Add model specific kwargs. Refer call signatures of specific models
         # for matching kwargs here.
@@ -259,7 +258,7 @@ class OptimizerFactory(Factory):
     PRODUCTS = {"sgd": optim.SGD}
 
     @classmethod
-    def from_config(  # type: ignore
+    def from_config(
         cls, config: Config, named_parameters: Iterable[Any]
     ) -> optim.Optimizer:
         _C = config
@@ -274,11 +273,9 @@ class OptimizerFactory(Factory):
             lr = _C.OPTIM.CNN_LR if "cnn" in name else _C.OPTIM.LR
             param_groups.append({"params": [param], "lr": lr, "weight_decay": wd})
 
-        kwargs = {
-            "momentum": _C.OPTIM.SGD_MOMENTUM,
-            "nesterov": _C.OPTIM.SGD_NESTEROV,
-        }
+        kwargs = {"momentum": _C.OPTIM.SGD_MOMENTUM}
         optimizer = cls.create(_C.OPTIM.OPTIMIZER_NAME, param_groups, **kwargs)
+
         if _C.OPTIM.USE_LOOKAHEAD:
             optimizer = Lookahead(
                 optimizer, k=_C.OPTIM.LOOKAHEAD_STEPS, alpha=_C.OPTIM.LOOKAHEAD_ALPHA
@@ -296,7 +293,7 @@ class LRSchedulerFactory(Factory):
     }
 
     @classmethod
-    def from_config(  # type: ignore
+    def from_config(
         cls, config: Config, optimizer: optim.Optimizer
     ) -> optim.lr_scheduler.LambdaLR:
         _C = config
@@ -318,7 +315,6 @@ class DownstreamDatasetFactory(Factory):
     PRODUCTS = {
         "datasets/VOC2007": vdata.VOC07ClassificationDataset,
         "datasets/imagenet": vdata.ImageNetDataset,
-        "datasets/places205": vdata.Places205Dataset,
     }
 
     @classmethod
