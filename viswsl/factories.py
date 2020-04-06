@@ -1,6 +1,6 @@
 from functools import partial
 import re
-from typing import Any, Callable, Dict, Iterable, List, Optional
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 import albumentations as alb
 from torch import nn, optim
@@ -174,18 +174,21 @@ class TextualStreamFactory(Factory):
         "allfuse_postnorm": partial(ts.AllLayersFusionTextualStream, norm_type="post"),
         "lastfuse_prenorm": partial(ts.LastLayerFusionTextualStream, norm_type="pre"),
         "lastfuse_postnorm": partial(ts.LastLayerFusionTextualStream, norm_type="post"),
+        "none": None,  # Keep for pretext tasks which don't use captions.
     }
     # fmt: on
 
     @classmethod
     def from_config(
         cls, config: Config, tokenizer: Optional[SentencePieceBPETokenizer] = None
-    ) -> nn.Module:
+    ) -> Union[None, nn.Module]:
 
         _C = config
         name = _C.MODEL.TEXTUAL.NAME.split("::")[0]
-        tokenizer = tokenizer or TokenizerFactory.from_config(_C)
+        if name == "none":
+            return None
 
+        tokenizer = tokenizer or TokenizerFactory.from_config(_C)
         # Transformer will be bidirectional only for word masking pretext.
         kwargs = {
             "vocab_size": tokenizer.get_vocab_size(),
@@ -221,11 +224,14 @@ class PretrainingModelFactory(Factory):
 
         # Build visual and textual streams based on config.
         visual = VisualStreamFactory.from_config(_C)
+        textual = TextualStreamFactory.from_config(_C, tokenizer)
 
-        if _C.MODEL.NAME not in {"token_classification", "instance_classification"}:
-            textual = TextualStreamFactory.from_config(_C, tokenizer)
-        else:
-            textual = None
+        # Check textual stream being none for fixed set of pretext tasks.
+        if textual is None:
+            assert _C.MODEL.NAME in {
+                "token_classification",
+                "instance_classification",
+            }, f"Textual stream can't be none for {_C.MODEL.NAME}"
 
         # Add model specific kwargs. Refer call signatures of specific models
         # for matching kwargs here.
@@ -247,10 +253,16 @@ class PretrainingModelFactory(Factory):
                     tokenizer.token_to_id("[MASK]"),
                 ],
             )
-        # Let the default values in `instance_classification` do the job right
-        # now. Change them later.
+        elif _C.MODEL.NAME == "instance_classification":
+            kwargs.update(
+                vocab_size=81,  # 80 COCO categories + background (padding, 0)
+                ignore_indices=[0],  # background index
+            )
 
-        return cls.create(_C.MODEL.NAME, visual, textual, **kwargs)
+        if textual is not None:
+            return cls.create(_C.MODEL.NAME, visual, textual, **kwargs)
+        else:
+            return cls.create(_C.MODEL.NAME, visual, **kwargs)
 
 
 class OptimizerFactory(Factory):
