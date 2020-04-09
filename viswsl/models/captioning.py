@@ -27,28 +27,25 @@ class CaptioningModel(nn.Module):
         super().__init__()
         self.visual = visual
         self.textual = textual
+        self.is_bidirectional = is_bidirectional
+        self.padding_idx = self.textual.padding_idx
 
         self.visual_projection = nn.Linear(
             self.visual.visual_feature_size, self.textual.textual_feature_size
         )
         self.output = nn.Linear(
-            self.textual.textual_feature_size, self.textual.vocab_size
+            self.textual.textual_feature_size, self.textual.vocab_size,
         )
-        self.is_bidirectional = is_bidirectional
-        self.padding_idx = self.textual.padding_idx
+        self.loss = nn.CrossEntropyLoss(ignore_index=self.padding_idx)
+
+        # Tie input and output word embeddings to reduce parameters.
+        self.output.weight = self.textual.embedding.words.weight
 
         # Clone the textual module for backward direction if doing captioning
         # in both directions (separately).
         if self.is_bidirectional:
             self.backward_textual = copy.deepcopy(self.textual)
-            # Tie word and position embeddings for both directions.
             self.backward_textual.embedding = self.textual.embedding
-
-        self.loss = nn.CrossEntropyLoss(ignore_index=self.padding_idx)
-
-        # Tie input and output word embeddings to reduce parameters.
-        # However, output embedding layer will learn its own bias.
-        self.output.weight = self.textual.embedding.words.weight
 
         # These boundary indices are needed for beam search.
         self.sos_index = sos_index
@@ -92,7 +89,7 @@ class CaptioningModel(nn.Module):
                 # Single scalar per batch for logging in training script.
                 "loss_components": {"captioning_forward": loss.clone().detach()},
             }
-            # Do captioning in backward direction.
+            # Do captioning in backward direction if needed.
             if self.is_bidirectional:
                 backward_caption_tokens = batch["noitpac_tokens"]
 
@@ -102,7 +99,6 @@ class CaptioningModel(nn.Module):
                     projected_visual_features,
                 )
                 backward_output_logits = self.output(backward_textual_features)
-
                 backward_loss = self.loss(
                     backward_output_logits[:, :-1]
                     .contiguous()
