@@ -5,10 +5,7 @@ import torch
 from torch import nn
 
 from viswsl.modules.embedding import WordAndPositionalEmbedding
-from viswsl.modules.transformer import (
-    PreNormTransformerEncoderLayer,
-    PreNormTransformerDecoderLayer,
-)
+from viswsl.modules.transformer import PreNormTransformerDecoderLayer
 
 
 class TextualStream(nn.Module):
@@ -79,7 +76,7 @@ class TextualStream(nn.Module):
         return mask
 
 
-class AllLayersFusionTextualStream(TextualStream):
+class TransformerTextualStream(TextualStream):
     def __init__(
         self,
         vocab_size: int,
@@ -167,116 +164,5 @@ class AllLayersFusionTextualStream(TextualStream):
         )
         # Undo the transpose and bring batch to dim 0.
         # shape: (batch_size, sequence_length, hidden_size)
-        textual_features = textual_features.transpose(0, 1)
-        return textual_features
-
-
-class LastLayerFusionTextualStream(TextualStream):
-    def __init__(
-        self,
-        vocab_size: int,
-        hidden_size: int,
-        feedforward_size: int,
-        attention_heads: int,
-        num_layers: int,
-        dropout: float = 0.1,
-        is_bidirectional: bool = True,
-        norm_type: str = "pre",
-        padding_idx: int = 0,
-        max_caption_length: int = 30,
-    ):
-        super().__init__(
-            vocab_size,
-            hidden_size,
-            feedforward_size,
-            attention_heads,
-            num_layers,
-            dropout=dropout,
-            is_bidirectional=is_bidirectional,
-            padding_idx=padding_idx,
-        )
-        self.embedding = WordAndPositionalEmbedding(
-            self.vocab_size,
-            self.textual_feature_size,
-            max_caption_length=max_caption_length,
-            dropout=dropout,
-        )
-        # Make encoder layer depending on whether it's a Pre-Norm or Post-Norm.
-        NonLastLayerClass = (
-            nn.TransformerEncoderLayer
-            if norm_type == "post"
-            else PreNormTransformerEncoderLayer
-        )
-        _layer = NonLastLayerClass(
-            self.textual_feature_size,
-            self.attention_heads,
-            dim_feedforward=self.feedforward_size,
-            dropout=dropout,
-            activation="gelu",
-        )
-        # We still call this member as "encoder" for consistent API, and
-        # because it still "encodes" the caption for us.
-        self.encoder = nn.TransformerEncoder(_layer, self.num_layers - 1)
-
-        # Make encoder layer depending on whether it's a Pre-Norm or Post-Norm.
-        LastLayerClass = (
-            nn.TransformerDecoderLayer
-            if norm_type == "post"
-            else PreNormTransformerDecoderLayer
-        )
-        self.last_layer = LastLayerClass(
-            self.textual_feature_size,
-            self.attention_heads,
-            dim_feedforward=self.feedforward_size,
-            dropout=dropout,
-            activation="gelu",
-        )
-        self.apply(self._init_weights)
-
-    def forward(
-        self,
-        caption_tokens: torch.Tensor,
-        caption_lengths: torch.Tensor,
-        visual_features: torch.Tensor,
-    ) -> torch.Tensor:
-        batch_size, max_caption_length = caption_tokens.size()
-
-        # All of the method body here is same as `AllLayersFusionTextualStream`,
-        # except the call to `self.encoder`.
-        ones = torch.ones_like(caption_tokens)
-        caption_mask = caption_lengths.unsqueeze(1) < ones.cumsum(dim=1)
-
-        # shape: (batch_size, max_caption_length, textual_feature_size)
-        caption_embeddings = self.embedding(caption_tokens)
-
-        # An additive mask for masking the future (one direction) if textual
-        # stream is unidirectional. For bidirectional stream, it is `None`.
-        unidirectional_mask = (
-            None
-            if self.is_bidirectional
-            else self._generate_square_subsequent_mask(
-                max_caption_length, caption_embeddings.dtype, caption_embeddings.device
-            )
-        )
-        # We transpose the first two dimensions of tokens embeddings and visual
-        # features, as required by encoder.
-        caption_embeddings = caption_embeddings.transpose(0, 1)
-        visual_features = visual_features.transpose(0, 1)
-
-        # Get textual features from all layers except the last one.
-        textual_features = self.encoder(
-            caption_embeddings,
-            mask=unidirectional_mask,
-            src_key_padding_mask=caption_mask,
-        )
-        # Finally fuse visual features in the last layer.
-        # shape: (max_caption_length, batch_size, hidden_size)
-        textual_features = self.last_layer(
-            textual_features,
-            visual_features,
-            tgt_mask=unidirectional_mask,
-            tgt_key_padding_mask=caption_mask,
-        )
-        # shape: (batch_size, max_caption_length, hidden_size)
         textual_features = textual_features.transpose(0, 1)
         return textual_features

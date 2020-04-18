@@ -29,7 +29,7 @@ MODEL:
     NAME: torchvision::resnet50
     PRETRAINED: false
   TEXTUAL:
-    NAME: allfuse_prenorm::L1_H1024_A16_F4096
+    NAME: transformer_postnorm::L1_H1024_A16_F4096
     HIDDEN_SIZE: 1024
     ATTENTION_HEADS: 16
     FEEDFORWARD_SIZE: 4096
