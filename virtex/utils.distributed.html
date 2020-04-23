@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120523111-2"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-120523111-2');
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+
+
+    <title>virtex.utils.distributed &#8212; virtex 0.9 documentation</title>
+
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="virtex.utils.checkpointing" href="utils.checkpointing.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-virtex.utils.distributed">
+<span id="virtex-utils-distributed"></span><h1>virtex.utils.distributed<a class="headerlink" href="#module-virtex.utils.distributed" title="Permalink to this headline">¶</a></h1>
+<p>A collection of common utilities for distributed training. These are a bunch of
+wrappers over utilities from <a class="reference external" href="https://pytorch.org/docs/stable/distributed.html#module-torch.distributed" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))"><code class="xref py py-mod docutils literal notranslate"><span class="pre">torch.distributed</span></code></a> module, but they do not
+raise exceptions in absence of distributed training / CPU-only training, and
+fall back to sensible default behavior.</p>
+<dl class="py function">
+<dt id="virtex.utils.distributed.launch">
+<code class="sig-prename descclassname">virtex.utils.distributed.</code><code class="sig-name descname">launch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">job_fn</span><span class="p">:</span> <span class="n">Callable</span></em>, <em class="sig-param"><span class="n">num_machines</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">num_gpus_per_machine</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">machine_rank</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">dist_url</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'tcp://127.0.0.1:23456'</span></em>, <em class="sig-param"><span class="n">args</span><span class="o">=</span><span class="default_value">()</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/distributed.py#L15-L84"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.distributed.launch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Launch a job in a distributed fashion: given <code class="docutils literal notranslate"><span class="pre">num_machines</span></code> machines,
+each with <code class="docutils literal notranslate"><span class="pre">num_gpus_per_machine</span></code> GPUs, this utility will launch one
+process per GPU. This wrapper uses <a class="reference external" href="https://pytorch.org/docs/stable/multiprocessing.html#torch.multiprocessing.spawn" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.multiprocessing.spawn()</span></code></a>.</p>
+<p>The user has to launch one job on each machine, manually specifying a
+machine rank (incrementing integers from 0), this utility will adjust
+process ranks per machine. One process on <code class="docutils literal notranslate"><span class="pre">machine_rank</span> <span class="pre">=</span> <span class="pre">0</span></code> will be
+refered as the <em>master process</em>, and the IP + a free port on this machine
+will serve as the distributed process communication URL.</p>
+<p>Default arguments imply one machine with one GPU, and communication URL
+as <code class="docutils literal notranslate"><span class="pre">localhost</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This utility assumes same number of GPUs per machine with IDs as
+<code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">1,</span> <span class="pre">2</span> <span class="pre">...)</span></code>. If you do not wish to use all GPUs on a machine,
+set <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code> environment variable (for example,
+<code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES=5,6</span></code>, which restricts to GPU 5 and 6 and
+re-assigns their IDs to 0 and 1 in this job scope).</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>job_fn: Callable</strong></dt><dd><p>A callable object to launch. Pass your main function doing training,
+validation etc. here.</p>
+</dd>
+<dt><strong>num_machines: int, optional (default = 1)</strong></dt><dd><p>Number of machines used, each with <code class="docutils literal notranslate"><span class="pre">num_gpus_per_machine</span></code> GPUs.</p>
+</dd>
+<dt><strong>num_gpus_per_machine: int, optional (default = 1)</strong></dt><dd><p>Number of GPUs per machine, with IDs as <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">1,</span> <span class="pre">2</span> <span class="pre">...)</span></code>.</p>
+</dd>
+<dt><strong>machine_rank: int, optional (default = 0)</strong></dt><dd><p>A manually specified rank of the machine, serves as a unique identifier
+and useful for assigning global ranks to processes.</p>
+</dd>
+<dt><strong>dist_url: str, optional (default = “tcp://127.0.0.1:23456”)</strong></dt><dd><p>Disributed process communication URL as <code class="docutils literal notranslate"><span class="pre">tcp://x.x.x.x:port</span></code>. Set
+this as the IP (and a free port) of machine with rank 0.</p>
+</dd>
+<dt><strong>args: Tuple</strong></dt><dd><p>Arguments to be passed to <code class="docutils literal notranslate"><span class="pre">job_fn</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="virtex.utils.distributed._job_worker">
+<code class="sig-prename descclassname">virtex.utils.distributed.</code><code class="sig-name descname">_job_worker</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">local_rank</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">job_fn</span><span class="p">:</span> <span class="n">Callable</span></em>, <em class="sig-param"><span class="n">world_size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">num_gpus_per_machine</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">machine_rank</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">dist_url</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">args</span><span class="p">:</span> <span class="n">Tuple</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/distributed.py#L88-L118"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.distributed._job_worker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Single distibuted process worker. This should never be used directly,
+only used by <a class="reference internal" href="#virtex.utils.distributed.launch" title="virtex.utils.distributed.launch"><code class="xref py py-func docutils literal notranslate"><span class="pre">launch()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="virtex.utils.distributed.synchronize">
+<code class="sig-prename descclassname">virtex.utils.distributed.</code><code class="sig-name descname">synchronize</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/distributed.py#L121-L124"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.distributed.synchronize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Synchronize (barrier) all processes in a process group.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="virtex.utils.distributed.get_world_size">
+<code class="sig-prename descclassname">virtex.utils.distributed.</code><code class="sig-name descname">get_world_size</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/distributed.py#L127-L129"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.distributed.get_world_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return number of processes in the process group, each uses 1 GPU.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="virtex.utils.distributed.get_rank">
+<code class="sig-prename descclassname">virtex.utils.distributed.</code><code class="sig-name descname">get_rank</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/distributed.py#L132-L134"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.distributed.get_rank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return rank of current process in the process group.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="virtex.utils.distributed.is_master_process">
+<code class="sig-prename descclassname">virtex.utils.distributed.</code><code class="sig-name descname">is_master_process</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; bool<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/distributed.py#L137-L143"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.distributed.is_master_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether current process is the master process. This check is useful
+to restrict logging and checkpointing to master process. It will always
+return <code class="docutils literal notranslate"><span class="pre">True</span></code> for single machine, single GPU execution.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="virtex.utils.distributed.average_across_processes">
+<code class="sig-prename descclassname">virtex.utils.distributed.</code><code class="sig-name descname">average_across_processes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span><span class="p">:</span> <span class="n">Union<span class="p">[</span><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><span class="p">, </span>Dict<span class="p">[</span>str<span class="p">, </span><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/distributed.py#L146-L167"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.distributed.average_across_processes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Averages a tensor, or a dict of tensors across all processes in a process
+group. Objects in all processes will finally have same mean value.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Nested dicts of tensors are not supported.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>t: torch.Tensor or Dict[str, torch.Tensor]</strong></dt><dd><p>A tensor or dict of tensors to average across processes.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="virtex.utils.distributed.gpu_mem_usage">
+<code class="sig-prename descclassname">virtex.utils.distributed.</code><code class="sig-name descname">gpu_mem_usage</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/distributed.py#L170-L179"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.distributed.gpu_mem_usage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return gpu memory usage (in megabytes). If not using GPU, return 0 without
+raising any exceptions.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">virtex</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="utils.html">virtex.utils</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="utils.checkpointing.html">virtex.utils.checkpointing</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">virtex.utils.distributed</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="utils.html">virtex.utils</a><ul>
+      <li>Previous: <a href="utils.checkpointing.html" title="previous chapter">virtex.utils.checkpointing</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Karan Desai and Justin Johnson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/virtex/utils.distributed.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
