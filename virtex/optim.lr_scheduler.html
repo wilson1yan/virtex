@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120523111-2"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-120523111-2');
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+
+
+    <title>virtex.optim.lr_scheduler &#8212; virtex 0.9 documentation</title>
+
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="virtex.utils" href="utils.html" />
+    <link rel="prev" title="virtex.optim.lookahead" href="optim.lookahead.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-virtex.optim.lr_scheduler">
+<span id="virtex-optim-lr-scheduler"></span><h1>virtex.optim.lr_scheduler<a class="headerlink" href="#module-virtex.optim.lr_scheduler" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="virtex.optim.lr_scheduler.LinearWarmupNoDecayLR">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.optim.lr_scheduler.</code><code class="sig-name descname">LinearWarmupNoDecayLR</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">optimizer</span><span class="p">:</span> <span class="n">torch.optim.optimizer.Optimizer</span></em>, <em class="sig-param"><span class="n">total_steps</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">warmup_steps</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">last_epoch</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/optim/lr_scheduler.py#L9-L45"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.optim.lr_scheduler.LinearWarmupNoDecayLR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.lr_scheduler.LambdaLR" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.lr_scheduler.LambdaLR</span></code></a></p>
+<p>A learning rate scheduler which linearly increases learning rate from 0
+LR, and further keeps it constant throughout training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>optimizer: torch.optim.Optimizer</strong></dt><dd><p>Wrapper optimizer.</p>
+</dd>
+<dt><strong>total_steps: int</strong></dt><dd><p>Total epochs (or iterations) for training.</p>
+</dd>
+<dt><strong>warmup_steps: int</strong></dt><dd><p>Number of first few steps to do linear warmup.</p>
+</dd>
+<dt><strong>last_epoch: int, optional (default = -1)</strong></dt><dd><p>The index of last step (epoch or iteration). We named it <code class="docutils literal notranslate"><span class="pre">last_epoch</span></code>
+instead of <code class="docutils literal notranslate"><span class="pre">last_step</span></code> to keep the naming consistent with other LR
+schedulers in PyTorch.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.optim.lr_scheduler.LinearWarmupMultiStepLR">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.optim.lr_scheduler.</code><code class="sig-name descname">LinearWarmupMultiStepLR</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">optimizer</span><span class="p">:</span> <span class="n">torch.optim.optimizer.Optimizer</span></em>, <em class="sig-param"><span class="n">total_steps</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">warmup_steps</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">milestones</span><span class="p">:</span> <span class="n">List<span class="p">[</span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">gamma</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">last_epoch</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/optim/lr_scheduler.py#L48-L107"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.optim.lr_scheduler.LinearWarmupMultiStepLR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.lr_scheduler.LambdaLR" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.lr_scheduler.LambdaLR</span></code></a></p>
+<p>A learning rate scheduler which linearly increases learning rate from 0
+LR, and further decreases it by gamma once the number of steps reaches one
+of the milestones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>optimizer: torch.optim.Optimizer</strong></dt><dd><p>Wrapper optimizer.</p>
+</dd>
+<dt><strong>total_steps: int</strong></dt><dd><p>Total epochs (or iterations) for training.</p>
+</dd>
+<dt><strong>warmup_steps: int</strong></dt><dd><p>Number of first few steps to do linear warmup.</p>
+</dd>
+<dt><strong>milestones: List[int]</strong></dt><dd><p>List of step indices (epochs or iterations depending on context). Must
+be increasing.</p>
+</dd>
+<dt><strong>gamma: float, optional (default = 0.1)</strong></dt><dd><p>Multiplicative factor of learning rate decay.</p>
+</dd>
+<dt><strong>last_epoch: int, optional (default = -1)</strong></dt><dd><p>The index of last step (epoch or iteration). We named it <code class="docutils literal notranslate"><span class="pre">last_epoch</span></code>
+instead of <code class="docutils literal notranslate"><span class="pre">last_step</span></code> to keep the naming consistent with other LR
+schedulers in PyTorch.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.optim.lr_scheduler.LinearWarmupLinearDecayLR">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.optim.lr_scheduler.</code><code class="sig-name descname">LinearWarmupLinearDecayLR</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">optimizer</span><span class="p">:</span> <span class="n">torch.optim.optimizer.Optimizer</span></em>, <em class="sig-param"><span class="n">total_steps</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">warmup_steps</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">last_epoch</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/optim/lr_scheduler.py#L110-L152"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.optim.lr_scheduler.LinearWarmupLinearDecayLR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.lr_scheduler.LambdaLR" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.lr_scheduler.LambdaLR</span></code></a></p>
+<p>A learning rate scheduler which linearly increases learning rate from 0
+LR, and further decreases it linearly to zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>optimizer: torch.optim.Optimizer</strong></dt><dd><p>Wrapper optimizer.</p>
+</dd>
+<dt><strong>total_steps: int</strong></dt><dd><p>Total epochs (or iterations) for training.</p>
+</dd>
+<dt><strong>warmup_steps: int</strong></dt><dd><p>Number of first few steps to do linear warmup.</p>
+</dd>
+<dt><strong>last_epoch: int, optional (default = -1)</strong></dt><dd><p>The index of last step (epoch or iteration). We named it <code class="docutils literal notranslate"><span class="pre">last_epoch</span></code>
+instead of <code class="docutils literal notranslate"><span class="pre">last_step</span></code> to keep the naming consistent with other LR
+schedulers in PyTorch.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.optim.lr_scheduler.LinearWarmupCosineAnnealingLR">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.optim.lr_scheduler.</code><code class="sig-name descname">LinearWarmupCosineAnnealingLR</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">optimizer</span><span class="p">:</span> <span class="n">torch.optim.optimizer.Optimizer</span></em>, <em class="sig-param"><span class="n">total_steps</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">warmup_steps</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">last_epoch</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/optim/lr_scheduler.py#L155-L202"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.optim.lr_scheduler.LinearWarmupCosineAnnealingLR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.lr_scheduler.LambdaLR" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.lr_scheduler.LambdaLR</span></code></a></p>
+<p>A learning rate scheduler which linearly increases learning rate from 0
+LR, and further decreases it to zero by cosine decay. After linear warmup,
+the LR decays as:</p>
+<div class="math notranslate nohighlight">
+\[\eta_t = \eta_{max}\cos^2(\frac{T_{cur} - T_{warm}}{T_{max} - T_{warm}}\frac{\pi}{2})\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>optimizer: torch.optim.Optimizer</strong></dt><dd><p>Wrapper optimizer.</p>
+</dd>
+<dt><strong>total_steps: int</strong></dt><dd><p>Total epochs (or iterations) for training.</p>
+</dd>
+<dt><strong>warmup_steps: int</strong></dt><dd><p>Number of first few steps to do linear warmup.</p>
+</dd>
+<dt><strong>last_epoch: int, optional (default = -1)</strong></dt><dd><p>The index of last step (epoch or iteration). We named it <code class="docutils literal notranslate"><span class="pre">last_epoch</span></code>
+instead of <code class="docutils literal notranslate"><span class="pre">last_step</span></code> to keep the naming consistent with other LR
+schedulers in PyTorch.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">virtex</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="factories.html">virtex.factories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">virtex.modules</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="optim.html">virtex.optim</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="optim.lookahead.html">virtex.optim.lookahead</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">virtex.optim.lr_scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">virtex.utils</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="optim.html">virtex.optim</a><ul>
+      <li>Previous: <a href="optim.lookahead.html" title="previous chapter">virtex.optim.lookahead</a></li>
+      <li>Next: <a href="utils.html" title="next chapter">virtex.utils</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Karan Desai and Justin Johnson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/virtex/optim.lr_scheduler.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -28,9 +28,10 @@
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="virtex.utils" href="utils.html" />
+    <link rel="next" title="virtex.factories" href="factories.html" />
     <link rel="prev" title="VirTex: Learning Visual Representations from Textual Annotations" href="../index.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -52,7 +53,7 @@
 <span id="virtex-config"></span><h1>virtex.config<a class="headerlink" href="#module-virtex.config" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="virtex.config.Config">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.config.</code><code class="sig-name descname">Config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_file</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">override_list</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Any<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L6-L218"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.config.</code><code class="sig-name descname">Config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_file</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">override_list</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Any<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L6-L208"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This class provides package-wide configuration management. It is a
 nested dict-like structure with nested keys accessible as attributes. It
@@ -89,13 +90,13 @@ This happens after overriding from YAML file.</p>
 </div>
 <dl class="py method">
 <dt id="virtex.config.Config.add_derived_params">
-<code class="sig-name descname">add_derived_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L195-L199"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config.add_derived_params" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add_derived_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L185-L189"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config.add_derived_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add parameters with values derived from existing parameters.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="virtex.config.Config.dump">
-<code class="sig-name descname">dump</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">file_path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L201-L209"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config.dump" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">dump</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">file_path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L191-L199"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config.dump" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save config at the specified file path.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -229,24 +230,7 @@ This happens after overriding from YAML file.</p>
 116
 117
 118
-119
-120
-121
-122
-123
-124
-125
-126
-127
-128
-129
-130
-131
-132
-133
-134
-135
-136</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1">#   Data paths and parameters related to dataloading.</span>
+119</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1">#   Data paths and parameters related to dataloading.</span>
 <span class="c1"># ---------------------------------------------------------------------</span>
 <span class="n">_C</span><span class="o">.</span><span class="n">DATA</span> <span class="o">=</span> <span class="n">CN</span><span class="p">()</span>
 
@@ -285,24 +269,14 @@ This happens after overriding from YAML file.</p>
     <span class="s2">&quot;normalize&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 
-<span class="c1"># Hyper-parameters for word masking pretext. These are only used when</span>
-<span class="c1"># ``MODEL.NAME`` is &quot;word_masking&quot;.</span>
-<span class="n">_C</span><span class="o">.</span><span class="n">DATA</span><span class="o">.</span><span class="n">WORD_MASKING</span> <span class="o">=</span> <span class="n">CN</span><span class="p">()</span>
-<span class="c1"># Fraction of tokens to choose for masking, this must be less than 1.</span>
-<span class="n">_C</span><span class="o">.</span><span class="n">DATA</span><span class="o">.</span><span class="n">WORD_MASKING</span><span class="o">.</span><span class="n">MASK_PROPORTION</span> <span class="o">=</span> <span class="mf">0.15</span>
-<span class="c1"># Probability to replace chosen tokens with [MASK] token.</span>
-<span class="n">_C</span><span class="o">.</span><span class="n">DATA</span><span class="o">.</span><span class="n">WORD_MASKING</span><span class="o">.</span><span class="n">MASK_PROBABILITY</span> <span class="o">=</span> <span class="mf">0.85</span>
-<span class="c1"># Probability to replace chosen tokens with a random token.</span>
-<span class="n">_C</span><span class="o">.</span><span class="n">DATA</span><span class="o">.</span><span class="n">WORD_MASKING</span><span class="o">.</span><span class="n">REPLACE_PROBABILITY</span> <span class="o">=</span> <span class="mf">0.10</span>
-
 <span class="c1"># ---------------------------------------------------------------------</span>
 <span class="c1">#   Model architecture: visual backbone and textual head.</span>
 <span class="c1"># ---------------------------------------------------------------------</span>
 <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span> <span class="o">=</span> <span class="n">CN</span><span class="p">()</span>
 
 <span class="c1"># Name of model, based on pretraining task.</span>
-<span class="c1"># Possible choices: {&quot;token_classification&quot;, &quot;instance_classification&quot;,</span>
-<span class="c1"># &quot;captioning&quot;, &quot;bicaptioning&quot;, &quot;word_masking&quot;}</span>
+<span class="c1"># Possible choices: {&quot;token_classification&quot;, &quot;multilabel_classification&quot;,</span>
+<span class="c1"># &quot;captioning&quot;, &quot;bicaptioning&quot;}</span>
 <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">NAME</span> <span class="o">=</span> <span class="s2">&quot;bicaptioning&quot;</span>
 
 <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">VISUAL</span> <span class="o">=</span> <span class="n">CN</span><span class="p">()</span>
@@ -348,7 +322,7 @@ This happens after overriding from YAML file.</p>
 <span class="c1"># Max gradient norm for clipping to avoid exploding gradients.</span>
 <span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">CLIP_GRAD_NORM</span> <span class="o">=</span> <span class="mi">10</span>
 
-<span class="c1"># Wrap our optimizer with LookAhead (https://arxiv.org/abs/1907.08610).</span>
+<span class="c1"># Wrap our optimizer with Lookahead (https://arxiv.org/abs/1907.08610).</span>
 <span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">USE_LOOKAHEAD</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">LOOKAHEAD_ALPHA</span> <span class="o">=</span> <span class="mf">0.5</span>
 <span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">LOOKAHEAD_STEPS</span> <span class="o">=</span> <span class="mi">5</span>
@@ -375,13 +349,6 @@ This happens after overriding from YAML file.</p>
 <span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">LR_STEPS</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="c1"># Factor to multiply with LR for &quot;multistep&quot; schedule.</span>
 <span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">LR_GAMMA</span> <span class="o">=</span> <span class="mf">0.1</span>
-
-<span class="c1"># Override parameter values from YAML file first, then from override</span>
-<span class="c1"># list, then add derived params.</span>
-<span class="bp">self</span><span class="o">.</span><span class="n">_C</span> <span class="o">=</span> <span class="n">_C</span>
-<span class="k">if</span> <span class="n">config_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="o">.</span><span class="n">merge_from_file</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
-<span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="o">.</span><span class="n">merge_from_list</span><span class="p">(</span><span class="n">override_list</span><span class="p">)</span>
 </pre></div>
 </td></tr></table></div>
 </div>
@@ -409,6 +376,9 @@ This happens after overriding from YAML file.</p>
 <li class="toctree-l2"><a class="reference internal" href="#config-references">Config References</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="factories.html">virtex.factories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">virtex.modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optim.html">virtex.optim</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">virtex.utils</a></li>
 </ul>
 
@@ -417,7 +387,7 @@ This happens after overriding from YAML file.</p>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="../index.html" title="previous chapter">VirTex: Learning Visual Representations from Textual Annotations</a></li>
-      <li>Next: <a href="utils.html" title="next chapter">virtex.utils</a></li>
+      <li>Next: <a href="factories.html" title="next chapter">virtex.factories</a></li>
   </ul></li>
 </ul>
 </div>

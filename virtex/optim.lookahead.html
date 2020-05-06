@@ -1,0 +1,231 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120523111-2"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-120523111-2');
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+
+
+    <title>virtex.optim.lookahead &#8212; virtex 0.9 documentation</title>
+
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="virtex.optim.lr_scheduler" href="optim.lr_scheduler.html" />
+    <link rel="prev" title="virtex.optim" href="optim.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-virtex.optim.lookahead">
+<span id="virtex-optim-lookahead"></span><h1>virtex.optim.lookahead<a class="headerlink" href="#module-virtex.optim.lookahead" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="https://arxiv.org/abs/1907.08610">Lookahead Optimizer: k steps forward, 1 step back</a>.</p>
+<p>This implementation is adopted with minimal modifications from the
+<a class="reference external" href="https://github.com/michaelrzhang/lookahead">authors’ implementation</a>.</p>
+<p>If you take it from here, please cite them:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>@inproceedings{zhang2019lookahead,
+    title={Lookahead Optimizer: k steps forward, 1 step back},
+    author={Zhang, Michael R and Lucas, James and Hinton, Geoffrey and Ba, Jimmy},
+    journal={NeurIPS},
+    year={2019}
+}
+</pre></div>
+</div>
+<dl class="py class">
+<dt id="virtex.optim.lookahead.Lookahead">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.optim.lookahead.</code><code class="sig-name descname">Lookahead</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">optimizer</span><span class="p">:</span> <span class="n">torch.optim.optimizer.Optimizer</span></em>, <em class="sig-param"><span class="n">k</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">5</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.8</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/optim/lookahead.py#L25-L128"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.optim.lookahead.Lookahead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.optimizer.Optimizer</span></code></p>
+<p>Implements Lookahead optimizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>optimizer: torch.optim.Optimizer</strong></dt><dd><p>Wrapper inner optimizer. The weights it manages will be the “fast”
+weights.</p>
+</dd>
+<dt><strong>k: int, optional (default = 5)</strong></dt><dd><p>Number of lookahead steps before updating “slow” weights.</p>
+</dd>
+<dt><strong>alpha: float, optional (default = 0.8)</strong></dt><dd><p>Linear interpolation factor, 1.0 recovers inner optimizer.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="virtex.optim.lookahead.Lookahead.zero_grad">
+<code class="sig-name descname">zero_grad</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/optim/lookahead.py#L69-L71"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.optim.lookahead.Lookahead.zero_grad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear all grad buffers at the start of new forward pass.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="virtex.optim.lookahead.Lookahead.state_dict">
+<code class="sig-name descname">state_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/optim/lookahead.py#L73-L74"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.optim.lookahead.Lookahead.state_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the state of the optimizer as a <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>.</p>
+<p>It contains two entries:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>state - a dict holding current optimization state. Its content</dt><dd><p>differs between optimizer classes.</p>
+</dd>
+</dl>
+</li>
+<li><p>param_groups - a dict containing all parameter groups</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="virtex.optim.lookahead.Lookahead.load_state_dict">
+<code class="sig-name descname">load_state_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">state_dict</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/optim/lookahead.py#L76-L77"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.optim.lookahead.Lookahead.load_state_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the optimizer state.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><dl class="simple">
+<dt>state_dict (dict): optimizer state. Should be an object returned</dt><dd><p>from a call to <a class="reference internal" href="#virtex.optim.lookahead.Lookahead.state_dict" title="virtex.optim.lookahead.Lookahead.state_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">state_dict()</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="virtex.optim.lookahead.Lookahead.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">closure</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/optim/lookahead.py#L79-L101"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.optim.lookahead.Lookahead.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a single Lookahead optimization step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>closure: Callable, optional (default = None)</strong></dt><dd><p>A callable that re-evaluates the model and returns the loss.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="virtex.optim.lookahead.Lookahead.load_slow_weights">
+<code class="sig-name descname">load_slow_weights</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/optim/lookahead.py#L103-L117"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.optim.lookahead.Lookahead.load_slow_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load slow weights from Lookahead optimizer. Useful for performing
+evaluation on the slow weights (which typically generalize better).</p>
+<p>This method backs up fast weights to load them after evaluation. No
+need to call this method if evaluation happens just after a lookahead
+step.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="virtex.optim.lookahead.Lookahead.restore_fast_weights">
+<code class="sig-name descname">restore_fast_weights</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/optim/lookahead.py#L119-L128"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.optim.lookahead.Lookahead.restore_fast_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore fast weights for optimization. Call this after evaluation if
+<a class="reference internal" href="#virtex.optim.lookahead.Lookahead.load_slow_weights" title="virtex.optim.lookahead.Lookahead.load_slow_weights"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_slow_weights()</span></code></a> was called.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">virtex</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="factories.html">virtex.factories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">virtex.modules</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="optim.html">virtex.optim</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">virtex.optim.lookahead</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optim.lr_scheduler.html">virtex.optim.lr_scheduler</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">virtex.utils</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="optim.html">virtex.optim</a><ul>
+      <li>Previous: <a href="optim.html" title="previous chapter">virtex.optim</a></li>
+      <li>Next: <a href="optim.lr_scheduler.html" title="next chapter">virtex.optim.lr_scheduler</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Karan Desai and Justin Johnson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/virtex/optim.lookahead.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

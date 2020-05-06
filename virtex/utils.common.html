@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120523111-2"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-120523111-2');
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+
+
+    <title>virtex.utils.common &#8212; virtex 0.9 documentation</title>
+
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="virtex.utils.distributed" href="utils.distributed.html" />
+    <link rel="prev" title="virtex.utils" href="utils.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-virtex.utils.common">
+<span id="virtex-utils-common"></span><h1>virtex.utils.common<a class="headerlink" href="#module-virtex.utils.common" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="virtex.utils.common.cycle">
+<code class="sig-prename descclassname">virtex.utils.common.</code><code class="sig-name descname">cycle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataloader</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">start_iteration</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/common.py#L14-L35"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.common.cycle" title="Permalink to this definition">¶</a></dt>
+<dd><p>A generator to yield batches of data from dataloader infinitely.</p>
+<p>Internally, it sets the <code class="docutils literal notranslate"><span class="pre">epoch</span></code> for dataloader sampler to shuffle the
+examples. One may optionally provide the starting iteration to make sure
+the shuffling seed is different and continues naturally.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="virtex.utils.common.common_setup">
+<code class="sig-prename descclassname">virtex.utils.common.</code><code class="sig-name descname">common_setup</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">_C</span><span class="p">:</span> <span class="n"><a class="reference internal" href="config.html#virtex.config.Config" title="virtex.config.Config">virtex.config.Config</a></span></em>, <em class="sig-param"><span class="n">_A</span><span class="p">:</span> <span class="n">argparse.Namespace</span></em>, <em class="sig-param"><span class="n">job_type</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'pretrain'</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/common.py#L38-L102"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.common.common_setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup common stuff at the start of every pretraining or downstream
+evaluation job, all listed here to avoid code duplication. Basic steps:</p>
+<ol class="arabic simple">
+<li><p>Fix random seeds and other PyTorch flags.</p></li>
+<li><p>Set up a serialization directory and loggers.</p></li>
+<li><dl class="simple">
+<dt>Log important stuff such as config, process info (useful during</dt><dd><p>distributed training).</p>
+</dd>
+</dl>
+</li>
+<li><p>Save a copy of config to serialization directory.</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is assumed that multiple processes for distributed training have
+already been launched from outside. Functions from
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">virtex.util.distributed</span></code> module ae used to get process info.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>_C: virtex.config.Config</strong></dt><dd><p>Config object with all the parameters.</p>
+</dd>
+<dt><strong>_A: argparse.Namespace</strong></dt><dd><p>Command line arguments.</p>
+</dd>
+<dt><strong>job_type: str, optional (default = “pretrain”)</strong></dt><dd><p>Type of job for which setup is to be done; one of <code class="docutils literal notranslate"><span class="pre">{&quot;pretrain&quot;,</span>
+<span class="pre">&quot;downstream&quot;}</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="virtex.utils.common.common_parser">
+<code class="sig-prename descclassname">virtex.utils.common.</code><code class="sig-name descname">common_parser</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">description</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em><span class="sig-paren">)</span> &#x2192; argparse.ArgumentParser<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/common.py#L105-L161"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.common.common_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an argument parser some common arguments useful for any pretraining
+or downstream evaluation scripts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>description: str, optional (default = “”)</strong></dt><dd><p>Description to be used with the argument parser.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>argparse.ArgumentParser</dt><dd><p>A parser object with added arguments.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">virtex</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="factories.html">virtex.factories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">virtex.modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optim.html">virtex.optim</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="utils.html">virtex.utils</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">virtex.utils.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.distributed.html">virtex.utils.distributed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.timer.html">virtex.utils.timer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.checkpointing.html">virtex.utils.checkpointing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.beam_search.html">virtex.utils.beam_search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.metrics.html">virtex.utils.metrics</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="utils.html">virtex.utils</a><ul>
+      <li>Previous: <a href="utils.html" title="previous chapter">virtex.utils</a></li>
+      <li>Next: <a href="utils.distributed.html" title="next chapter">virtex.utils.distributed</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Karan Desai and Justin Johnson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/virtex/utils.common.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

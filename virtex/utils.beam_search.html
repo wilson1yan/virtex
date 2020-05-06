@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120523111-2"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-120523111-2');
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+
+
+    <title>virtex.utils.beam_search &#8212; virtex 0.9 documentation</title>
+
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="virtex.utils.metrics" href="utils.metrics.html" />
+    <link rel="prev" title="virtex.utils.checkpointing" href="utils.checkpointing.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-virtex.utils.beam_search">
+<span id="virtex-utils-beam-search"></span><h1>virtex.utils.beam_search<a class="headerlink" href="#module-virtex.utils.beam_search" title="Permalink to this headline">¶</a></h1>
+<p>This Beam Search implementation is adopted with minor modifications from
+<a class="reference external" href="https://github.com/allenai/allennlp/blob/master/allennlp/nn/beam_search.py">AllenNLP</a>.</p>
+<p>Thanks to the developers of AllenNLP!</p>
+<dl class="py class">
+<dt id="virtex.utils.beam_search.AutoRegressiveBeamSearch">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.utils.beam_search.</code><code class="sig-name descname">AutoRegressiveBeamSearch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">end_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">max_steps</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">beam_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">5</span></em>, <em class="sig-param"><span class="n">per_node_beam_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/beam_search.py#L18-L265"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.beam_search.AutoRegressiveBeamSearch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Implements the beam search algorithm for decoding the most likely captions.
+This only works for auto-regressive models (Transformer-like) and not
+recurrent models (LSTM-like).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>end_index</strong><span class="classifier">int</span></dt><dd><p>The index of the end token (<code class="docutils literal notranslate"><span class="pre">[EOS]</span></code>) in vocabulary.</p>
+</dd>
+<dt><strong>max_steps</strong><span class="classifier">int, optional (default = 50)</span></dt><dd><p>The maximum number of decoding steps.</p>
+</dd>
+<dt><strong>beam_size</strong><span class="classifier">int, optional (default = 5)</span></dt><dd><p>The width of the beam used.</p>
+</dd>
+<dt><strong>per_node_beam_size</strong><span class="classifier">int, optional (default = 2)</span></dt><dd><p>The maximum number of candidates to consider per node, at each step in
+the search. Setting this parameter to a number smaller than <cite>beam_size</cite>
+may give better results, as it can introduce more diversity into the
+search. See <a class="reference external" href="https://arxiv.org/abs/1702.01806">Beam Search Strategies for Neural Machine Translation.
+Freitag and Al-Onaizan, 2017</a>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="virtex.utils.beam_search.AutoRegressiveBeamSearch.search">
+<code class="sig-name descname">search</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">start_predictions</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em>, <em class="sig-param"><span class="n">step</span><span class="p">:</span> <span class="n">Callable[…, torch.Tensor]</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><span class="p">, </span><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><span class="p">]</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/beam_search.py#L52-L265"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.beam_search.AutoRegressiveBeamSearch.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a starting state and a step function, apply beam search to find
+the most likely target captions.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If your step function returns <code class="docutils literal notranslate"><span class="pre">-inf</span></code> for some log probs
+(like if you’re using a masked log-softmax) then some of the “best”
+captions returned may have <code class="docutils literal notranslate"><span class="pre">-inf</span></code> log probability. Specifically
+this happens when the beam size is smaller than the number of actions
+with finite log probability (non-zero probability) returned by the
+step function. Therefore if you’re using a mask you may want to
+check the results from <code class="docutils literal notranslate"><span class="pre">search</span></code> and potentially discard captions
+with non-finite log probability.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>start_predictions</strong><span class="classifier">torch.Tensor</span></dt><dd><p>Tensor containing the initial predictions, shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">)</span></code>.
+Usually the initial predictions are just the index of the start
+token (<code class="docutils literal notranslate"><span class="pre">[SOS]</span></code>) in the vocabulary.</p>
+</dd>
+<dt><strong>step</strong><span class="classifier">Callable[…, torch.Tensor]</span></dt><dd><p>A function that is responsible for computing the next most likely
+tokens, given the past predictions. Predictions from all previous
+time-steps are required, not just the last time-step, because our
+model is auto-regressive instead of recurrent.  The function should
+The function is expected to return a tensor of shape
+<code class="docutils literal notranslate"><span class="pre">(group_size,</span> <span class="pre">target_vocab_size)</span></code> containing
+the log probs of the tokens for the next step.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>Tuple[torch.Tensor, torch.Tensor]</dt><dd><p>Tuple of <code class="docutils literal notranslate"><span class="pre">(predictions,</span> <span class="pre">log_probs)</span></code>, where <code class="docutils literal notranslate"><span class="pre">predictions</span></code>
+has shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">beam_size,</span> <span class="pre">max_steps)</span></code> and <code class="docutils literal notranslate"><span class="pre">log_probs</span></code>
+has shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">beam_size)</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">virtex</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="factories.html">virtex.factories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">virtex.modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optim.html">virtex.optim</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="utils.html">virtex.utils</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="utils.common.html">virtex.utils.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.distributed.html">virtex.utils.distributed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.timer.html">virtex.utils.timer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.checkpointing.html">virtex.utils.checkpointing</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">virtex.utils.beam_search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.metrics.html">virtex.utils.metrics</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="utils.html">virtex.utils</a><ul>
+      <li>Previous: <a href="utils.checkpointing.html" title="previous chapter">virtex.utils.checkpointing</a></li>
+      <li>Next: <a href="utils.metrics.html" title="next chapter">virtex.utils.metrics</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Karan Desai and Justin Johnson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/virtex/utils.beam_search.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

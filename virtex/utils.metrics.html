@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120523111-2"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-120523111-2');
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+
+
+    <title>virtex.utils.metrics &#8212; virtex 0.9 documentation</title>
+
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="virtex.utils.beam_search" href="utils.beam_search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-virtex.utils.metrics">
+<span id="virtex-utils-metrics"></span><h1>virtex.utils.metrics<a class="headerlink" href="#module-virtex.utils.metrics" title="Permalink to this headline">¶</a></h1>
+<p>This module is a collection of metrics commonly used during pretraining and
+downstream evaluation. Two main classes here are:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#virtex.utils.metrics.TopkAccuracy" title="virtex.utils.metrics.TopkAccuracy"><code class="xref py py-class docutils literal notranslate"><span class="pre">TopkAccuracy</span></code></a> used for ImageNet linear classification evaluation.</p></li>
+<li><p><a class="reference internal" href="#virtex.utils.metrics.CocoCaptionsEvaluator" title="virtex.utils.metrics.CocoCaptionsEvaluator"><code class="xref py py-class docutils literal notranslate"><span class="pre">CocoCaptionsEvaluator</span></code></a> used for caption evaluation (CIDEr and SPICE).</p></li>
+</ul>
+<p>Parts of this module (<a class="reference internal" href="#virtex.utils.metrics.tokenize" title="virtex.utils.metrics.tokenize"><code class="xref py py-meth docutils literal notranslate"><span class="pre">tokenize()</span></code></a>, <a class="reference internal" href="#virtex.utils.metrics.cider" title="virtex.utils.metrics.cider"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cider()</span></code></a> and <a class="reference internal" href="#virtex.utils.metrics.spice" title="virtex.utils.metrics.spice"><code class="xref py py-meth docutils literal notranslate"><span class="pre">spice()</span></code></a>) are
+adopted from <a class="reference external" href="https://github.com/tylin/coco-caption">coco-captions evaluation code</a>.</p>
+<dl class="py class">
+<dt id="virtex.utils.metrics.TopkAccuracy">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.utils.metrics.</code><code class="sig-name descname">TopkAccuracy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">top_k</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/metrics.py#L22-L79"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.metrics.TopkAccuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An accumulator for Top-K classification accuracy. This accumulates per-batch
+accuracy during training/validation, which can retrieved at the end. Assumes
+integer labels and predictions.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If used in <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.parallel.DistributedDataParallel" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">DistributedDataParallel</span></code></a>, results
+need to be aggregated across GPU processes outside this class.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>top_k: int, optional (default = 1)</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">k</span></code> for computing Top-K accuracy.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="virtex.utils.metrics.TopkAccuracy.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/metrics.py#L43-L46"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.metrics.TopkAccuracy.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset counters; to be used at the start of new epoch/validation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="virtex.utils.metrics.TopkAccuracy.get_metric">
+<code class="sig-name descname">get_metric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">reset</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/metrics.py#L71-L79"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.metrics.TopkAccuracy.get_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get accumulated accuracy so far (and optionally reset counters).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.utils.metrics.CocoCaptionsEvaluator">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.utils.metrics.</code><code class="sig-name descname">CocoCaptionsEvaluator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">gt_annotations_path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/metrics.py#L82-L135"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.metrics.CocoCaptionsEvaluator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A helper class to evaluate caption predictions in COCO format. This uses
+<a class="reference internal" href="#virtex.utils.metrics.cider" title="virtex.utils.metrics.cider"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cider()</span></code></a> and <a class="reference internal" href="#virtex.utils.metrics.spice" title="virtex.utils.metrics.spice"><code class="xref py py-meth docutils literal notranslate"><span class="pre">spice()</span></code></a> which exactly follow original COCO Captions
+evaluation protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>gt_annotations_path: str</strong></dt><dd><p>Path to ground truth annotations in COCO format (typically this would
+be COCO Captions <code class="docutils literal notranslate"><span class="pre">val2017</span></code> split).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="virtex.utils.metrics.CocoCaptionsEvaluator.evaluate">
+<code class="sig-name descname">evaluate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">preds</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>float<span class="p">]</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/metrics.py#L104-L135"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.metrics.CocoCaptionsEvaluator.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute CIDEr and SPICE scores for predictions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>preds: List[Dict[str, Any]]</strong></dt><dd><p>List of per instance predictions in COCO Captions format:
+<code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">{&quot;image_id&quot;:</span> <span class="pre">int,</span> <span class="pre">&quot;caption&quot;:</span> <span class="pre">str}</span> <span class="pre">...]</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>Dict[str, float]</dt><dd><p>Computed metrics; a dict with keys <code class="docutils literal notranslate"><span class="pre">{&quot;CIDEr&quot;,</span> <span class="pre">&quot;SPICE&quot;}</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="virtex.utils.metrics.tokenize">
+<code class="sig-prename descclassname">virtex.utils.metrics.</code><code class="sig-name descname">tokenize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image_id_to_captions</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>int<span class="p">, </span>List<span class="p">[</span>str<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>int<span class="p">, </span>List<span class="p">[</span>str<span class="p">]</span><span class="p">]</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/metrics.py#L138-L187"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.metrics.tokenize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a mapping of image id to a list of corrsponding captions, tokenize
+captions in place according to Penn Treebank Tokenizer. This method assumes
+the presence of Stanford CoreNLP JAR file in directory of this module.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="virtex.utils.metrics.cider">
+<code class="sig-prename descclassname">virtex.utils.metrics.</code><code class="sig-name descname">cider</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">predictions</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>int<span class="p">, </span>List<span class="p">[</span>str<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">ground_truth</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>int<span class="p">, </span>List<span class="p">[</span>str<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">n</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">4</span></em>, <em class="sig-param"><span class="n">sigma</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">6.0</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/metrics.py#L190-L277"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.metrics.cider" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute CIDEr score given ground truth captions and predictions.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="virtex.utils.metrics.spice">
+<code class="sig-prename descclassname">virtex.utils.metrics.</code><code class="sig-name descname">spice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">predictions</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>int<span class="p">, </span>List<span class="p">[</span>str<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">ground_truth</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>int<span class="p">, </span>List<span class="p">[</span>str<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/utils/metrics.py#L280-L319"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.utils.metrics.spice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute SPICE score given ground truth captions and predictions.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">virtex</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="factories.html">virtex.factories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">virtex.modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optim.html">virtex.optim</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="utils.html">virtex.utils</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="utils.common.html">virtex.utils.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.distributed.html">virtex.utils.distributed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.timer.html">virtex.utils.timer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.checkpointing.html">virtex.utils.checkpointing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.beam_search.html">virtex.utils.beam_search</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">virtex.utils.metrics</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="utils.html">virtex.utils</a><ul>
+      <li>Previous: <a href="utils.beam_search.html" title="previous chapter">virtex.utils.beam_search</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Karan Desai and Justin Johnson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/virtex/utils.metrics.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

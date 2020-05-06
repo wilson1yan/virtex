@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120523111-2"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-120523111-2');
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+
+
+    <title>virtex.modules.visual_backbones &#8212; virtex 0.9 documentation</title>
+
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="virtex.modules.textual_heads" href="modules.textual_heads.html" />
+    <link rel="prev" title="virtex.modules.embedding" href="modules.embedding.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-virtex.modules.visual_backbones">
+<span id="virtex-modules-visual-backbones"></span><h1>virtex.modules.visual_backbones<a class="headerlink" href="#module-virtex.modules.visual_backbones" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="virtex.modules.visual_backbones.VisualBackbone">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.modules.visual_backbones.</code><code class="sig-name descname">VisualBackbone</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">visual_feature_size</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L8-L25"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.VisualBackbone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
+<p>Base class for all visual backbones. All child classes can simply inherit
+from <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Module" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>, however this is kept here for uniform
+type annotations.</p>
+<dl class="py method">
+<dt id="virtex.modules.visual_backbones.VisualBackbone.visual_feature_size">
+<em class="property">property </em><code class="sig-name descname">visual_feature_size</code><a class="headerlink" href="#virtex.modules.visual_backbones.VisualBackbone.visual_feature_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of the channel dimension of output from forward pass. This
+property is used to create layers (heads) on top of this backbone.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.modules.visual_backbones.BlindVisualBackbone">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.modules.visual_backbones.</code><code class="sig-name descname">BlindVisualBackbone</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">visual_feature_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2048</span></em>, <em class="sig-param"><span class="n">bias_value</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L28-L69"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.BlindVisualBackbone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#virtex.modules.visual_backbones.VisualBackbone" title="virtex.modules.visual_backbones.VisualBackbone"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.modules.visual_backbones.VisualBackbone</span></code></a></p>
+<p>A visual backbone which cannot see the image. It always outputs a tensor
+filled with constant value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>visual_feature_size: int, optional (default = 2048)</strong></dt><dd><p>Size of the last dimension (channels) of output from forward pass.</p>
+</dd>
+<dt><strong>bias_value: float, optional (default = 1.0)</strong></dt><dd><p>Constant value to fill in the output tensor.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="virtex.modules.visual_backbones.BlindVisualBackbone.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">image</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L51-L69"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.BlindVisualBackbone.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute visual features for a batch of input images. Since this model
+is <em>blind</em>, output will always be constant.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>image: torch.Tensor</strong></dt><dd><p>Batch of input images. A tensor of shape
+<code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">3,</span> <span class="pre">height,</span> <span class="pre">width)</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>torch.Tensor</dt><dd><p>Output visual features, filled with <code class="xref py py-attr docutils literal notranslate"><span class="pre">bias_value</span></code>. A tensor of
+shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">visual_feature_size)</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.modules.visual_backbones.TorchvisionVisualBackbone">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.modules.visual_backbones.</code><code class="sig-name descname">TorchvisionVisualBackbone</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'resnet50'</span></em>, <em class="sig-param"><span class="n">visual_feature_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2048</span></em>, <em class="sig-param"><span class="n">pretrained</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">frozen</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L72-L207"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.TorchvisionVisualBackbone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#virtex.modules.visual_backbones.VisualBackbone" title="virtex.modules.visual_backbones.VisualBackbone"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.modules.visual_backbones.VisualBackbone</span></code></a></p>
+<p>A visual backbone from <a class="reference external" href="https://pytorch.org/docs/stable/torchvision/models.html">Torchvision model zoo</a>. Any model can
+be specified using corresponding method name from the model zoo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>name: str, optional (default = “resnet50”)</strong></dt><dd><p>Name of the model from Torchvision model zoo.</p>
+</dd>
+<dt><strong>visual_feature_size: int, optional (default = 2048)</strong></dt><dd><p>Size of the last dimension (channels) of output from forward pass.</p>
+</dd>
+<dt><strong>pretrained: bool, optional (default = False)</strong></dt><dd><p>Whether to load ImageNet pretrained weights from Torchvision.</p>
+</dd>
+<dt><strong>frozen: float, optional (default = False)</strong></dt><dd><p>Whether to keep all weights frozen during training.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="virtex.modules.visual_backbones.TorchvisionVisualBackbone.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">image</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em>, <em class="sig-param"><span class="n">return_intermediate_outputs</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Union<span class="p">[</span><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><span class="p">, </span>Dict<span class="p">[</span>str<span class="p">, </span><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><span class="p">]</span><span class="p">]</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L114-L159"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.TorchvisionVisualBackbone.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute visual features for a batch of input images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>image: torch.Tensor</strong></dt><dd><p>Batch of input images. A tensor of shape
+<code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">3,</span> <span class="pre">height,</span> <span class="pre">width)</span></code>.</p>
+</dd>
+<dt><strong>return_intermediate_outputs: bool, optional (default = False)</strong></dt><dd><p>Whether to return feaures extracted from all intermediate stages or
+just the last one. This can only be set <code class="docutils literal notranslate"><span class="pre">True</span></code> when using a
+ResNet-like model.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>Union[torch.Tensor, Dict[str, torch.Tensor]]</dt><dd><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">return_intermediate_outputs</span> <span class="pre">=</span> <span class="pre">False</span></code>, this will be a tensor
+of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">visual_feature_size,</span> <span class="pre">*)</span></code>, for example
+it will be <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">2048,</span> <span class="pre">7,</span> <span class="pre">7)</span></code> for ResNet-50 (<code class="docutils literal notranslate"><span class="pre">layer4</span></code>).</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">return_intermediate_outputs</span> <span class="pre">=</span> <span class="pre">True</span></code>, this will be a dict
+with keys <code class="docutils literal notranslate"><span class="pre">{&quot;layer1&quot;,</span> <span class="pre">&quot;layer2&quot;,</span> <span class="pre">&quot;layer3&quot;,</span> <span class="pre">&quot;layer4&quot;,</span> <span class="pre">&quot;avgpool&quot;}</span></code>
+containing features from all intermediate layers and global
+average pooling layer.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="virtex.modules.visual_backbones.TorchvisionVisualBackbone.detectron2_backbone_state_dict">
+<code class="sig-name descname">detectron2_backbone_state_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L161-L207"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.TorchvisionVisualBackbone.detectron2_backbone_state_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return state dict of visual backbone which can be loaded with
+<a class="reference external" href="https://github.com/facebookresearch/detectron2">Detectron2</a>.
+This is useful for downstream tasks based on Detectron2 (such as
+object detection and instance segmentation). This method renames
+certain parameters from Torchvision-style to Detectron2-style.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>Dict[str, Any]</dt><dd><p>A dict with three keys: <code class="docutils literal notranslate"><span class="pre">{&quot;model&quot;,</span> <span class="pre">&quot;author&quot;,</span> <span class="pre">&quot;matching_heuristics&quot;}</span></code>.
+These are necessary keys for loading this state dict properly with
+Detectron2.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">virtex</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="factories.html">virtex.factories</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">virtex.modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="modules.embedding.html">virtex.modules.embedding</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">virtex.modules.visual_backbones</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.textual_heads.html">virtex.modules.textual_heads</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="optim.html">virtex.optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">virtex.utils</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">virtex.modules</a><ul>
+      <li>Previous: <a href="modules.embedding.html" title="previous chapter">virtex.modules.embedding</a></li>
+      <li>Next: <a href="modules.textual_heads.html" title="next chapter">virtex.modules.textual_heads</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Karan Desai and Justin Johnson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/virtex/modules.visual_backbones.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
