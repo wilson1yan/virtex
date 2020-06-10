@@ -4,6 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120523111-2"></script>
@@ -28,7 +29,7 @@
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/language_data.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="virtex.optim" href="optim.html" />
@@ -49,15 +50,34 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="module-virtex.modules.textual_heads">
-<span id="virtex-modules-textual-heads"></span><h1>virtex.modules.textual_heads<a class="headerlink" href="#module-virtex.modules.textual_heads" title="Permalink to this headline">¶</a></h1>
-<dl class="py class">
+  <div class="section" id="virtex-modules-textual-heads">
+<h1>virtex.modules.textual_heads<a class="headerlink" href="#virtex-modules-textual-heads" title="Permalink to this headline">¶</a></h1>
+<hr><span class="target" id="module-virtex.modules.textual_heads"></span><dl class="py class">
 <dt id="virtex.modules.textual_heads.TextualHead">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.modules.textual_heads.</code><code class="sig-name descname">TextualHead</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vocab_size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">hidden_size</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/textual_heads.py#L10-L30"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.textual_heads.TextualHead" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.modules.textual_heads.</code><code class="sig-name descname">TextualHead</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vocab_size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">hidden_size</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/textual_heads.py#L8-L30"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.textual_heads.TextualHead" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
+<p>Base class for all textual heads. All child classes can simply inherit
+from <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Module" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>, however this is kept here for uniform
+type annotations.</p>
 <dl class="py method">
-<dt id="virtex.modules.textual_heads.TextualHead.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">caption_tokens</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em>, <em class="sig-param"><span class="n">caption_lengths</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em>, <em class="sig-param"><span class="n">visual_features</span><span class="p">:</span> <span class="n">Union<span class="p">[</span><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><span class="p">, </span>NoneType<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/textual_heads.py#L24-L30"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.textual_heads.TextualHead.forward" title="Permalink to this definition">¶</a></dt>
+<dt id="virtex.modules.textual_heads.TextualHead.textual_feature_size">
+<em class="property">property </em><code class="sig-name descname">textual_feature_size</code><a class="headerlink" href="#virtex.modules.textual_heads.TextualHead.textual_feature_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of the last dimension of output from forward pass; typically same
+as <code class="xref py py-attr docutils literal notranslate"><span class="pre">hidden_size</span></code> for most modules. This property is used to add
+more modules on top of this.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.modules.textual_heads.LinearTextualHead">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.modules.textual_heads.</code><code class="sig-name descname">LinearTextualHead</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vocab_size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">hidden_size</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/textual_heads.py#L33-L55"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.textual_heads.LinearTextualHead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#virtex.modules.textual_heads.TextualHead" title="virtex.modules.textual_heads.TextualHead"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.modules.textual_heads.TextualHead</span></code></a></p>
+<p>Textual head containing a single linear layer projecting from textual
+feature size to output vocabulary size.</p>
+<dl class="py method">
+<dt id="virtex.modules.textual_heads.LinearTextualHead.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">caption_tokens</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em>, <em class="sig-param"><span class="n">caption_lengths</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em>, <em class="sig-param"><span class="n">visual_features</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/textual_heads.py#L47-L55"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.textual_heads.LinearTextualHead.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -73,17 +93,17 @@ registered hooks while the latter silently ignores them.</p>
 
 <dl class="py class">
 <dt id="virtex.modules.textual_heads.TransformerTextualHead">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.modules.textual_heads.</code><code class="sig-name descname">TransformerTextualHead</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vocab_size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">hidden_size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">num_layers</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">attention_heads</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">feedforward_size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">dropout</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">norm_type</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'pre'</span></em>, <em class="sig-param"><span class="n">padding_idx</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">max_caption_length</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">30</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/textual_heads.py#L33-L145"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.textual_heads.TransformerTextualHead" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.modules.textual_heads.</code><code class="sig-name descname">TransformerTextualHead</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vocab_size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">hidden_size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">num_layers</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">attention_heads</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">feedforward_size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">dropout</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">norm_type</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'pre'</span></em>, <em class="sig-param"><span class="n">padding_idx</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">max_caption_length</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">30</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/textual_heads.py#L58-L178"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.textual_heads.TransformerTextualHead" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#virtex.modules.textual_heads.TextualHead" title="virtex.modules.textual_heads.TextualHead"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.modules.textual_heads.TextualHead</span></code></a></p>
 <dl class="py method">
 <dt id="virtex.modules.textual_heads.TransformerTextualHead._init_weights">
-<em class="property">static </em><code class="sig-name descname">_init_weights</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">module</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/textual_heads.py#L77-L89"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.textual_heads.TransformerTextualHead._init_weights" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">_init_weights</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">module</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/textual_heads.py#L107-L119"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.textual_heads.TransformerTextualHead._init_weights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize weights like BERT - N(0.0, 0.02), bias = 0.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="virtex.modules.textual_heads.TransformerTextualHead.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">caption_tokens</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em>, <em class="sig-param"><span class="n">caption_lengths</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em>, <em class="sig-param"><span class="n">visual_features</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/textual_heads.py#L91-L127"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.textual_heads.TransformerTextualHead.forward" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">caption_tokens</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em>, <em class="sig-param"><span class="n">caption_lengths</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em>, <em class="sig-param"><span class="n">visual_features</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/textual_heads.py#L121-L160"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.textual_heads.TransformerTextualHead.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -97,7 +117,7 @@ registered hooks while the latter silently ignores them.</p>
 
 <dl class="py method">
 <dt id="virtex.modules.textual_heads.TransformerTextualHead._generate_future_mask">
-<code class="sig-name descname">_generate_future_mask</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">dtype</span><span class="p">:</span> <span class="n">torch.dtype</span></em>, <em class="sig-param"><span class="n">device</span><span class="p">:</span> <span class="n">torch.device</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/textual_heads.py#L129-L145"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.textual_heads.TransformerTextualHead._generate_future_mask" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">_generate_future_mask</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">dtype</span><span class="p">:</span> <span class="n">torch.dtype</span></em>, <em class="sig-param"><span class="n">device</span><span class="p">:</span> <span class="n">torch.device</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/textual_heads.py#L162-L178"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.textual_heads.TransformerTextualHead._generate_future_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a mask for “future” positions, useful when using this module
 for language modeling.</p>
 <dl class="field-list simple">
@@ -130,9 +150,14 @@ for language modeling.</p>
 
 
 <h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/setup_dependencies.html">How to setup this codebase?</a></li>
+</ul>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>
 <li class="toctree-l1"><a class="reference internal" href="factories.html">virtex.factories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">virtex.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">virtex.models</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">virtex.modules</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="modules.embedding.html">virtex.modules.embedding</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules.visual_backbones.html">virtex.modules.visual_backbones</a></li>
@@ -180,7 +205,7 @@ for language modeling.</p>
       &copy;2020, Karan Desai and Justin Johnson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120523111-2"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-120523111-2');
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+
+
+    <title>virtex.data.structures &#8212; virtex 0.9 documentation</title>
+
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="virtex.data.readers" href="data.readers.html" />
+    <link rel="prev" title="virtex.data" href="data.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="virtex-data-structures">
+<h1>virtex.data.structures<a class="headerlink" href="#virtex-data-structures" title="Permalink to this headline">¶</a></h1>
+<hr><span class="target" id="module-virtex.data.structures"></span><dl class="py class">
+<dt id="virtex.data.structures.Instance">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.structures.</code><code class="sig-name descname">Instance</code><span class="sig-paren">(</span><em class="sig-param">) -&gt; new empty dictionary dict(mapping) -&gt; new dictionary initialized from a mapping object's (key</em>, <em class="sig-param">value) pairs dict(iterable) -&gt; new dictionary initialized as if via: d = {} for k</em>, <em class="sig-param">v in iterable: d[k] = v dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs in the keyword argument list.  For example:  dict(one=1</em>, <em class="sig-param">two=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/structures.py#L7-L39"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.structures.Instance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.data.structures.Batch">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.structures.</code><code class="sig-name descname">Batch</code><span class="sig-paren">(</span><em class="sig-param">) -&gt; new empty dictionary dict(mapping) -&gt; new dictionary initialized from a mapping object's (key</em>, <em class="sig-param">value) pairs dict(iterable) -&gt; new dictionary initialized as if via: d = {} for k</em>, <em class="sig-param">v in iterable: d[k] = v dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs in the keyword argument list.  For example:  dict(one=1</em>, <em class="sig-param">two=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/structures.py#L42-L68"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.structures.Batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.data.structures.ImageCaptionInstance">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.structures.</code><code class="sig-name descname">ImageCaptionInstance</code><span class="sig-paren">(</span><em class="sig-param">) -&gt; new empty dictionary dict(mapping) -&gt; new dictionary initialized from a mapping object's (key</em>, <em class="sig-param">value) pairs dict(iterable) -&gt; new dictionary initialized as if via: d = {} for k</em>, <em class="sig-param">v in iterable: d[k] = v dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs in the keyword argument list.  For example:  dict(one=1</em>, <em class="sig-param">two=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/structures.py#L71-L90"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.structures.ImageCaptionInstance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#virtex.data.structures.Instance" title="virtex.data.structures.Instance"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.data.structures.Instance</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.data.structures.ImageCaptionBatch">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.structures.</code><code class="sig-name descname">ImageCaptionBatch</code><span class="sig-paren">(</span><em class="sig-param">) -&gt; new empty dictionary dict(mapping) -&gt; new dictionary initialized from a mapping object's (key</em>, <em class="sig-param">value) pairs dict(iterable) -&gt; new dictionary initialized as if via: d = {} for k</em>, <em class="sig-param">v in iterable: d[k] = v dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs in the keyword argument list.  For example:  dict(one=1</em>, <em class="sig-param">two=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/structures.py#L93-L138"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.structures.ImageCaptionBatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#virtex.data.structures.Batch" title="virtex.data.structures.Batch"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.data.structures.Batch</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.data.structures.LinearClassificationInstance">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.structures.</code><code class="sig-name descname">LinearClassificationInstance</code><span class="sig-paren">(</span><em class="sig-param">) -&gt; new empty dictionary dict(mapping) -&gt; new dictionary initialized from a mapping object's (key</em>, <em class="sig-param">value) pairs dict(iterable) -&gt; new dictionary initialized as if via: d = {} for k</em>, <em class="sig-param">v in iterable: d[k] = v dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs in the keyword argument list.  For example:  dict(one=1</em>, <em class="sig-param">two=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/structures.py#L141-L149"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.structures.LinearClassificationInstance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#virtex.data.structures.Instance" title="virtex.data.structures.Instance"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.data.structures.Instance</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.data.structures.LinearClassificationBatch">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.structures.</code><code class="sig-name descname">LinearClassificationBatch</code><span class="sig-paren">(</span><em class="sig-param">) -&gt; new empty dictionary dict(mapping) -&gt; new dictionary initialized from a mapping object's (key</em>, <em class="sig-param">value) pairs dict(iterable) -&gt; new dictionary initialized as if via: d = {} for k</em>, <em class="sig-param">v in iterable: d[k] = v dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs in the keyword argument list.  For example:  dict(one=1</em>, <em class="sig-param">two=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/structures.py#L152-L161"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.structures.LinearClassificationBatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#virtex.data.structures.Batch" title="virtex.data.structures.Batch"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.data.structures.Batch</span></code></a></p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">virtex</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/setup_dependencies.html">How to setup this codebase?</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="factories.html">virtex.factories</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="data.html">virtex.data</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">virtex.data.structures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.readers.html">virtex.data.readers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.datasets.html">virtex.data.datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.tokenizers.html">virtex.data.tokenizers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.transforms.html">virtex.data.transforms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">virtex.models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">virtex.modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optim.html">virtex.optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">virtex.utils</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="data.html">virtex.data</a><ul>
+      <li>Previous: <a href="data.html" title="previous chapter">virtex.data</a></li>
+      <li>Next: <a href="data.readers.html" title="next chapter">virtex.data.readers</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Karan Desai and Justin Johnson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/virtex/data.structures.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

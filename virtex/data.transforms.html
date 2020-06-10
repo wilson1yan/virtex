@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120523111-2"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-120523111-2');
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+
+
+    <title>virtex.data.transforms &#8212; virtex 0.9 documentation</title>
+
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="virtex.models" href="models.html" />
+    <link rel="prev" title="virtex.data.tokenizers" href="data.tokenizers.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="virtex-data-transforms">
+<h1>virtex.data.transforms<a class="headerlink" href="#virtex-data-transforms" title="Permalink to this headline">¶</a></h1>
+<hr><span class="target" id="module-virtex.data.transforms"></span><dl class="py class">
+<dt id="virtex.data.transforms.CaptionOnlyTransform">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.transforms.</code><code class="sig-name descname">CaptionOnlyTransform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">always_apply</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">p</span><span class="o">=</span><span class="default_value">0.5</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/transforms.py#L11-L29"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.transforms.CaptionOnlyTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">albumentations.core.transforms_interface.BasicTransform</span></code></p>
+<p>Transforms in <strong>albumentations</strong> are mainly suited for images (and bbox,
+keypoints etc.) We extend the basic functionality to also transform captions.
+Captions may be <code class="docutils literal notranslate"><span class="pre">str</span></code>, or tokens (<code class="docutils literal notranslate"><span class="pre">List[int]</span></code>) as per implementation
+of <code class="xref py py-meth docutils literal notranslate"><span class="pre">apply_to_caption()</span></code>. These transforms will have consistent API as
+other transforms from albumentations.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.data.transforms.ImageCaptionTransform">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.transforms.</code><code class="sig-name descname">ImageCaptionTransform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">always_apply</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">p</span><span class="o">=</span><span class="default_value">0.5</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/transforms.py#L32-L43"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.transforms.ImageCaptionTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">albumentations.core.transforms_interface.BasicTransform</span></code></p>
+<p>Similar to <a class="reference internal" href="#virtex.data.transforms.CaptionOnlyTransform" title="virtex.data.transforms.CaptionOnlyTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">CaptionOnlyTransform</span></code></a>, this
+extends super class to work on <code class="docutils literal notranslate"><span class="pre">(image,</span> <span class="pre">caption)</span></code> pair together.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.data.transforms.NormalizeCaption">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.transforms.</code><code class="sig-name descname">NormalizeCaption</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/transforms.py#L46-L65"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.transforms.NormalizeCaption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#virtex.data.transforms.CaptionOnlyTransform" title="virtex.data.transforms.CaptionOnlyTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.data.transforms.CaptionOnlyTransform</span></code></a></p>
+<p>Perform common normalization with caption: lowercase, trim leading and
+trailing whitespaces, NFKD normalization and strip accents.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">normalize</span> <span class="o">=</span> <span class="n">NormalizeCaption</span><span class="p">(</span><span class="n">always_apply</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">caption</span><span class="o">=</span><span class="s2">&quot;Some caption input here.&quot;</span><span class="p">)</span>  <span class="c1"># keys: {&quot;caption&quot;}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.data.transforms.TokenizeCaption">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.transforms.</code><code class="sig-name descname">TokenizeCaption</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tokenizer</span><span class="p">:</span> <span class="n">virtex.data.tokenizers.SentencePieceBPETokenizer</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/transforms.py#L68-L85"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.transforms.TokenizeCaption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#virtex.data.transforms.CaptionOnlyTransform" title="virtex.data.transforms.CaptionOnlyTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.data.transforms.CaptionOnlyTransform</span></code></a></p>
+<p>Tokenize a caption (<code class="docutils literal notranslate"><span class="pre">str</span></code>) to list of tokens (<code class="docutils literal notranslate"><span class="pre">int</span></code>).</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.data.transforms.TruncateCaptionTokens">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.transforms.</code><code class="sig-name descname">TruncateCaptionTokens</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">max_caption_length</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">30</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/transforms.py#L88-L100"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.transforms.TruncateCaptionTokens" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#virtex.data.transforms.CaptionOnlyTransform" title="virtex.data.transforms.CaptionOnlyTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.data.transforms.CaptionOnlyTransform</span></code></a></p>
+<p>Truncate a list of caption tokens (<code class="docutils literal notranslate"><span class="pre">int</span></code>) to maximum length.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.data.transforms.HorizontalFlip">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.transforms.</code><code class="sig-name descname">HorizontalFlip</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">always_apply</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">p</span><span class="o">=</span><span class="default_value">0.5</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/transforms.py#L103-L124"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.transforms.HorizontalFlip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#virtex.data.transforms.ImageCaptionTransform" title="virtex.data.transforms.ImageCaptionTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.data.transforms.ImageCaptionTransform</span></code></a></p>
+<p>Flip the image horizontally randomly (equally likely) and replace the
+word “left” with “right” in the caption. This transform can also work on
+images only (without the captions).</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">flip</span> <span class="o">=</span> <span class="n">ImageCaptionHorizontalFlip</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">flip</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="n">image</span><span class="p">,</span> <span class="n">caption</span><span class="o">=</span><span class="n">caption</span><span class="p">)</span>  <span class="c1"># keys: {&quot;image&quot;, &quot;caption&quot;}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.data.transforms.ColorJitter">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.transforms.</code><code class="sig-name descname">ColorJitter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">brightness</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">contrast</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">saturation</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">hue</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">p</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.5</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/transforms.py#L127-L195"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.transforms.ColorJitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://albumentations.readthedocs.io/en/latest/api/core.html#albumentations.core.transforms_interface.ImageOnlyTransform" title="(in albumentations v0.4.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">albumentations.core.transforms_interface.ImageOnlyTransform</span></code></a></p>
+<p>Randomly change brightness, contrast, hue and saturation of the image. This
+class behaves exactly like <a class="reference external" href="https://pytorch.org/docs/stable/torchvision/transforms.html#torchvision.transforms.ColorJitter" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torchvision.transforms.ColorJitter</span></code></a> but
+is slightly faster (uses OpenCV) and compatible with rest of the transforms
+used here (albumentations-style). This class works only on <code class="docutils literal notranslate"><span class="pre">uint8</span></code> images.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Unlike torchvision variant, this class follows “garbage-in, garbage-out”
+policy and does not check limits for jitter factors. User must ensure
+that <code class="docutils literal notranslate"><span class="pre">brightness</span></code>, <code class="docutils literal notranslate"><span class="pre">contrast</span></code>, <code class="docutils literal notranslate"><span class="pre">saturation</span></code> should be <code class="docutils literal notranslate"><span class="pre">float``s</span>
+<span class="pre">``[0,</span> <span class="pre">1]</span></code> and <code class="docutils literal notranslate"><span class="pre">hue</span></code> should be a <code class="docutils literal notranslate"><span class="pre">float</span></code> in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">0.5]</span></code>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>brightness: float, optional (default = 0)</strong></dt><dd><p>How much to jitter brightness. <code class="docutils literal notranslate"><span class="pre">brightness_factor</span></code> is chosen
+uniformly from <code class="docutils literal notranslate"><span class="pre">[1</span> <span class="pre">-</span> <span class="pre">brightness,</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">brightness]</span></code>.</p>
+</dd>
+<dt><strong>contrast: float, optional (default = 0)</strong></dt><dd><p>How much to jitter contrast. <code class="docutils literal notranslate"><span class="pre">contrast_factor</span></code> is chosen uniformly
+from <code class="docutils literal notranslate"><span class="pre">[1</span> <span class="pre">-</span> <span class="pre">contrast,</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">contrast]</span></code></p>
+</dd>
+<dt><strong>saturation: float, optional (default = 0)</strong></dt><dd><p>How much to jitter saturation. <code class="docutils literal notranslate"><span class="pre">saturation_factor</span></code> is chosen
+uniformly from <code class="docutils literal notranslate"><span class="pre">[1</span> <span class="pre">-</span> <span class="pre">saturation,</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">saturation]</span></code>.</p>
+</dd>
+<dt><strong>hue: float, optional (default = 0)</strong></dt><dd><p>How much to jitter hue. <code class="docutils literal notranslate"><span class="pre">hue_factor</span></code> is chosen uniformly from
+<code class="docutils literal notranslate"><span class="pre">[-hue,</span> <span class="pre">hue]</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.data.transforms.RandomResizedSquareCrop">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.transforms.</code><code class="sig-name descname">RandomResizedSquareCrop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/transforms.py#L198-L205"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.transforms.RandomResizedSquareCrop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://albumentations.readthedocs.io/en/latest/api/augmentations.html#albumentations.augmentations.transforms.RandomResizedCrop" title="(in albumentations v0.4.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">albumentations.augmentations.transforms.RandomResizedCrop</span></code></a></p>
+<p>A variant of <code class="xref py py-class docutils literal notranslate"><span class="pre">albumentations.transforms.RandomResizedCrop</span></code> which
+assumes a square crop (width = height). Everything else is same.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.data.transforms.CenterSquareCrop">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.transforms.</code><code class="sig-name descname">CenterSquareCrop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/transforms.py#L208-L215"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.transforms.CenterSquareCrop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://albumentations.readthedocs.io/en/latest/api/augmentations.html#albumentations.augmentations.transforms.CenterCrop" title="(in albumentations v0.4.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">albumentations.augmentations.transforms.CenterCrop</span></code></a></p>
+<p>A variant of <code class="xref py py-class docutils literal notranslate"><span class="pre">albumentations.transforms.CenterCrop</span></code> which
+assumes a square crop (width = height). Everything else is same.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.data.transforms.SquareResize">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.transforms.</code><code class="sig-name descname">SquareResize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/transforms.py#L218-L225"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.transforms.SquareResize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://albumentations.readthedocs.io/en/latest/api/augmentations.html#albumentations.augmentations.transforms.Resize" title="(in albumentations v0.4.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">albumentations.augmentations.transforms.Resize</span></code></a></p>
+<p>A variant of <code class="xref py py-class docutils literal notranslate"><span class="pre">albumentations.transforms.Resize</span></code> which assumes a
+square resize (width = height). Everything else is same.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="virtex.data.transforms.IMAGENET_COLOR_MEAN">
+<code class="sig-prename descclassname">virtex.data.transforms.</code><code class="sig-name descname">IMAGENET_COLOR_MEAN</code><em class="property"> = (0.485, 0.456, 0.406)</em><a class="headerlink" href="#virtex.data.transforms.IMAGENET_COLOR_MEAN" title="Permalink to this definition">¶</a></dt>
+<dd><p>ImageNet color normalization std in RGB format (values in 0-1).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="virtex.data.transforms.IMAGENET_COLOR_STD">
+<code class="sig-prename descclassname">virtex.data.transforms.</code><code class="sig-name descname">IMAGENET_COLOR_STD</code><em class="property"> = (0.229, 0.224, 0.225)</em><a class="headerlink" href="#virtex.data.transforms.IMAGENET_COLOR_STD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default transform without any data augmentation (during pretraining).</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">virtex</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/setup_dependencies.html">How to setup this codebase?</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="factories.html">virtex.factories</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="data.html">virtex.data</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="data.structures.html">virtex.data.structures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.readers.html">virtex.data.readers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.datasets.html">virtex.data.datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.tokenizers.html">virtex.data.tokenizers</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">virtex.data.transforms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">virtex.models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">virtex.modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optim.html">virtex.optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">virtex.utils</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="data.html">virtex.data</a><ul>
+      <li>Previous: <a href="data.tokenizers.html" title="previous chapter">virtex.data.tokenizers</a></li>
+      <li>Next: <a href="models.html" title="next chapter">virtex.models</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Karan Desai and Justin Johnson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/virtex/data.transforms.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

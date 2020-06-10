@@ -1,0 +1,280 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120523111-2"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-120523111-2');
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+
+
+    <title>How to setup this codebase? &#8212; virtex 0.9 documentation</title>
+
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="How to train your VirTex model?" href="training.html" />
+    <link rel="prev" title="VirTex: Learning Visual Representations from Textual Annotations" href="../../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="how-to-setup-this-codebase">
+<h1>How to setup this codebase?<a class="headerlink" href="#how-to-setup-this-codebase" title="Permalink to this headline">¶</a></h1>
+<hr><p>This codebase requires Python 3.6+ or higher. We recommend using Anaconda or
+Miniconda. We walk through installation and data preprocessing here.</p>
+<div class="section" id="install-dependencies">
+<h2>Install Dependencies<a class="headerlink" href="#install-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>For these steps to install through Anaconda (or Miniconda).</p>
+<ol class="arabic">
+<li><p>Install Anaconda or Miniconda distribution based on Python 3+ from their
+<a class="reference external" href="https://conda.io/docs/user-guide/install/download.html">downloads site</a>.</p></li>
+<li><p>Clone the repository first.</p>
+<blockquote>
+<div><div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://www.github.com/kdexd/virtex
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Create a conda environment and install all the dependencies.</p>
+<blockquote>
+<div><div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> virtex
+conda create -n virtex <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.6
+conda activate virtex
+pip install -r requirements.txt
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Install this codebase as a package in development version.</p>
+<blockquote>
+<div><div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python setup.py develop
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
+<p>Now you can <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">virtex</span></code> from anywhere as long as you have this conda
+environment activated.</p>
+</div>
+<hr class="docutils" />
+<div class="section" id="setup-datasets">
+<h2>Setup Datasets<a class="headerlink" href="#setup-datasets" title="Permalink to this headline">¶</a></h2>
+<p>Datasets are assumed to exist in <code class="docutils literal notranslate"><span class="pre">./datasets</span></code> directory (relative to the
+project root) following the structure specified below. COCO is used for
+pretraining, and rest of the datasets (including COCO) are used for downstream
+tasks. This structure is compatible when using
+<a class="reference external" href="https://github.com/facebookresearch/detectron2">Detectron2</a> for downstream
+tasks.</p>
+<div class="section" id="coco">
+<h3>COCO<a class="headerlink" href="#coco" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">datasets</span><span class="o">/</span><span class="n">coco</span><span class="o">/</span>
+    <span class="n">annotations</span><span class="o">/</span>
+        <span class="n">captions_</span><span class="p">{</span><span class="n">train</span><span class="p">,</span><span class="n">val</span><span class="p">}</span><span class="mf">2017.</span><span class="n">json</span>
+        <span class="n">instances_</span><span class="p">{</span><span class="n">train</span><span class="p">,</span><span class="n">val</span><span class="p">}</span><span class="mf">2017.</span><span class="n">json</span>
+    <span class="n">train2017</span><span class="o">/</span>
+        <span class="c1"># images in train2017 split</span>
+    <span class="n">val2017</span><span class="o">/</span>
+        <span class="c1"># images in val2017 split</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="lvis">
+<h3>LVIS<a class="headerlink" href="#lvis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">datasets</span><span class="o">/</span><span class="n">coco</span><span class="o">/</span>
+    <span class="n">train2017</span><span class="o">/</span>
+    <span class="n">val2017</span><span class="o">/</span>
+<span class="n">datasets</span><span class="o">/</span><span class="n">lvis</span><span class="o">/</span>
+    <span class="n">lvis_v0</span><span class="o">.</span><span class="mi">5</span><span class="n">_</span><span class="p">{</span><span class="n">train</span><span class="p">,</span><span class="n">val</span><span class="p">}</span><span class="o">.</span><span class="n">json</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pascal-voc">
+<h3>PASCAL VOC<a class="headerlink" href="#pascal-voc" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">datasets</span><span class="o">/</span><span class="n">VOC2007</span><span class="o">/</span>
+    <span class="n">Annotations</span><span class="o">/</span>
+    <span class="n">ImageSets</span><span class="o">/</span>
+        <span class="n">Main</span><span class="o">/</span>
+            <span class="n">trainval</span><span class="o">.</span><span class="n">txt</span>
+            <span class="n">test</span><span class="o">.</span><span class="n">txt</span>
+    <span class="n">JPEGImages</span><span class="o">/</span>
+
+<span class="n">datasets</span><span class="o">/</span><span class="n">VOC2012</span><span class="o">/</span>
+    <span class="c1"># Same as VOC2007 above</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="imagenet">
+<h3>ImageNet<a class="headerlink" href="#imagenet" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">datasets</span><span class="o">/</span><span class="n">imagenet</span><span class="o">/</span>
+    <span class="n">train</span><span class="o">/</span>
+        <span class="c1"># One directory per category with images in it</span>
+    <span class="n">val</span><span class="o">/</span>
+        <span class="c1"># One directory per category with images in it</span>
+    <span class="n">ILSVRC2012_devkit_t12</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="inaturalist-2018">
+<h3>iNaturalist 2018<a class="headerlink" href="#inaturalist-2018" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">datasets</span><span class="o">/</span><span class="n">inaturalist</span><span class="o">/</span>
+    <span class="n">train_val2018</span><span class="o">/</span>
+    <span class="n">annotations</span><span class="o">/</span>
+        <span class="n">train2018</span><span class="o">.</span><span class="n">json</span>
+        <span class="n">val2018</span><span class="o">.</span><span class="n">json</span>
+</pre></div>
+</div>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="preprocess-data">
+<h2>Preprocess Data<a class="headerlink" href="#preprocess-data" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p>Build a vocabulary out of COCO Captions <code class="docutils literal notranslate"><span class="pre">train2017</span></code> split.</p>
+<blockquote>
+<div><div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python scripts/preprocess/build_vocabulary.py <span class="se">\</span>
+    --captions datasets/coco/annotations/captions_train2017.json <span class="se">\</span>
+    --vocab-size <span class="m">10000</span> <span class="se">\</span>
+    --output-prefix datasets/vocab/coco_10k <span class="se">\</span>
+    --do-lower-case
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Serialize COCO Captions (<code class="docutils literal notranslate"><span class="pre">train2017</span></code> and <code class="docutils literal notranslate"><span class="pre">val2017</span></code> splits) into LMDB
+files. These are faster for data reading during pretraining.</p>
+<blockquote>
+<div><div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python scripts/preprocess/preprocess_coco.py <span class="se">\</span>
+    --data-root datasets/coco <span class="se">\</span>
+    --split train <span class="se">\</span>
+    --output datasets/serialized/coco_train2017.lmdb
+</pre></div>
+</div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python scripts/preprocess/preprocess_coco.py <span class="se">\</span>
+    --data-root datasets/coco <span class="se">\</span>
+    --split val <span class="se">\</span>
+    --output datasets/serialized/coco_val2017.lmdb
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
+<p>That’s it! You are all set to use this codebase.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">virtex</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">How to setup this codebase?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#install-dependencies">Install Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setup-datasets">Setup Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#preprocess-data">Preprocess Data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="training.html">How to train your VirTex model?</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../config.html">virtex.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../factories.html">virtex.factories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data.html">virtex.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models.html">virtex.models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">virtex.modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../optim.html">virtex.optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils.html">virtex.utils</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../../index.html" title="previous chapter">VirTex: Learning Visual Representations from Textual Annotations</a></li>
+      <li>Next: <a href="training.html" title="next chapter">How to train your VirTex model?</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Karan Desai and Justin Johnson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/virtex/usage/setup_dependencies.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,279 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120523111-2"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-120523111-2');
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+
+
+    <title>virtex.models &#8212; virtex 0.9 documentation</title>
+
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="virtex.modules" href="modules.html" />
+    <link rel="prev" title="virtex.data.transforms" href="data.transforms.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="virtex-models">
+<h1>virtex.models<a class="headerlink" href="#virtex-models" title="Permalink to this headline">¶</a></h1>
+<hr><div class="section" id="module-virtex.models.classification">
+<span id="pretraining-models"></span><h2>Pretraining Models<a class="headerlink" href="#module-virtex.models.classification" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="virtex.models.classification.ClassificationModel">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.models.classification.</code><code class="sig-name descname">ClassificationModel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">visual</span><span class="p">:</span> <span class="n"><a class="reference internal" href="modules.visual_backbones.html#virtex.modules.visual_backbones.VisualBackbone" title="virtex.modules.visual_backbones.VisualBackbone">virtex.modules.visual_backbones.VisualBackbone</a></span></em>, <em class="sig-param"><span class="n">textual</span><span class="p">:</span> <span class="n"><a class="reference internal" href="modules.textual_heads.html#virtex.modules.textual_heads.TextualHead" title="virtex.modules.textual_heads.TextualHead">virtex.modules.textual_heads.TextualHead</a></span></em>, <em class="sig-param"><span class="n">ignore_indices</span><span class="p">:</span> <span class="n">List<span class="p">[</span>int<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/models/classification.py#L13-L78"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.models.classification.ClassificationModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
+<dl class="py method">
+<dt id="virtex.models.classification.ClassificationModel.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">batch</span><span class="p">:</span> <span class="n"><a class="reference internal" href="data.structures.html#virtex.data.structures.Batch" title="virtex.data.structures.Batch">virtex.data.structures.Batch</a></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/models/classification.py#L25-L78"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.models.classification.ClassificationModel.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.models.classification.TokenClassificationModel">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.models.classification.</code><code class="sig-name descname">TokenClassificationModel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">visual</span><span class="p">:</span> <span class="n"><a class="reference internal" href="modules.visual_backbones.html#virtex.modules.visual_backbones.VisualBackbone" title="virtex.modules.visual_backbones.VisualBackbone">virtex.modules.visual_backbones.VisualBackbone</a></span></em>, <em class="sig-param"><span class="n">textual</span><span class="p">:</span> <span class="n"><a class="reference internal" href="modules.textual_heads.html#virtex.modules.textual_heads.TextualHead" title="virtex.modules.textual_heads.TextualHead">virtex.modules.textual_heads.TextualHead</a></span></em>, <em class="sig-param"><span class="n">ignore_indices</span><span class="p">:</span> <span class="n">List<span class="p">[</span>int<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/models/classification.py#L81-L103"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.models.classification.TokenClassificationModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#virtex.models.classification.ClassificationModel" title="virtex.models.classification.ClassificationModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.models.classification.ClassificationModel</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.models.classification.MultiLabelClassificationModel">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.models.classification.</code><code class="sig-name descname">MultiLabelClassificationModel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">visual</span><span class="p">:</span> <span class="n"><a class="reference internal" href="modules.visual_backbones.html#virtex.modules.visual_backbones.VisualBackbone" title="virtex.modules.visual_backbones.VisualBackbone">virtex.modules.visual_backbones.VisualBackbone</a></span></em>, <em class="sig-param"><span class="n">textual</span><span class="p">:</span> <span class="n"><a class="reference internal" href="modules.textual_heads.html#virtex.modules.textual_heads.TextualHead" title="virtex.modules.textual_heads.TextualHead">virtex.modules.textual_heads.TextualHead</a></span></em>, <em class="sig-param"><span class="n">ignore_indices</span><span class="p">:</span> <span class="n">List<span class="p">[</span>int<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/models/classification.py#L106-L128"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.models.classification.MultiLabelClassificationModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#virtex.models.classification.ClassificationModel" title="virtex.models.classification.ClassificationModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.models.classification.ClassificationModel</span></code></a></p>
+</dd></dl>
+
+<span class="target" id="module-virtex.models.captioning"></span><dl class="py class">
+<dt id="virtex.models.captioning.CaptioningModel">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.models.captioning.</code><code class="sig-name descname">CaptioningModel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">visual</span><span class="p">:</span> <span class="n"><a class="reference internal" href="modules.visual_backbones.html#virtex.modules.visual_backbones.VisualBackbone" title="virtex.modules.visual_backbones.VisualBackbone">virtex.modules.visual_backbones.VisualBackbone</a></span></em>, <em class="sig-param"><span class="n">textual</span><span class="p">:</span> <span class="n"><a class="reference internal" href="modules.textual_heads.html#virtex.modules.textual_heads.TextualHead" title="virtex.modules.textual_heads.TextualHead">virtex.modules.textual_heads.TextualHead</a></span></em>, <em class="sig-param"><span class="n">beam_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">5</span></em>, <em class="sig-param"><span class="n">max_decoding_steps</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">30</span></em>, <em class="sig-param"><span class="n">sos_index</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">eos_index</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2</span></em>, <em class="sig-param"><span class="n">caption_backward</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/models/captioning.py#L16-L206"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.models.captioning.CaptioningModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
+<dl class="py method">
+<dt id="virtex.models.captioning.CaptioningModel.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">batch</span><span class="p">:</span> <span class="n"><a class="reference internal" href="data.structures.html#virtex.data.structures.Batch" title="virtex.data.structures.Batch">virtex.data.structures.Batch</a></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/models/captioning.py#L52-L123"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.models.captioning.CaptioningModel.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="virtex.models.captioning.CaptioningModel.beam_search_step">
+<code class="sig-name descname">beam_search_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">projected_visual_features</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em>, <em class="sig-param"><span class="n">partial_captions</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/models/captioning.py#L125-L188"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.models.captioning.CaptioningModel.beam_search_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given visual features and a batch of (assumed) partial captions, predict
+the distribution over vocabulary tokens for next time-step. This method
+is used by <a class="reference internal" href="utils.beam_search.html#virtex.utils.beam_search.AutoRegressiveBeamSearch" title="virtex.utils.beam_search.AutoRegressiveBeamSearch"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoRegressiveBeamSearch</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>projected_visual_features: torch.Tensor</strong></dt><dd><p>A tensor of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">...,</span> <span class="pre">textual_feature_size)</span></code>
+with visual features already projected to <code class="docutils literal notranslate"><span class="pre">textual_feature_size</span></code>.</p>
+</dd>
+<dt><strong>partial_captions: torch.Tensor</strong></dt><dd><p>A tensor of shape <code class="docutils literal notranslate"><span class="pre">(batch_size</span> <span class="pre">*</span> <span class="pre">beam_size,</span> <span class="pre">timesteps)</span></code>
+containing tokens predicted so far – one for each beam. We need all
+prior predictions because our model is auto-regressive.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>torch.Tensor</dt><dd><p>A tensor of shape <code class="docutils literal notranslate"><span class="pre">(batch_size</span> <span class="pre">*</span> <span class="pre">beam_size,</span> <span class="pre">vocab_size)</span></code> – output
+distribution over tokens for next time-step.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.models.captioning.ForwardCaptioningModel">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.models.captioning.</code><code class="sig-name descname">ForwardCaptioningModel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">visual</span><span class="p">:</span> <span class="n"><a class="reference internal" href="modules.visual_backbones.html#virtex.modules.visual_backbones.VisualBackbone" title="virtex.modules.visual_backbones.VisualBackbone">virtex.modules.visual_backbones.VisualBackbone</a></span></em>, <em class="sig-param"><span class="n">textual</span><span class="p">:</span> <span class="n"><a class="reference internal" href="modules.textual_heads.html#virtex.modules.textual_heads.TextualHead" title="virtex.modules.textual_heads.TextualHead">virtex.modules.textual_heads.TextualHead</a></span></em>, <em class="sig-param"><span class="n">beam_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">5</span></em>, <em class="sig-param"><span class="n">max_decoding_steps</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">30</span></em>, <em class="sig-param"><span class="n">sos_index</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">eos_index</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/models/captioning.py#L209-L227"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.models.captioning.ForwardCaptioningModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#virtex.models.captioning.CaptioningModel" title="virtex.models.captioning.CaptioningModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.models.captioning.CaptioningModel</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.models.captioning.BidirectionalCaptioningModel">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.models.captioning.</code><code class="sig-name descname">BidirectionalCaptioningModel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">visual</span><span class="p">:</span> <span class="n"><a class="reference internal" href="modules.visual_backbones.html#virtex.modules.visual_backbones.VisualBackbone" title="virtex.modules.visual_backbones.VisualBackbone">virtex.modules.visual_backbones.VisualBackbone</a></span></em>, <em class="sig-param"><span class="n">textual</span><span class="p">:</span> <span class="n"><a class="reference internal" href="modules.textual_heads.html#virtex.modules.textual_heads.TextualHead" title="virtex.modules.textual_heads.TextualHead">virtex.modules.textual_heads.TextualHead</a></span></em>, <em class="sig-param"><span class="n">beam_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">5</span></em>, <em class="sig-param"><span class="n">max_decoding_steps</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">30</span></em>, <em class="sig-param"><span class="n">sos_index</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">eos_index</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/models/captioning.py#L230-L248"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.models.captioning.BidirectionalCaptioningModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#virtex.models.captioning.CaptioningModel" title="virtex.models.captioning.CaptioningModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.models.captioning.CaptioningModel</span></code></a></p>
+</dd></dl>
+
+</div>
+<hr class="docutils" />
+<div class="section" id="module-virtex.models.downstream">
+<span id="downstream-models"></span><h2>Downstream Models<a class="headerlink" href="#module-virtex.models.downstream" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="virtex.models.downstream.FeatureExtractor">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.models.downstream.</code><code class="sig-name descname">FeatureExtractor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trained_model</span><span class="p">:</span> <span class="n">torch.nn.modules.module.Module</span></em>, <em class="sig-param"><span class="n">layer_name</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'layer4'</span></em>, <em class="sig-param"><span class="n">flatten_and_normalize</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/models/downstream.py#L9-L74"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.models.downstream.FeatureExtractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
+<p>Extract features from intermediate ResNet layers (stages) pool them such
+that their feature dimension is approximately 9000 (except 2048-d global
+average pooled features). These features can be used to train SVMs / linear
+layers to evaluate quality of learned representations.</p>
+<p>Features extraction and pooling is consistent with prior works like FAIR
+Self Supervision Benchmark <a class="reference external" href="https://arxiv.org/abs/1905.01235">(Goyal et al, 2019)</a>,
+and Split-Brain Autoencoder <a class="reference external" href="https://arxiv.org/abs/1611.09842">(Zhang et al, 2016b)</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>trained_model: nn.Module</strong></dt><dd><p>Trained model (either imagenet or one of our pretext tasks). We would
+only use the visual stream.</p>
+</dd>
+<dt><strong>layer_name: str, optional (default = “layer4”)</strong></dt><dd><p>Which layer of ResNet to extract features from. One of <code class="docutils literal notranslate"><span class="pre">{&quot;layer1&quot;,</span>
+<span class="pre">&quot;layer2&quot;,</span> <span class="pre">&quot;layer3&quot;,</span> <span class="pre">&quot;layer4&quot;,</span> <span class="pre">&quot;avgpool&quot;}</span></code>.</p>
+</dd>
+<dt><strong>flatten_and_normalize: bool, optional (default = False)</strong></dt><dd><p>Whether to flatten the features and perform L2 normalization. This flag
+is <code class="docutils literal notranslate"><span class="pre">True</span></code> for VOC07 linear SVM classification, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="virtex.models.downstream.FeatureExtractor.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">images</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))">torch.Tensor</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/models/downstream.py#L64-L74"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.models.downstream.FeatureExtractor.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">virtex</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/setup_dependencies.html">How to setup this codebase?</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="factories.html">virtex.factories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">virtex.data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">virtex.models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-virtex.models.classification">Pretraining Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-virtex.models.downstream">Downstream Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">virtex.modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optim.html">virtex.optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">virtex.utils</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="data.transforms.html" title="previous chapter">virtex.data.transforms</a></li>
+      <li>Next: <a href="modules.html" title="next chapter">virtex.modules</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Karan Desai and Justin Johnson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/virtex/models.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
