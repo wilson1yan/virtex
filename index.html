@@ -81,6 +81,16 @@ that match or exceed those learned on ImageNet -- supervised or unsupervised
 -- despite using up to ten times fewer images.
 </p><p><strong>Code available at:</strong> <a class="reference external" href="https://github.com/kdexd/virtex">github.com/kdexd/virtex</a>.</p>
 <img alt="_images/system_figure.jpg" src="_images/system_figure.jpg" />
+<p>Get the pretrained ResNet-50 visual backbone from our best performing VirTex
+model in one line <em>without any installation</em>!</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="c1"># That&#39;s it, this one line only requires PyTorch.</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">hub</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;kdexd/virtex&quot;</span><span class="p">,</span> <span class="s2">&quot;resnet50&quot;</span><span class="p">,</span> <span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>More details in <a class="reference internal" href="virtex/usage/model_zoo.html"><span class="doc">VirTex Model Zoo</span></a>. Next, dive deeper into our
+code with User Guide and API References!</p>
 <div class="section" id="user-guide">
 <h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
@@ -91,10 +101,27 @@ that match or exceed those learned on ImageNet -- supervised or unsupervised
 <li class="toctree-l2"><a class="reference internal" href="virtex/usage/setup_dependencies.html#preprocess-data">Preprocess Data</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="virtex/usage/training.html">How to train your VirTex model?</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="virtex/usage/training.html#training-the-base-virtex-model">Training the base VirTex model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="virtex/usage/training.html#reproducing-all-virtex-ablations">Reproducing all VirTex ablations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="virtex/usage/training.html#training-imagenet-supervised-baselines">Training ImageNet-supervised baselines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="virtex/usage/model_zoo.html">VirTex Model Zoo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="virtex/usage/model_zoo.html#pretraining-task-ablations">Pretraining Task Ablations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virtex/usage/model_zoo.html#width-ablations">Width Ablations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virtex/usage/model_zoo.html#depth-ablations">Depth Ablations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virtex/usage/model_zoo.html#backbone-ablations">Backbone Ablations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="virtex/usage/pretrain.html">How to train your VirTex model?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="virtex/usage/pretrain.html#training-the-base-virtex-model">Training the base VirTex model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virtex/usage/pretrain.html#reproducing-all-virtex-ablations">Reproducing all VirTex ablations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virtex/usage/pretrain.html#training-imagenet-supervised-baselines">Training ImageNet-supervised baselines</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="virtex/usage/downstream.html">How to evaluate on downstream tasks?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="virtex/usage/downstream.html#pascal-voc-2007-linear-classification">PASCAL VOC 2007 Linear Classification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virtex/usage/downstream.html#imagenet-linear-classification">ImageNet Linear Classification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virtex/usage/downstream.html#instance-segmentation-and-object-detection-on-coco">Instance Segmentation (and Object Detection) on COCO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virtex/usage/downstream.html#instance-segmentation-on-lvis">Instance Segmentation on LVIS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virtex/usage/downstream.html#object-detection-on-pascal-voc-2007-12">Object Detection on PASCAL VOC 2007+12</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virtex/usage/downstream.html#inaturalist-2018-fine-grained-classification">iNaturalist 2018 Fine-Grained Classification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="virtex/usage/downstream.html#image-captioning-on-coco-captions-val2017">Image Captioning on COCO Captions val2017</a></li>
 </ul>
 </li>
 </ul>
@@ -147,7 +174,20 @@ that match or exceed those learned on ImageNet -- supervised or unsupervised
 <li class="toctree-l2"><a class="reference internal" href="virtex/utils.metrics.html">virtex.utils.metrics</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="virtex/model_zoo.html">virtex.model_zoo</a></li>
 </ul>
+</div>
+</div>
+<div class="section" id="citation">
+<h1>Citation<a class="headerlink" href="#citation" title="Permalink to this headline">¶</a></h1>
+<p>If you find this code useful, please consider citing:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>@article{desai2020virtex,
+    title={VirTex: Learning Visual Representations from Textual Annotations},
+    author={Karan Desai and Justin Johnson},
+    journal={ TODO },
+    year={2020}
+}
+</pre></div>
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -178,7 +218,9 @@ that match or exceed those learned on ImageNet -- supervised or unsupervised
 <h3>Navigation</h3>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="virtex/usage/setup_dependencies.html">How to setup this codebase?</a></li>
-<li class="toctree-l1"><a class="reference internal" href="virtex/usage/training.html">How to train your VirTex model?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="virtex/usage/model_zoo.html">VirTex Model Zoo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="virtex/usage/pretrain.html">How to train your VirTex model?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="virtex/usage/downstream.html">How to evaluate on downstream tasks?</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="virtex/config.html">virtex.config</a></li>
@@ -188,6 +230,7 @@ that match or exceed those learned on ImageNet -- supervised or unsupervised
 <li class="toctree-l1"><a class="reference internal" href="virtex/modules.html">virtex.modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="virtex/optim.html">virtex.optim</a></li>
 <li class="toctree-l1"><a class="reference internal" href="virtex/utils.html">virtex.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="virtex/model_zoo.html">virtex.model_zoo</a></li>
 </ul>
 
 <div class="relations">

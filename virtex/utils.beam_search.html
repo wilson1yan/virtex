@@ -52,7 +52,7 @@
             
   <div class="section" id="virtex-utils-beam-search">
 <h1>virtex.utils.beam_search<a class="headerlink" href="#virtex-utils-beam-search" title="Permalink to this headline">¶</a></h1>
-<hr><span class="target" id="module-virtex.utils.beam_search"></span><p>This Beam Search implementation is adopted with minor modifications from
+<hr><span class="target" id="module-virtex.utils.beam_search"></span><p>This Beam Search implementation is adapted with minor modifications from
 <a class="reference external" href="https://github.com/allenai/allennlp/blob/master/allennlp/nn/beam_search.py">AllenNLP</a>.</p>
 <p>Thanks to the developers of AllenNLP!</p>
 <dl class="py class">
@@ -65,13 +65,13 @@ recurrent models (LSTM-like).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>end_index</strong><span class="classifier">int</span></dt><dd><p>The index of the end token (<code class="docutils literal notranslate"><span class="pre">[EOS]</span></code>) in vocabulary.</p>
+<dt><strong>end_index: int</strong></dt><dd><p>The index of the end token (<code class="docutils literal notranslate"><span class="pre">[EOS]</span></code>) in vocabulary.</p>
 </dd>
-<dt><strong>max_steps</strong><span class="classifier">int, optional (default = 50)</span></dt><dd><p>The maximum number of decoding steps.</p>
+<dt><strong>max_steps: int, optional (default = 50)</strong></dt><dd><p>The maximum number of decoding steps.</p>
 </dd>
-<dt><strong>beam_size</strong><span class="classifier">int, optional (default = 5)</span></dt><dd><p>The width of the beam used.</p>
+<dt><strong>beam_size: int, optional (default = 5)</strong></dt><dd><p>The width of the beam used.</p>
 </dd>
-<dt><strong>per_node_beam_size</strong><span class="classifier">int, optional (default = 2)</span></dt><dd><p>The maximum number of candidates to consider per node, at each step in
+<dt><strong>per_node_beam_size: int, optional (default = 2)</strong></dt><dd><p>The maximum number of candidates to consider per node, at each step in
 the search. Setting this parameter to a number smaller than <cite>beam_size</cite>
 may give better results, as it can introduce more diversity into the
 search. See <a class="reference external" href="https://arxiv.org/abs/1702.01806">Beam Search Strategies for Neural Machine Translation.
@@ -147,6 +147,7 @@ has shape <code class="docutils literal notranslate"><span class="pre">(batch_si
 <h3>Navigation</h3>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="usage/setup_dependencies.html">How to setup this codebase?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/training.html">How to train your VirTex model?</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>

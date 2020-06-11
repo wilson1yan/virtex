@@ -56,14 +56,61 @@
 <span id="pretraining-datasets"></span><h2>Pretraining Datasets<a class="headerlink" href="#module-virtex.data.datasets.captioning" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="virtex.data.datasets.captioning.CaptioningDataset">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.captioning.</code><code class="sig-name descname">CaptioningDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">tokenizer</span><span class="p">:</span> <span class="n">virtex.data.tokenizers.SentencePieceBPETokenizer</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em>, <em class="sig-param"><span class="n">max_caption_length</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">30</span></em>, <em class="sig-param"><span class="n">use_single_caption</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">percentage</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">100.0</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/captioning.py#L15-L64"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.captioning.CaptioningDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.captioning.</code><code class="sig-name descname">CaptioningDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">tokenizer</span><span class="p">:</span> <span class="n"><a class="reference internal" href="data.tokenizers.html#virtex.data.tokenizers.SentencePieceBPETokenizer" title="virtex.data.tokenizers.SentencePieceBPETokenizer">virtex.data.tokenizers.SentencePieceBPETokenizer</a></span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em>, <em class="sig-param"><span class="n">max_caption_length</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">30</span></em>, <em class="sig-param"><span class="n">use_single_caption</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">percentage</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">100.0</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/captioning.py#L15-L97"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.captioning.CaptioningDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code></p>
+<p>A dataset which provides image-caption (forward and backward) pairs from
+a serialized LMDB file (COCO Captions in this codebase). This is used for
+pretraining tasks which use captions - bicaptioning, forward captioning and
+token classification.</p>
+<p>This dataset also supports training on a randomly selected subset of the
+full dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data_root: str, optional (default = “datasets/coco”)</strong></dt><dd><p>Path to the dataset root directory. This must contain the serialized
+LMDB files (for COCO <code class="docutils literal notranslate"><span class="pre">train2017</span></code> and <code class="docutils literal notranslate"><span class="pre">val2017</span></code> splits).</p>
+</dd>
+<dt><strong>split: str, optional (default = “train”)</strong></dt><dd><p>Which split (from COCO 2017 version) to read. One of <code class="docutils literal notranslate"><span class="pre">{&quot;train&quot;,</span> <span class="pre">&quot;val&quot;}</span></code>.</p>
+</dd>
+<dt><strong>tokenizer: virtex.data.tokenizers.SentencePieceBPETokenizer</strong></dt><dd><p>A tokenizer which has the mapping between word tokens and their
+integer IDs.</p>
+</dd>
+<dt><strong>image_tranform: Callable, optional (default = virtex.data.transforms.DEFAULT_IMAGE_TRANSFORM)</strong></dt><dd><p>A list of transformations, from either <a class="reference external" href="https://albumentations.readthedocs.io/en/latest/">albumentations</a> or <a class="reference internal" href="data.transforms.html#module-virtex.data.transforms" title="virtex.data.transforms"><code class="xref py py-mod docutils literal notranslate"><span class="pre">virtex.data.transforms</span></code></a>
+to be applied on the image.</p>
+</dd>
+<dt><strong>max_caption_length: int, optional (default = 30)</strong></dt><dd><p>Maximum number of tokens to keep in output caption tokens. Extra tokens
+will be trimmed from the right end of the token list.</p>
+</dd>
+<dt><strong>use_single_caption: bool, optional (default = False)</strong></dt><dd><p>COCO Captions provides five captions per image. If this is True, only
+one fixed caption per image is use fo training (used for an ablation).</p>
+</dd>
+<dt><strong>percentage: float, optional (default = 100.0)</strong></dt><dd><p>Randomly sample this much percentage of full dataset for training.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <span class="target" id="module-virtex.data.datasets.multilabel"></span><dl class="py class">
 <dt id="virtex.data.datasets.multilabel.MultiLabelClassificationDataset">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.multilabel.</code><code class="sig-name descname">MultiLabelClassificationDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/multilabel.py#L15-L88"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.multilabel.MultiLabelClassificationDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.multilabel.</code><code class="sig-name descname">MultiLabelClassificationDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/multilabel.py#L15-L105"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.multilabel.MultiLabelClassificationDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code></p>
+<p>A dataset which provides image-labelset pairs from COCO instance annotation
+files. This is used for multilabel classification pretraining task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data_root: str, optional (default = “datasets/coco”)</strong></dt><dd><p>Path to the dataset root directory. This must contain images and
+annotations (<code class="docutils literal notranslate"><span class="pre">train2017</span></code>, <code class="docutils literal notranslate"><span class="pre">val2017</span></code> and <code class="docutils literal notranslate"><span class="pre">annotations</span></code> directories).</p>
+</dd>
+<dt><strong>split: str, optional (default = “train”)</strong></dt><dd><p>Which split (from COCO 2017 version) to read. One of <code class="docutils literal notranslate"><span class="pre">{&quot;train&quot;,</span> <span class="pre">&quot;val&quot;}</span></code>.</p>
+</dd>
+<dt><strong>image_tranform: Callable, optional (default = virtex.data.transforms.DEFAULT_IMAGE_TRANSFORM)</strong></dt><dd><p>A list of transformations, from either <a class="reference external" href="https://albumentations.readthedocs.io/en/latest/">albumentations</a> or <a class="reference internal" href="data.transforms.html#module-virtex.data.transforms" title="virtex.data.transforms"><code class="xref py py-mod docutils literal notranslate"><span class="pre">virtex.data.transforms</span></code></a>
+to be applied on the image.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -72,15 +119,23 @@
 <span id="downstream-datasets"></span><h2>Downstream Datasets<a class="headerlink" href="#module-virtex.data.datasets.downstream" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="virtex.data.datasets.downstream.ImageNetDataset">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">ImageNetDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'train'</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em>, <em class="sig-param"><span class="n">percentage</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">100</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L21-L84"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.ImageNetDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">ImageNetDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'datasets/imagenet'</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'train'</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em>, <em class="sig-param"><span class="n">percentage</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">100</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L21-L93"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.ImageNetDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchvision.datasets.imagenet.ImageNet</span></code></p>
-<p>Simple wrapper over torchvision’s super class with a feature to support
+<p>Simple wrapper over torchvision’s ImageNet dataset with a feature to support
 restricting dataset size for semi-supervised learning setup (data-efficiency
 ablations).</p>
 <p>We also handle image transform here instead of passing to super class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
+<dt><strong>data_root: str, optional (default = “datasets/imagenet”)</strong></dt><dd><p>Path to the dataset root directory. This must contain directories
+<code class="docutils literal notranslate"><span class="pre">train</span></code>, <code class="docutils literal notranslate"><span class="pre">val</span></code> with per-category sub-directories.</p>
+</dd>
+<dt><strong>split: str, optional (default = “train”)</strong></dt><dd><p>Which split to read from. One of <code class="docutils literal notranslate"><span class="pre">{&quot;train&quot;,</span> <span class="pre">&quot;val&quot;}</span></code>.</p>
+</dd>
+<dt><strong>image_tranform: Callable, optional (default = virtex.data.transforms.DEFAULT_IMAGE_TRANSFORM)</strong></dt><dd><p>A list of transformations, from either <a class="reference external" href="https://albumentations.readthedocs.io/en/latest/">albumentations</a> or <a class="reference internal" href="data.transforms.html#module-virtex.data.transforms" title="virtex.data.transforms"><code class="xref py py-mod docutils literal notranslate"><span class="pre">virtex.data.transforms</span></code></a>
+to be applied on the image.</p>
+</dd>
 <dt><strong>percentage: int, optional (default = 100)</strong></dt><dd><p>Percentage of dataset to keep. This dataset retains first K% of images
 per class to retain same class label distribution. This is 100% by
 default, and will be ignored if <code class="docutils literal notranslate"><span class="pre">split</span></code> is <code class="docutils literal notranslate"><span class="pre">val</span></code>.</p>
@@ -92,20 +147,64 @@ default, and will be ignored if <code class="docutils literal notranslate"><span
 
 <dl class="py class">
 <dt id="virtex.data.datasets.downstream.INaturalist2018Dataset">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">INaturalist2018Dataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'train'</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L87-L129"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.INaturalist2018Dataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">INaturalist2018Dataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'datasets/inaturalist'</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'train'</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L96-L154"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.INaturalist2018Dataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code></p>
+<p>A dataset which provides image-label pairs from the iNaturalist 2018 dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data_root: str, optional (default = “datasets/inaturalist”)</strong></dt><dd><p>Path to the dataset root directory. This must contain images and
+annotations (<code class="docutils literal notranslate"><span class="pre">train2018</span></code>, <code class="docutils literal notranslate"><span class="pre">val2018</span></code> and <code class="docutils literal notranslate"><span class="pre">annotations</span></code> directories).</p>
+</dd>
+<dt><strong>split: str, optional (default = “train”)</strong></dt><dd><p>Which split to read from. One of <code class="docutils literal notranslate"><span class="pre">{&quot;train&quot;,</span> <span class="pre">&quot;val&quot;}</span></code>.</p>
+</dd>
+<dt><strong>image_tranform: Callable, optional (default = virtex.data.transforms.DEFAULT_IMAGE_TRANSFORM)</strong></dt><dd><p>A list of transformations, from either <a class="reference external" href="https://albumentations.readthedocs.io/en/latest/">albumentations</a> or <a class="reference internal" href="data.transforms.html#module-virtex.data.transforms" title="virtex.data.transforms"><code class="xref py py-mod docutils literal notranslate"><span class="pre">virtex.data.transforms</span></code></a>
+to be applied on the image.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py class">
 <dt id="virtex.data.datasets.downstream.VOC07ClassificationDataset">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">VOC07ClassificationDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'train'</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L132-L196"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.VOC07ClassificationDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">VOC07ClassificationDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'datasets/VOC2007'</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'trainval'</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L157-L237"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.VOC07ClassificationDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code></p>
+<p>A dataset which provides image-label pairs from the PASCAL VOC 2007 dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data_root: str, optional (default = “datasets/VOC2007”)</strong></dt><dd><p>Path to the dataset root directory. This must contain directories
+<code class="docutils literal notranslate"><span class="pre">Annotations</span></code>, <code class="docutils literal notranslate"><span class="pre">ImageSets</span></code> and <code class="docutils literal notranslate"><span class="pre">JPEGImages</span></code>.</p>
+</dd>
+<dt><strong>split: str, optional (default = “trainval”)</strong></dt><dd><p>Which split to read from. One of <code class="docutils literal notranslate"><span class="pre">{&quot;trainval&quot;,</span> <span class="pre">&quot;test&quot;}</span></code>.</p>
+</dd>
+<dt><strong>image_tranform: Callable, optional (default = virtex.data.transforms.DEFAULT_IMAGE_TRANSFORM)</strong></dt><dd><p>A list of transformations, from either <a class="reference external" href="https://albumentations.readthedocs.io/en/latest/">albumentations</a> or <a class="reference internal" href="data.transforms.html#module-virtex.data.transforms" title="virtex.data.transforms"><code class="xref py py-mod docutils literal notranslate"><span class="pre">virtex.data.transforms</span></code></a>
+to be applied on the image.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py class">
 <dt id="virtex.data.datasets.downstream.CocoCaptionsEvalDataset">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">CocoCaptionsEvalDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L199-L221"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.CocoCaptionsEvalDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">CocoCaptionsEvalDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'datasets/coco'</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L240-L277"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.CocoCaptionsEvalDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code></p>
+<p>A dataset which provides only images (for inference) from the COCO 2017
+dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data_root: str, optional (default = “datasets/coco”)</strong></dt><dd><p>Path to the dataset root directory. This must contain the serialized
+LMDB file (for COCO <code class="docutils literal notranslate"><span class="pre">val2017</span></code> split).</p>
+</dd>
+<dt><strong>image_tranform: Callable, optional (default = virtex.data.transforms.DEFAULT_IMAGE_TRANSFORM)</strong></dt><dd><p>A list of transformations, from either <a class="reference external" href="https://albumentations.readthedocs.io/en/latest/">albumentations</a> or <a class="reference internal" href="data.transforms.html#module-virtex.data.transforms" title="virtex.data.transforms"><code class="xref py py-mod docutils literal notranslate"><span class="pre">virtex.data.transforms</span></code></a>
+to be applied on the image.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -130,6 +229,7 @@ default, and will be ignored if <code class="docutils literal notranslate"><span
 <h3>Navigation</h3>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="usage/setup_dependencies.html">How to setup this codebase?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/training.html">How to train your VirTex model?</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>

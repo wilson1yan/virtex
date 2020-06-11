@@ -33,7 +33,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="virtex.factories" href="factories.html" />
-    <link rel="prev" title="How to setup this codebase?" href="usage/setup_dependencies.html" />
+    <link rel="prev" title="How to train your VirTex model?" href="usage/training.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -54,7 +54,7 @@
 <h1>virtex.config<a class="headerlink" href="#virtex-config" title="Permalink to this headline">¶</a></h1>
 <hr><span class="target" id="module-virtex.config"></span><dl class="py class">
 <dt id="virtex.config.Config">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.config.</code><code class="sig-name descname">Config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_file</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">override_list</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Any<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L6-L208"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.config.</code><code class="sig-name descname">Config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_file</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">override_list</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Any<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L6-L226"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This class provides package-wide configuration management. It is a
 nested dict-like structure with nested keys accessible as attributes. It
@@ -91,13 +91,13 @@ This happens after overriding from YAML file.</p>
 </div>
 <dl class="py method">
 <dt id="virtex.config.Config.add_derived_params">
-<code class="sig-name descname">add_derived_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L185-L189"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config.add_derived_params" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add_derived_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L203-L207"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config.add_derived_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add parameters with values derived from existing parameters.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="virtex.config.Config.dump">
-<code class="sig-name descname">dump</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">file_path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L191-L199"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config.dump" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">dump</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">file_path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L209-L217"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config.dump" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save config at the specified file path.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -231,7 +231,25 @@ This happens after overriding from YAML file.</p>
 116
 117
 118
-119</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1">#   Data paths and parameters related to dataloading.</span>
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1">#   Data paths and parameters related to dataloading.</span>
 <span class="c1"># ---------------------------------------------------------------------</span>
 <span class="n">_C</span><span class="o">.</span><span class="n">DATA</span> <span class="o">=</span> <span class="n">CN</span><span class="p">()</span>
 
@@ -242,6 +260,24 @@ This happens after overriding from YAML file.</p>
 <span class="n">_C</span><span class="o">.</span><span class="n">DATA</span><span class="o">.</span><span class="n">TOKENIZER_VOCAB</span> <span class="o">=</span> <span class="s2">&quot;datasets/vocab/coco_10k.vocab&quot;</span>
 <span class="c1"># Path to .model file generated by ``sentencepiece``.</span>
 <span class="n">_C</span><span class="o">.</span><span class="n">DATA</span><span class="o">.</span><span class="n">TOKENIZER_MODEL</span> <span class="o">=</span> <span class="s2">&quot;datasets/vocab/coco_10k.model&quot;</span>
+
+<span class="c1"># Handy config params for vocab size and indices of special tokens.</span>
+<span class="c1"># While these can be picked up from the tokenizer, having these in</span>
+<span class="c1"># the config makes it easy to create a model without instantiating too</span>
+<span class="c1"># many tokenizer instances (especially when not needed, e.g. model zoo).</span>
+<span class="c1"># These must match according to what&#39;s present in ``TOKENIZER_VOCAB``</span>
+<span class="c1"># and ``TOKENIZER_MODEL`` above.</span>
+<span class="n">_C</span><span class="o">.</span><span class="n">DATA</span><span class="o">.</span><span class="n">VOCAB_SIZE</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="c1"># Index of out-of-vocabulary (and padding) token.</span>
+<span class="n">_C</span><span class="o">.</span><span class="n">DATA</span><span class="o">.</span><span class="n">UNK_INDEX</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="c1"># Index of the start-of-sentence [SOS] token.</span>
+<span class="n">_C</span><span class="o">.</span><span class="n">DATA</span><span class="o">.</span><span class="n">SOS_INDEX</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="c1"># Index of the end-of-sentence [EOS] token.</span>
+<span class="n">_C</span><span class="o">.</span><span class="n">DATA</span><span class="o">.</span><span class="n">EOS_INDEX</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="c1"># Index of the word masking token. While not used for captioning, having</span>
+<span class="c1"># this extra token makes it possible to train an MLM model without</span>
+<span class="c1"># re-creating a new vocab mapping.</span>
+<span class="n">_C</span><span class="o">.</span><span class="n">DATA</span><span class="o">.</span><span class="n">MASK_INDEX</span> <span class="o">=</span> <span class="mi">3</span>
 
 <span class="c1"># Size of the image (square) to crop from original input image.</span>
 <span class="n">_C</span><span class="o">.</span><span class="n">DATA</span><span class="o">.</span><span class="n">IMAGE_CROP_SIZE</span> <span class="o">=</span> <span class="mi">224</span>
@@ -374,6 +410,7 @@ This happens after overriding from YAML file.</p>
 <h3>Navigation</h3>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="usage/setup_dependencies.html">How to setup this codebase?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/training.html">How to train your VirTex model?</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">virtex.config</a><ul>
@@ -392,7 +429,7 @@ This happens after overriding from YAML file.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="usage/setup_dependencies.html" title="previous chapter">How to setup this codebase?</a></li>
+      <li>Previous: <a href="usage/training.html" title="previous chapter">How to train your VirTex model?</a></li>
       <li>Next: <a href="factories.html" title="next chapter">virtex.factories</a></li>
   </ul></li>
 </ul>

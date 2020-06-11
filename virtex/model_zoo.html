@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120523111-2"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-120523111-2');
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+
+
+    <title>virtex.model_zoo &#8212; virtex 0.9 documentation</title>
+
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="virtex.utils.metrics" href="utils.metrics.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="virtex-model-zoo">
+<h1>virtex.model_zoo<a class="headerlink" href="#virtex-model-zoo" title="Permalink to this headline">¶</a></h1>
+<hr><span class="target" id="module-virtex.model_zoo.model_zoo"></span><p>A utility module which provides functionality to easily load common VirTex
+models (optionally with pretrained weights) using a single line of code.</p>
+<p>Get our full best performing VirTex model (with pretrained weights as):</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">virtex.model_zoo</span> <span class="k">as</span> <span class="nn">mz</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">mz</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;width_ablations/bicaptioning_R_50_L1_H2048.yaml&quot;</span><span class="p">,</span> <span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Any config available in <code class="docutils literal notranslate"><span class="pre">configs/</span></code> directory under project root can be
+specified here, although this command need not be executed from project root.
+For more details on available models, refer <a class="reference internal" href="usage/model_zoo.html"><span class="doc">VirTex Model Zoo</span></a>.</p>
+<p>Part of this code is adapted from Detectron2’s model zoo; which was originally
+implemented by the developers of this codebase, with reviews and further
+changes by Detectron2 developers.</p>
+<dl class="py class">
+<dt id="virtex.model_zoo.model_zoo._ModelZooUrls">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.model_zoo.model_zoo.</code><code class="sig-name descname">_ModelZooUrls</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/model_zoo/model_zoo.py#L30-L59"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.model_zoo.model_zoo._ModelZooUrls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Mapping from config names to URL suffixes of pretrained weights.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="virtex.model_zoo.model_zoo.get">
+<code class="sig-prename descclassname">virtex.model_zoo.model_zoo.</code><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_path</span></em>, <em class="sig-param"><span class="n">pretrained</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/model_zoo/model_zoo.py#L63-L104"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.model_zoo.model_zoo.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a model specified by relative path under Detectron2’s official <code class="docutils literal notranslate"><span class="pre">configs/</span></code> directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>config_path: str</strong></dt><dd><p>Name of config file relative to <code class="docutils literal notranslate"><span class="pre">configs/</span></code> directory under project
+root. (For example, <code class="docutils literal notranslate"><span class="pre">width_ablations/bicaptioning_R_50_L1_H2048.yaml</span></code>)</p>
+</dd>
+<dt><strong>pretrained: bool, optional (default = False)</strong></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, will initialize the model with the pretrained weights. If
+<code class="docutils literal notranslate"><span class="pre">False</span></code>, the weights will be initialized randomly.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">virtex</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/setup_dependencies.html">How to setup this codebase?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/model_zoo.html">VirTex Model Zoo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/pretrain.html">How to train your VirTex model?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/downstream.html">How to evaluate on downstream tasks?</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="factories.html">virtex.factories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">virtex.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">virtex.models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">virtex.modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optim.html">virtex.optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">virtex.utils</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">virtex.model_zoo</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="utils.metrics.html" title="previous chapter">virtex.utils.metrics</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Karan Desai and Justin Johnson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/virtex/model_zoo.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
