@@ -24,11 +24,14 @@
 
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
     <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/language_data.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
     <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -54,7 +57,7 @@
 <h1>virtex.modules.embedding<a class="headerlink" href="#virtex-modules-embedding" title="Permalink to this headline">¶</a></h1>
 <hr><span class="target" id="module-virtex.modules.embedding"></span><dl class="py class">
 <dt id="virtex.modules.embedding.WordAndPositionalEmbedding">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.modules.embedding.</code><code class="sig-name descname">WordAndPositionalEmbedding</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vocab_size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">hidden_size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">max_caption_length</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">30</span></em>, <em class="sig-param"><span class="n">dropout</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">padding_idx</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/embedding.py#L7-L96"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.embedding.WordAndPositionalEmbedding" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.modules.embedding.</code><code class="sig-name descname">WordAndPositionalEmbedding</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vocab_size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">hidden_size</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">dropout</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">max_caption_length</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">30</span></em>, <em class="sig-param"><span class="n">padding_idx</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/embedding.py#L7-L96"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.embedding.WordAndPositionalEmbedding" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
 <p>A <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Module" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a> for learned word embeddings and position
 embeddings for input tokens. Each token is mapped to a fixed dimensional
@@ -68,10 +71,10 @@ dropout.</p>
 </dd>
 <dt><strong>hidden_size: int</strong></dt><dd><p>Size of token embedding vectors.</p>
 </dd>
+<dt><strong>dropout: float, optional (default = 0.1)</strong></dt><dd><p>Dropout probability for final dropout applied after layer normalization.</p>
+</dd>
 <dt><strong>max_caption_length: int, optional (default = 30)</strong></dt><dd><p>Maximum length of input captions; this is used to create a fixed
 positional embedding lookup table.</p>
-</dd>
-<dt><strong>dropout: float, optional (default = 0.1)</strong></dt><dd><p>Dropout probability for final dropout applied after layer normalization.</p>
 </dd>
 <dt><strong>padding_idx: int, optional (default = 0)</strong></dt><dd><p>Token index of <code class="docutils literal notranslate"><span class="pre">[PAD]</span></code> token, word embedding for these tokens will
 be a vector of zeroes (and not trainable).</p>
@@ -124,6 +127,9 @@ containing corresponding token embeddings.</p>
 <h3>Navigation</h3>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="usage/setup_dependencies.html">How to setup this codebase?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/model_zoo.html">VirTex Model Zoo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/pretrain.html">How to train your VirTex model?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/downstream.html">How to evaluate on downstream tasks?</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>
@@ -138,6 +144,7 @@ containing corresponding token embeddings.</p>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="optim.html">virtex.optim</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">virtex.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_zoo.html">virtex.model_zoo</a></li>
 </ul>
 
 <div class="relations">
