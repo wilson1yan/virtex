@@ -214,11 +214,28 @@ split (reporting CIDEr and SPICE metics):</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python scripts/eval_captioning.py <span class="se">\</span>
     --config /tmp/bicaptioning_R_50_L1_H2048/pretrain_config.yaml <span class="se">\</span>
     --checkpoint-path /tmp/bicaptioning_R_50_L1_H2048/checkpoint_500000.pth <span class="se">\</span>
+    --calc-metrics <span class="se">\</span>
     --num-gpus-per-machine <span class="m">1</span> <span class="se">\</span>
-    --cpu-workers <span class="m">4</span> <span class="se">\</span>
-    --serialization-dir /tmp/bicaptioning_R_50_L1_H2048
+    --cpu-workers <span class="m">4</span>
 </pre></div>
 </div>
+</div>
+<hr class="docutils" />
+<div class="section" id="running-image-captioning-inference-on-arbitrary-images">
+<h2>Running Image Captioning Inference on Arbitrary Images<a class="headerlink" href="#running-image-captioning-inference-on-arbitrary-images" title="Permalink to this headline">¶</a></h2>
+<p>The above script can be used for generating captions for any images in a directory.
+Replace certain commands as follows:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python scripts/eval_captioning.py <span class="se">\</span>
+    --config /tmp/bicaptioning_R_50_L1_H2048/pretrain_config.yaml <span class="se">\</span>
+    --checkpoint-path /tmp/bicaptioning_R_50_L1_H2048/checkpoint_500000.pth <span class="se">\</span>
+    --data-root /path/to/images_dir <span class="se">\</span>
+    --output /path/to/save/predictions.json <span class="se">\</span>
+    --num-gpus-per-machine <span class="m">1</span> <span class="se">\</span>
+    --cpu-workers <span class="m">4</span>
+</pre></div>
+</div>
+<p>This script will save predictions in JSON format. Since our goal is to not
+improve image captioning, these models may not generate the best captions.</p>
 </div>
 </div>
 
@@ -251,6 +268,7 @@ split (reporting CIDEr and SPICE metics):</p>
 <li class="toctree-l2"><a class="reference internal" href="#object-detection-on-pascal-voc-2007-12">Object Detection on PASCAL VOC 2007+12</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#inaturalist-2018-fine-grained-classification">iNaturalist 2018 Fine-Grained Classification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#image-captioning-on-coco-captions-val2017">Image Captioning on COCO Captions val2017</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-image-captioning-inference-on-arbitrary-images">Running Image Captioning Inference on Arbitrary Images</a></li>
 </ul>
 </li>
 </ul>
