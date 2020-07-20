@@ -87,6 +87,8 @@ pip install -r requirements.txt
 </div>
 </div></blockquote>
 </li>
+<li><p>Install NVIDIA Apex for mixed precision training, following instructions in
+their <a class="reference external" href="https://github.com/nvidia/apex">README</a>.</p></li>
 </ol>
 <p>Now you can <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">virtex</span></code> from anywhere as long as you have this conda
 environment activated.</p>
@@ -181,13 +183,13 @@ files. These are faster for data reading during pretraining.</p>
 <div><div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python scripts/preprocess/preprocess_coco.py <span class="se">\</span>
     --data-root datasets/coco <span class="se">\</span>
     --split train <span class="se">\</span>
-    --output datasets/serialized/coco_train2017.lmdb
+    --output datasets/coco/serialized_train.lmdb
 </pre></div>
 </div>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python scripts/preprocess/preprocess_coco.py <span class="se">\</span>
     --data-root datasets/coco <span class="se">\</span>
     --split val <span class="se">\</span>
-    --output datasets/serialized/coco_val2017.lmdb
+    --output datasets/coco/serialized_val.lmdb
 </pre></div>
 </div>
 </div></blockquote>

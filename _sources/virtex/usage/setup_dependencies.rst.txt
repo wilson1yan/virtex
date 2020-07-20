@@ -41,6 +41,8 @@ For these steps to install through Anaconda (or Miniconda).
 
         python setup.py develop
 
+5. Install NVIDIA Apex for mixed precision training, following instructions in
+   their `README <https://github.com/nvidia/apex>`_.
 
 Now you can ``import virtex`` from anywhere as long as you have this conda
 environment activated.
@@ -142,13 +144,13 @@ Preprocess Data
         python scripts/preprocess/preprocess_coco.py \
             --data-root datasets/coco \
             --split train \
-            --output datasets/serialized/coco_train2017.lmdb
+            --output datasets/coco/serialized_train.lmdb
 
     .. code-block:: shell
 
         python scripts/preprocess/preprocess_coco.py \
             --data-root datasets/coco \
             --split val \
-            --output datasets/serialized/coco_val2017.lmdb
+            --output datasets/coco/serialized_val.lmdb
 
 That's it! You are all set to use this codebase.
