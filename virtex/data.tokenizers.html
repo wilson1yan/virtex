@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 
 
-    <title>virtex.data.tokenizers &#8212; virtex 0.9 documentation</title>
+    <title>virtex.data.tokenizers &#8212; virtex 1.0 documentation</title>
 
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -57,15 +57,13 @@
 <h1>virtex.data.tokenizers<a class="headerlink" href="#virtex-data-tokenizers" title="Permalink to this headline">¶</a></h1>
 <hr><span class="target" id="module-virtex.data.tokenizers"></span><dl class="py class">
 <dt id="virtex.data.tokenizers.SentencePieceBPETokenizer">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.data.tokenizers.</code><code class="sig-name descname">SentencePieceBPETokenizer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vocab_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">model_path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/tokenizers.py#L7-L74"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.tokenizers.SentencePieceBPETokenizer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.tokenizers.</code><code class="sig-name descname">SentencePieceBPETokenizer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model_path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/tokenizers.py#L7-L61"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.tokenizers.SentencePieceBPETokenizer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A tokenizer based on <a class="reference external" href="https://github.com/google/sentencepiece">SentencePiece</a>
 with BPE sub-routine. It encodes caption strings into list of tokens.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>vocab_path: str</strong></dt><dd><p>Path to the <code class="docutils literal notranslate"><span class="pre">.vocab</span></code> file trained by SentencePiece.</p>
-</dd>
 <dt><strong>model_path: str</strong></dt><dd><p>Path to the <code class="docutils literal notranslate"><span class="pre">.model</span></code> file trained by SentencePiece.</p>
 </dd>
 </dl>
@@ -73,31 +71,31 @@ with BPE sub-routine. It encodes caption strings into list of tokens.</p>
 </dl>
 <dl class="py method">
 <dt id="virtex.data.tokenizers.SentencePieceBPETokenizer.get_vocab_size">
-<code class="sig-name descname">get_vocab_size</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span> &#x2192; int<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/tokenizers.py#L56-L58"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.tokenizers.SentencePieceBPETokenizer.get_vocab_size" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_vocab_size</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span> &#x2192; int<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/tokenizers.py#L41-L43"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.tokenizers.SentencePieceBPETokenizer.get_vocab_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return number of tokens in vocabulary (including special tokens).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="virtex.data.tokenizers.SentencePieceBPETokenizer.token_to_id">
-<code class="sig-name descname">token_to_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">token</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; int<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/tokenizers.py#L60-L62"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.tokenizers.SentencePieceBPETokenizer.token_to_id" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">token_to_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">token</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; int<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/tokenizers.py#L45-L49"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.tokenizers.SentencePieceBPETokenizer.token_to_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get integer ID of a string token (<code class="docutils literal notranslate"><span class="pre">&lt;unk&gt;</span></code> if does not exist).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="virtex.data.tokenizers.SentencePieceBPETokenizer.id_to_token">
-<code class="sig-name descname">id_to_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">token_id</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; str<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/tokenizers.py#L64-L66"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.tokenizers.SentencePieceBPETokenizer.id_to_token" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">id_to_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">token_id</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; str<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/tokenizers.py#L51-L53"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.tokenizers.SentencePieceBPETokenizer.id_to_token" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get string token of an integer ID (<code class="docutils literal notranslate"><span class="pre">&lt;unk&gt;</span></code> if does not exist).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="virtex.data.tokenizers.SentencePieceBPETokenizer.encode">
-<code class="sig-name descname">encode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>int<span class="p">]</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/tokenizers.py#L68-L70"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.tokenizers.SentencePieceBPETokenizer.encode" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">encode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>int<span class="p">]</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/tokenizers.py#L55-L57"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.tokenizers.SentencePieceBPETokenizer.encode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a text string to a list of integer token ids.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="virtex.data.tokenizers.SentencePieceBPETokenizer.decode">
-<code class="sig-name descname">decode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">token_ids</span><span class="p">:</span> <span class="n">List<span class="p">[</span>int<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; str<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/tokenizers.py#L72-L74"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.tokenizers.SentencePieceBPETokenizer.decode" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">decode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">token_ids</span><span class="p">:</span> <span class="n">List<span class="p">[</span>int<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; str<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/tokenizers.py#L59-L61"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.tokenizers.SentencePieceBPETokenizer.decode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a sequence of token IDs to a text string.</p>
 </dd></dl>
 
@@ -132,7 +130,6 @@ with BPE sub-routine. It encodes caption strings into list of tokens.</p>
 <li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>
 <li class="toctree-l1"><a class="reference internal" href="factories.html">virtex.factories</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="data.html">virtex.data</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="data.structures.html">virtex.data.structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="data.readers.html">virtex.data.readers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="data.datasets.html">virtex.data.datasets</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">virtex.data.tokenizers</a></li>
@@ -180,7 +177,7 @@ with BPE sub-routine. It encodes caption strings into list of tokens.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Karan Desai and Justin Johnson.
+      &copy;2021, Karan Desai and Justin Johnson.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>

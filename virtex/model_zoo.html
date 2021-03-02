@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 
 
-    <title>virtex.model_zoo &#8212; virtex 0.9 documentation</title>
+    <title>virtex.model_zoo &#8212; virtex 1.0 documentation</title>
 
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -54,8 +54,8 @@
             
   <div class="section" id="virtex-model-zoo">
 <h1>virtex.model_zoo<a class="headerlink" href="#virtex-model-zoo" title="Permalink to this headline">¶</a></h1>
-<hr><span class="target" id="module-virtex.model_zoo.model_zoo"></span><p>A utility module which provides functionality to easily load common VirTex
-models (optionally with pretrained weights) using a single line of code.</p>
+<hr><span class="target" id="module-virtex.model_zoo.model_zoo"></span><p>A utility module to easily load common VirTex models (optionally with pretrained
+weights) using a single line of code.</p>
 <p>Get our full best performing VirTex model (with pretrained weights as):</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">virtex.model_zoo</span> <span class="k">as</span> <span class="nn">mz</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">mz</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;width_ablations/bicaptioning_R_50_L1_H2048.yaml&quot;</span><span class="p">,</span> <span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -69,15 +69,16 @@ implemented by the developers of this codebase, with reviews and further
 changes by Detectron2 developers.</p>
 <dl class="py class">
 <dt id="virtex.model_zoo.model_zoo._ModelZooUrls">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.model_zoo.model_zoo.</code><code class="sig-name descname">_ModelZooUrls</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/model_zoo/model_zoo.py#L30-L59"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.model_zoo.model_zoo._ModelZooUrls" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.model_zoo.model_zoo.</code><code class="sig-name descname">_ModelZooUrls</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/model_zoo/model_zoo.py#L30-L60"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.model_zoo.model_zoo._ModelZooUrls" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Mapping from config names to URL suffixes of pretrained weights.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt id="virtex.model_zoo.model_zoo.get">
-<code class="sig-prename descclassname">virtex.model_zoo.model_zoo.</code><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_path</span></em>, <em class="sig-param"><span class="n">pretrained</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/model_zoo/model_zoo.py#L63-L104"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.model_zoo.model_zoo.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get a model specified by relative path under Detectron2’s official <code class="docutils literal notranslate"><span class="pre">configs/</span></code> directory.</p>
+<code class="sig-prename descclassname">virtex.model_zoo.model_zoo.</code><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_path</span></em>, <em class="sig-param"><span class="n">pretrained</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/model_zoo/model_zoo.py#L63-L105"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.model_zoo.model_zoo.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a model specified by relative path under Detectron2’s official
+<code class="docutils literal notranslate"><span class="pre">configs/</span></code> directory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
@@ -159,7 +160,7 @@ root. (For example, <code class="docutils literal notranslate"><span class="pre"
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Karan Desai and Justin Johnson.
+      &copy;2021, Karan Desai and Justin Johnson.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>

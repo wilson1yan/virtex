@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 
 
-    <title>virtex.data.datasets &#8212; virtex 0.9 documentation</title>
+    <title>virtex.data.datasets &#8212; virtex 1.0 documentation</title>
 
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -59,7 +59,7 @@
 <span id="pretraining-datasets"></span><h2>Pretraining Datasets<a class="headerlink" href="#module-virtex.data.datasets.captioning" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="virtex.data.datasets.captioning.CaptioningDataset">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.captioning.</code><code class="sig-name descname">CaptioningDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">tokenizer</span><span class="p">:</span> <span class="n"><a class="reference internal" href="data.tokenizers.html#virtex.data.tokenizers.SentencePieceBPETokenizer" title="virtex.data.tokenizers.SentencePieceBPETokenizer">virtex.data.tokenizers.SentencePieceBPETokenizer</a></span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em>, <em class="sig-param"><span class="n">max_caption_length</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">30</span></em>, <em class="sig-param"><span class="n">use_single_caption</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">percentage</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">100.0</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/captioning.py#L15-L97"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.captioning.CaptioningDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.captioning.</code><code class="sig-name descname">CaptioningDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/captioning.py#L15-L123"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.captioning.CaptioningDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code></p>
 <p>A dataset which provides image-caption (forward and backward) pairs from
 a serialized LMDB file (COCO Captions in this codebase). This is used for
@@ -92,11 +92,52 @@ one fixed caption per image is use fo training (used for an ablation).</p>
 </dl>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt id="virtex.data.datasets.captioning.CaptioningDataset._gorg">
+<code class="sig-name descname">_gorg</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/captioning.py#L15-L123"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.captioning.CaptioningDataset._gorg" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#virtex.data.datasets.captioning.CaptioningDataset" title="virtex.data.datasets.captioning.CaptioningDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">CaptioningDataset</span></code></a></p>
 </dd></dl>
 
-<span class="target" id="module-virtex.data.datasets.multilabel"></span><dl class="py class">
-<dt id="virtex.data.datasets.multilabel.MultiLabelClassificationDataset">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.multilabel.</code><code class="sig-name descname">MultiLabelClassificationDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/multilabel.py#L15-L105"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.multilabel.MultiLabelClassificationDataset" title="Permalink to this definition">¶</a></dt>
+</dd></dl>
+
+<span class="target" id="module-virtex.data.datasets.classification"></span><dl class="py class">
+<dt id="virtex.data.datasets.classification.TokenClassificationDataset">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.classification.</code><code class="sig-name descname">TokenClassificationDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/classification.py#L19-L102"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.classification.TokenClassificationDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code></p>
+<p>A dataset which provides image-labelset pairs from a serialized LMDB file
+(COCO Captions in this codebase). the set of caption tokens (unordered)
+is treated as a labelset. Used for token classification pretraining task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data_root: str, optional (default = “datasets/coco”)</strong></dt><dd><p>Path to the dataset root directory. This must contain the serialized
+LMDB files (for COCO <code class="docutils literal notranslate"><span class="pre">train2017</span></code> and <code class="docutils literal notranslate"><span class="pre">val2017</span></code> splits).</p>
+</dd>
+<dt><strong>split: str, optional (default = “train”)</strong></dt><dd><p>Which split (from COCO 2017 version) to read. One of <code class="docutils literal notranslate"><span class="pre">{&quot;train&quot;,</span> <span class="pre">&quot;val&quot;}</span></code>.</p>
+</dd>
+<dt><strong>tokenizer: virtex.data.tokenizers.SentencePieceBPETokenizer</strong></dt><dd><p>A tokenizer which has the mapping between word tokens and their
+integer IDs.</p>
+</dd>
+<dt><strong>image_tranform: Callable, optional (default = virtex.data.transforms.DEFAULT_IMAGE_TRANSFORM)</strong></dt><dd><p>A list of transformations, from either <a class="reference external" href="https://albumentations.readthedocs.io/en/latest/">albumentations</a> or <a class="reference internal" href="data.transforms.html#module-virtex.data.transforms" title="virtex.data.transforms"><code class="xref py py-mod docutils literal notranslate"><span class="pre">virtex.data.transforms</span></code></a>
+to be applied on the image.</p>
+</dd>
+<dt><strong>max_caption_length: int, optional (default = 30)</strong></dt><dd><p>Maximum number of tokens to keep in output caption tokens. Extra tokens
+will be trimmed from the right end of the token list.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="virtex.data.datasets.classification.TokenClassificationDataset._gorg">
+<code class="sig-name descname">_gorg</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/classification.py#L19-L102"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.classification.TokenClassificationDataset._gorg" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#virtex.data.datasets.classification.TokenClassificationDataset" title="virtex.data.datasets.classification.TokenClassificationDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">TokenClassificationDataset</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="virtex.data.datasets.classification.MultiLabelClassificationDataset">
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.classification.</code><code class="sig-name descname">MultiLabelClassificationDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/classification.py#L105-L202"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.classification.MultiLabelClassificationDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code></p>
 <p>A dataset which provides image-labelset pairs from COCO instance annotation
 files. This is used for multilabel classification pretraining task.</p>
@@ -114,6 +155,12 @@ to be applied on the image.</p>
 </dl>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt id="virtex.data.datasets.classification.MultiLabelClassificationDataset._gorg">
+<code class="sig-name descname">_gorg</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/classification.py#L105-L202"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.classification.MultiLabelClassificationDataset._gorg" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#virtex.data.datasets.classification.MultiLabelClassificationDataset" title="virtex.data.datasets.classification.MultiLabelClassificationDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiLabelClassificationDataset</span></code></a></p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -122,7 +169,7 @@ to be applied on the image.</p>
 <span id="downstream-datasets"></span><h2>Downstream Datasets<a class="headerlink" href="#module-virtex.data.datasets.downstream" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="virtex.data.datasets.downstream.ImageNetDataset">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">ImageNetDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'datasets/imagenet'</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'train'</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em>, <em class="sig-param"><span class="n">percentage</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">100</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L20-L92"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.ImageNetDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">ImageNetDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L16-L93"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.ImageNetDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchvision.datasets.imagenet.ImageNet</span></code></p>
 <p>Simple wrapper over torchvision’s ImageNet dataset with a feature to support
 restricting dataset size for semi-supervised learning setup (data-efficiency
@@ -146,11 +193,17 @@ default, and will be ignored if <code class="docutils literal notranslate"><span
 </dl>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt id="virtex.data.datasets.downstream.ImageNetDataset._gorg">
+<code class="sig-name descname">_gorg</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L16-L93"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.ImageNetDataset._gorg" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#virtex.data.datasets.downstream.ImageNetDataset" title="virtex.data.datasets.downstream.ImageNetDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageNetDataset</span></code></a></p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt id="virtex.data.datasets.downstream.INaturalist2018Dataset">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">INaturalist2018Dataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'datasets/inaturalist'</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'train'</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L95-L153"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.INaturalist2018Dataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">INaturalist2018Dataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L96-L159"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.INaturalist2018Dataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code></p>
 <p>A dataset which provides image-label pairs from the iNaturalist 2018 dataset.</p>
 <dl class="field-list simple">
@@ -167,11 +220,17 @@ to be applied on the image.</p>
 </dl>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt id="virtex.data.datasets.downstream.INaturalist2018Dataset._gorg">
+<code class="sig-name descname">_gorg</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L96-L159"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.INaturalist2018Dataset._gorg" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#virtex.data.datasets.downstream.INaturalist2018Dataset" title="virtex.data.datasets.downstream.INaturalist2018Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">INaturalist2018Dataset</span></code></a></p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt id="virtex.data.datasets.downstream.VOC07ClassificationDataset">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">VOC07ClassificationDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'datasets/VOC2007'</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'trainval'</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L156-L236"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.VOC07ClassificationDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">VOC07ClassificationDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L162-L247"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.VOC07ClassificationDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code></p>
 <p>A dataset which provides image-label pairs from the PASCAL VOC 2007 dataset.</p>
 <dl class="field-list simple">
@@ -188,11 +247,17 @@ to be applied on the image.</p>
 </dl>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt id="virtex.data.datasets.downstream.VOC07ClassificationDataset._gorg">
+<code class="sig-name descname">_gorg</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L162-L247"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.VOC07ClassificationDataset._gorg" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#virtex.data.datasets.downstream.VOC07ClassificationDataset" title="virtex.data.datasets.downstream.VOC07ClassificationDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">VOC07ClassificationDataset</span></code></a></p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt id="virtex.data.datasets.downstream.ImageDirectoryDataset">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">ImageDirectoryDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_root</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">image_transform</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="default_value">Compose([SmallestMaxSize(always_apply=False, p=1.0, max_size=256, interpolation=1), CenterSquareCrop(always_apply=False, p=1.0, height=224, width=224), Normalize(always_apply=False, p=1.0, mean=0.485, 0.456, 0.406, std=0.229, 0.224, 0.225, max_pixel_value=255.0)], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L239-L278"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.ImageDirectoryDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.data.datasets.downstream.</code><code class="sig-name descname">ImageDirectoryDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L250-L286"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.ImageDirectoryDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code></p>
 <p>A dataset which reads images from any directory. This class is useful to
 run image captioning inference on our models with any arbitrary images.</p>
@@ -207,6 +272,12 @@ to be applied on the image.</p>
 </dl>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt id="virtex.data.datasets.downstream.ImageDirectoryDataset._gorg">
+<code class="sig-name descname">_gorg</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/data/datasets/downstream.py#L250-L286"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.data.datasets.downstream.ImageDirectoryDataset._gorg" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#virtex.data.datasets.downstream.ImageDirectoryDataset" title="virtex.data.datasets.downstream.ImageDirectoryDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageDirectoryDataset</span></code></a></p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -239,7 +310,6 @@ to be applied on the image.</p>
 <li class="toctree-l1"><a class="reference internal" href="config.html">virtex.config</a></li>
 <li class="toctree-l1"><a class="reference internal" href="factories.html">virtex.factories</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="data.html">virtex.data</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="data.structures.html">virtex.data.structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="data.readers.html">virtex.data.readers</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">virtex.data.datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="data.tokenizers.html">virtex.data.tokenizers</a></li>
@@ -287,7 +357,7 @@ to be applied on the image.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Karan Desai and Justin Johnson.
+      &copy;2021, Karan Desai and Justin Johnson.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>

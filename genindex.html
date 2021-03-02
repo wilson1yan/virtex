@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 
 
-    <title>Index &#8212; virtex 0.9 documentation</title>
+    <title>Index &#8212; virtex 1.0 documentation</title>
 
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -83,10 +83,30 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="virtex/modules.textual_heads.html#virtex.modules.textual_heads.TransformerTextualHead._generate_future_mask">_generate_future_mask() (virtex.modules.textual_heads.TransformerTextualHead method)</a>
 </li>
-      <li><a href="virtex/modules.textual_heads.html#virtex.modules.textual_heads.TransformerTextualHead._init_weights">_init_weights() (virtex.modules.textual_heads.TransformerTextualHead static method)</a>
+      <li><a href="virtex/data.datasets.html#virtex.data.datasets.captioning.CaptioningDataset._gorg">_gorg (virtex.data.datasets.captioning.CaptioningDataset attribute)</a>
+
+      <ul>
+        <li><a href="virtex/data.datasets.html#virtex.data.datasets.classification.MultiLabelClassificationDataset._gorg">(virtex.data.datasets.classification.MultiLabelClassificationDataset attribute)</a>
 </li>
+        <li><a href="virtex/data.datasets.html#virtex.data.datasets.classification.TokenClassificationDataset._gorg">(virtex.data.datasets.classification.TokenClassificationDataset attribute)</a>
+</li>
+        <li><a href="virtex/data.datasets.html#virtex.data.datasets.downstream.ImageDirectoryDataset._gorg">(virtex.data.datasets.downstream.ImageDirectoryDataset attribute)</a>
+</li>
+        <li><a href="virtex/data.datasets.html#virtex.data.datasets.downstream.ImageNetDataset._gorg">(virtex.data.datasets.downstream.ImageNetDataset attribute)</a>
+</li>
+        <li><a href="virtex/data.datasets.html#virtex.data.datasets.downstream.INaturalist2018Dataset._gorg">(virtex.data.datasets.downstream.INaturalist2018Dataset attribute)</a>
+</li>
+        <li><a href="virtex/data.datasets.html#virtex.data.datasets.downstream.VOC07ClassificationDataset._gorg">(virtex.data.datasets.downstream.VOC07ClassificationDataset attribute)</a>
+</li>
+        <li><a href="virtex/data.readers.html#virtex.data.readers.LmdbReader._gorg">(virtex.data.readers.LmdbReader attribute)</a>
+</li>
+        <li><a href="virtex/data.readers.html#virtex.data.readers.SimpleCocoCaptionsReader._gorg">(virtex.data.readers.SimpleCocoCaptionsReader attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="virtex/modules.textual_heads.html#virtex.modules.textual_heads.TransformerTextualHead._init_weights">_init_weights() (virtex.modules.textual_heads.TransformerTextualHead static method)</a>
+</li>
       <li><a href="virtex/utils.distributed.html#virtex.utils.distributed._job_worker">_job_worker() (in module virtex.utils.distributed)</a>
 </li>
       <li><a href="virtex/model_zoo.html#virtex.model_zoo.model_zoo._ModelZooUrls">_ModelZooUrls (class in virtex.model_zoo.model_zoo)</a>
@@ -113,8 +133,6 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="virtex/data.structures.html#virtex.data.structures.Batch">Batch (class in virtex.data.structures)</a>
-</li>
       <li><a href="virtex/models.html#virtex.models.captioning.CaptioningModel.beam_search_step">beam_search_step() (virtex.models.captioning.CaptioningModel method)</a>
 </li>
   </ul></td>
@@ -147,8 +165,6 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="virtex/utils.metrics.html#virtex.utils.metrics.CocoCaptionsEvaluator">CocoCaptionsEvaluator (class in virtex.utils.metrics)</a>
 </li>
-      <li><a href="virtex/data.transforms.html#virtex.data.transforms.ColorJitter">ColorJitter (class in virtex.data.transforms)</a>
-</li>
       <li><a href="virtex/utils.common.html#virtex.utils.common.common_parser">common_parser() (in module virtex.utils.common)</a>
 </li>
       <li><a href="virtex/utils.common.html#virtex.utils.common.common_setup">common_setup() (in module virtex.utils.common)</a>
@@ -156,7 +172,11 @@
       <li><a href="virtex/config.html#virtex.config.Config">Config (class in virtex.config)</a>
 </li>
       <li><a href="virtex/factories.html#virtex.factories.Factory.create">create() (virtex.factories.Factory class method)</a>
+
+      <ul>
+        <li><a href="virtex/factories.html#virtex.factories.ImageTransformsFactory.create">(virtex.factories.ImageTransformsFactory class method)</a>
 </li>
+      </ul></li>
       <li><a href="virtex/utils.common.html#virtex.utils.common.cycle">cycle() (in module virtex.utils.common)</a>
 </li>
   </ul></td>
@@ -209,6 +229,8 @@
         <li><a href="virtex/models.html#virtex.models.classification.ClassificationModel.forward">(virtex.models.classification.ClassificationModel method)</a>
 </li>
         <li><a href="virtex/models.html#virtex.models.downstream.FeatureExtractor.forward">(virtex.models.downstream.FeatureExtractor method)</a>
+</li>
+        <li><a href="virtex/models.html#virtex.models.masked_lm.MaskedLMModel.forward">(virtex.models.masked_lm.MaskedLMModel method)</a>
 </li>
         <li><a href="virtex/modules.embedding.html#virtex.modules.embedding.WordAndPositionalEmbedding.forward">(virtex.modules.embedding.WordAndPositionalEmbedding method)</a>
 </li>
@@ -285,10 +307,6 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="virtex/data.tokenizers.html#virtex.data.tokenizers.SentencePieceBPETokenizer.id_to_token">id_to_token() (virtex.data.tokenizers.SentencePieceBPETokenizer method)</a>
 </li>
-      <li><a href="virtex/data.structures.html#virtex.data.structures.ImageCaptionBatch">ImageCaptionBatch (class in virtex.data.structures)</a>
-</li>
-      <li><a href="virtex/data.structures.html#virtex.data.structures.ImageCaptionInstance">ImageCaptionInstance (class in virtex.data.structures)</a>
-</li>
       <li><a href="virtex/data.transforms.html#virtex.data.transforms.ImageCaptionTransform">ImageCaptionTransform (class in virtex.data.transforms)</a>
 </li>
       <li><a href="virtex/data.datasets.html#virtex.data.datasets.downstream.ImageDirectoryDataset">ImageDirectoryDataset (class in virtex.data.datasets.downstream)</a>
@@ -305,8 +323,6 @@
 </li>
       <li><a href="virtex/data.datasets.html#virtex.data.datasets.downstream.INaturalist2018Dataset">INaturalist2018Dataset (class in virtex.data.datasets.downstream)</a>
 </li>
-      <li><a href="virtex/data.structures.html#virtex.data.structures.Instance">Instance (class in virtex.data.structures)</a>
-</li>
       <li><a href="virtex/utils.distributed.html#virtex.utils.distributed.is_master_process">is_master_process() (in module virtex.utils.distributed)</a>
 </li>
   </ul></td>
@@ -317,10 +333,6 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="virtex/utils.distributed.html#virtex.utils.distributed.launch">launch() (in module virtex.utils.distributed)</a>
 </li>
-      <li><a href="virtex/data.structures.html#virtex.data.structures.LinearClassificationBatch">LinearClassificationBatch (class in virtex.data.structures)</a>
-</li>
-      <li><a href="virtex/data.structures.html#virtex.data.structures.LinearClassificationInstance">LinearClassificationInstance (class in virtex.data.structures)</a>
-</li>
       <li><a href="virtex/modules.textual_heads.html#virtex.modules.textual_heads.LinearTextualHead">LinearTextualHead (class in virtex.modules.textual_heads)</a>
 </li>
       <li><a href="virtex/optim.lr_scheduler.html#virtex.optim.lr_scheduler.LinearWarmupCosineAnnealingLR">LinearWarmupCosineAnnealingLR (class in virtex.optim.lr_scheduler)</a>
@@ -329,10 +341,10 @@
 </li>
       <li><a href="virtex/optim.lr_scheduler.html#virtex.optim.lr_scheduler.LinearWarmupMultiStepLR">LinearWarmupMultiStepLR (class in virtex.optim.lr_scheduler)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="virtex/optim.lr_scheduler.html#virtex.optim.lr_scheduler.LinearWarmupNoDecayLR">LinearWarmupNoDecayLR (class in virtex.optim.lr_scheduler)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="virtex/data.readers.html#virtex.data.readers.LmdbReader">LmdbReader (class in virtex.data.readers)</a>
 </li>
       <li><a href="virtex/utils.checkpointing.html#virtex.utils.checkpointing.CheckpointManager.load">load() (virtex.utils.checkpointing.CheckpointManager method)</a>
@@ -351,6 +363,8 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="virtex/models.html#virtex.models.masked_lm.MaskedLMModel">MaskedLMModel (class in virtex.models.masked_lm)</a>
+</li>
       <li>
     module
 
@@ -359,13 +373,11 @@
 </li>
         <li><a href="virtex/data.datasets.html#module-virtex.data.datasets.captioning">virtex.data.datasets.captioning</a>
 </li>
+        <li><a href="virtex/data.datasets.html#module-virtex.data.datasets.classification">virtex.data.datasets.classification</a>
+</li>
         <li><a href="virtex/data.datasets.html#module-virtex.data.datasets.downstream">virtex.data.datasets.downstream</a>
 </li>
-        <li><a href="virtex/data.datasets.html#module-virtex.data.datasets.multilabel">virtex.data.datasets.multilabel</a>
-</li>
         <li><a href="virtex/data.readers.html#module-virtex.data.readers">virtex.data.readers</a>
-</li>
-        <li><a href="virtex/data.structures.html#module-virtex.data.structures">virtex.data.structures</a>
 </li>
         <li><a href="virtex/data.tokenizers.html#module-virtex.data.tokenizers">virtex.data.tokenizers</a>
 </li>
@@ -380,6 +392,8 @@
         <li><a href="virtex/models.html#module-virtex.models.classification">virtex.models.classification</a>
 </li>
         <li><a href="virtex/models.html#module-virtex.models.downstream">virtex.models.downstream</a>
+</li>
+        <li><a href="virtex/models.html#module-virtex.models.masked_lm">virtex.models.masked_lm</a>
 </li>
         <li><a href="virtex/modules.embedding.html#module-virtex.modules.embedding">virtex.modules.embedding</a>
 </li>
@@ -406,7 +420,7 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="virtex/data.datasets.html#virtex.data.datasets.multilabel.MultiLabelClassificationDataset">MultiLabelClassificationDataset (class in virtex.data.datasets.multilabel)</a>
+      <li><a href="virtex/data.datasets.html#virtex.data.datasets.classification.MultiLabelClassificationDataset">MultiLabelClassificationDataset (class in virtex.data.datasets.classification)</a>
 </li>
       <li><a href="virtex/models.html#virtex.models.classification.MultiLabelClassificationModel">MultiLabelClassificationModel (class in virtex.models.classification)</a>
 </li>
@@ -432,12 +446,10 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="virtex/data.structures.html#virtex.data.structures.Instance.pin_memory">pin_memory() (virtex.data.structures.Instance method)</a>
+      <li><a href="virtex/factories.html#virtex.factories.PretrainingDatasetFactory">PretrainingDatasetFactory (class in virtex.factories)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="virtex/factories.html#virtex.factories.PretrainingDatasetFactory">PretrainingDatasetFactory (class in virtex.factories)</a>
-</li>
       <li><a href="virtex/factories.html#virtex.factories.PretrainingModelFactory">PretrainingModelFactory (class in virtex.factories)</a>
 </li>
   </ul></td>
@@ -506,11 +518,11 @@
 </li>
       <li><a href="virtex/utils.timer.html#virtex.utils.timer.Timer">Timer (class in virtex.utils.timer)</a>
 </li>
-      <li><a href="virtex/data.structures.html#virtex.data.structures.Instance.to">to() (virtex.data.structures.Instance method)</a>
-</li>
       <li><a href="virtex/utils.timer.html#virtex.utils.timer.Timer.toc">toc() (virtex.utils.timer.Timer method)</a>
 </li>
       <li><a href="virtex/data.tokenizers.html#virtex.data.tokenizers.SentencePieceBPETokenizer.token_to_id">token_to_id() (virtex.data.tokenizers.SentencePieceBPETokenizer method)</a>
+</li>
+      <li><a href="virtex/data.datasets.html#virtex.data.datasets.classification.TokenClassificationDataset">TokenClassificationDataset (class in virtex.data.datasets.classification)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -551,6 +563,13 @@
 </li>
       </ul></li>
       <li>
+    virtex.data.datasets.classification
+
+      <ul>
+        <li><a href="virtex/data.datasets.html#module-virtex.data.datasets.classification">module</a>
+</li>
+      </ul></li>
+      <li>
     virtex.data.datasets.downstream
 
       <ul>
@@ -558,24 +577,10 @@
 </li>
       </ul></li>
       <li>
-    virtex.data.datasets.multilabel
-
-      <ul>
-        <li><a href="virtex/data.datasets.html#module-virtex.data.datasets.multilabel">module</a>
-</li>
-      </ul></li>
-      <li>
     virtex.data.readers
 
       <ul>
         <li><a href="virtex/data.readers.html#module-virtex.data.readers">module</a>
-</li>
-      </ul></li>
-      <li>
-    virtex.data.structures
-
-      <ul>
-        <li><a href="virtex/data.structures.html#module-virtex.data.structures">module</a>
 </li>
       </ul></li>
       <li>
@@ -625,6 +630,13 @@
 
       <ul>
         <li><a href="virtex/models.html#module-virtex.models.downstream">module</a>
+</li>
+      </ul></li>
+      <li>
+    virtex.models.masked_lm
+
+      <ul>
+        <li><a href="virtex/models.html#module-virtex.models.masked_lm">module</a>
 </li>
       </ul></li>
   </ul></td>
@@ -706,6 +718,8 @@
         <li><a href="virtex/utils.timer.html#module-virtex.utils.timer">module</a>
 </li>
       </ul></li>
+      <li><a href="virtex/models.html#virtex.models.captioning.VirTexModel">VirTexModel (in module virtex.models.captioning)</a>
+</li>
       <li><a href="virtex/modules.visual_backbones.html#virtex.modules.visual_backbones.VisualBackbone">VisualBackbone (class in virtex.modules.visual_backbones)</a>
 </li>
       <li><a href="virtex/factories.html#virtex.factories.VisualBackboneFactory">VisualBackboneFactory (class in virtex.factories)</a>
@@ -796,7 +810,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Karan Desai and Justin Johnson.
+      &copy;2021, Karan Desai and Justin Johnson.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>

@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 
 
-    <title>virtex.modules.visual_backbones &#8212; virtex 0.9 documentation</title>
+    <title>virtex.modules.visual_backbones &#8212; virtex 1.0 documentation</title>
 
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -60,7 +60,7 @@
 <em class="property">class </em><code class="sig-prename descclassname">virtex.modules.visual_backbones.</code><code class="sig-name descname">VisualBackbone</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">visual_feature_size</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L8-L17"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.VisualBackbone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
 <p>Base class for all visual backbones. All child classes can simply inherit
-from <a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch vmaster (1.6.0a0+4392e52 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>, however this is kept here for uniform
+from <a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v1.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>, however this is kept here for uniform
 type annotations.</p>
 </dd></dl>
 
@@ -82,7 +82,7 @@ filled with constant value.</p>
 </dl>
 <dl class="py method">
 <dt id="virtex.modules.visual_backbones.BlindVisualBackbone.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">image</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.6.0a0+4392e52 ))">torch.Tensor</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.6.0a0+4392e52 ))">torch.Tensor</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L43-L61"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.BlindVisualBackbone.forward" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">image</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.8.0)">torch.Tensor</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.8.0)">torch.Tensor</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L43-L61"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.BlindVisualBackbone.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute visual features for a batch of input images. Since this model
 is <em>blind</em>, output will always be constant.</p>
 <dl class="field-list simple">
@@ -127,7 +127,7 @@ be specified using corresponding method name from the model zoo.</p>
 </dl>
 <dl class="py method">
 <dt id="virtex.modules.visual_backbones.TorchvisionVisualBackbone.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">image</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.6.0a0+4392e52 ))">torch.Tensor</a></span></em>, <em class="sig-param"><span class="n">return_intermediate_outputs</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Union<span class="p">[</span><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.6.0a0+4392e52 ))">torch.Tensor</a><span class="p">, </span>Dict<span class="p">[</span>str<span class="p">, </span><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.6.0a0+4392e52 ))">torch.Tensor</a><span class="p">]</span><span class="p">]</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L106-L151"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.TorchvisionVisualBackbone.forward" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">image</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.8.0)">torch.Tensor</a></span></em>, <em class="sig-param"><span class="n">return_intermediate_outputs</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Union<span class="p">[</span><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.8.0)">torch.Tensor</a><span class="p">, </span>Dict<span class="p">[</span>str<span class="p">, </span><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.8.0)">torch.Tensor</a><span class="p">]</span><span class="p">]</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L106-L151"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.TorchvisionVisualBackbone.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute visual features for a batch of input images.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -255,7 +255,7 @@ Detectron2.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Karan Desai and Justin Johnson.
+      &copy;2021, Karan Desai and Justin Johnson.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>

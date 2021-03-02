@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 
 
-    <title>How to setup this codebase? &#8212; virtex 0.9 documentation</title>
+    <title>How to setup this codebase? &#8212; virtex 1.0 documentation</title>
 
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -87,8 +87,6 @@ pip install -r requirements.txt
 </div>
 </div></blockquote>
 </li>
-<li><p>Install NVIDIA Apex for mixed precision training, following instructions in
-their <a class="reference external" href="https://github.com/nvidia/apex">README</a>.</p></li>
 </ol>
 <p>Now you can <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">virtex</span></code> from anywhere as long as you have this conda
 environment activated.</p>
@@ -121,7 +119,7 @@ tasks.</p>
     <span class="n">train2017</span><span class="o">/</span>
     <span class="n">val2017</span><span class="o">/</span>
 <span class="n">datasets</span><span class="o">/</span><span class="n">lvis</span><span class="o">/</span>
-    <span class="n">lvis_v0</span><span class="o">.</span><span class="mi">5</span><span class="n">_</span><span class="p">{</span><span class="n">train</span><span class="p">,</span><span class="n">val</span><span class="p">}</span><span class="o">.</span><span class="n">json</span>
+    <span class="n">lvis_v1</span><span class="o">.</span><span class="mi">0</span><span class="n">_</span><span class="p">{</span><span class="n">train</span><span class="p">,</span><span class="n">val</span><span class="p">}</span><span class="o">.</span><span class="n">json</span>
 </pre></div>
 </div>
 </div>
@@ -270,7 +268,7 @@ files. These are faster for data reading during pretraining.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Karan Desai and Justin Johnson.
+      &copy;2021, Karan Desai and Justin Johnson.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>
