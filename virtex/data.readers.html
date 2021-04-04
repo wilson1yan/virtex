@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 
 
-    <title>virtex.data.readers &#8212; virtex 1.0 documentation</title>
+    <title>virtex.data.readers &#8212; virtex 1.1 documentation</title>
 
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -55,7 +55,7 @@
             
   <div class="section" id="virtex-data-readers">
 <h1>virtex.data.readers<a class="headerlink" href="#virtex-data-readers" title="Permalink to this headline">¶</a></h1>
-<hr><span class="target" id="module-virtex.data.readers"></span><p>A <em>Reader</em> is a PyTorch <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset" title="(in PyTorch v1.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a> which simply reads
+<hr><span class="target" id="module-virtex.data.readers"></span><p>A <em>Reader</em> is a PyTorch <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset" title="(in PyTorch v1.8.0a0+56b43f4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a> which simply reads
 data from disk and returns it almost as is. Readers defined here are used by
 datasets in <code class="xref py py-mod docutils literal notranslate"><span class="pre">virtex.data.datasets</span></code>.</p>
 <dl class="py class">
@@ -101,7 +101,7 @@ each worker, select keys manually outside of this class and use
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Similar to <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.distributed.DistributedSampler" title="(in PyTorch v1.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DistributedSampler</span></code></a>,
+<p>Similar to <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.distributed.DistributedSampler" title="(in PyTorch v1.8.0a0+56b43f4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DistributedSampler</span></code></a>,
 this reader can shuffle the dataset deterministically at the start of
 epoch. Use <a class="reference internal" href="#virtex.data.readers.LmdbReader.set_shuffle_seed" title="virtex.data.readers.LmdbReader.set_shuffle_seed"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_shuffle_seed()</span></code></a> manually from outside to change the
 seed at every epoch.</p>

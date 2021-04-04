@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 
 
-    <title>virtex.modules.visual_backbones &#8212; virtex 1.0 documentation</title>
+    <title>virtex.modules.visual_backbones &#8212; virtex 1.1 documentation</title>
 
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -60,54 +60,13 @@
 <em class="property">class </em><code class="sig-prename descclassname">virtex.modules.visual_backbones.</code><code class="sig-name descname">VisualBackbone</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">visual_feature_size</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L8-L17"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.VisualBackbone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
 <p>Base class for all visual backbones. All child classes can simply inherit
-from <a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v1.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>, however this is kept here for uniform
+from <a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v1.8.0a0+56b43f4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>, however this is kept here for uniform
 type annotations.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="virtex.modules.visual_backbones.BlindVisualBackbone">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.modules.visual_backbones.</code><code class="sig-name descname">BlindVisualBackbone</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">visual_feature_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2048</span></em>, <em class="sig-param"><span class="n">bias_value</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L20-L61"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.BlindVisualBackbone" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#virtex.modules.visual_backbones.VisualBackbone" title="virtex.modules.visual_backbones.VisualBackbone"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.modules.visual_backbones.VisualBackbone</span></code></a></p>
-<p>A visual backbone which cannot see the image. It always outputs a tensor
-filled with constant value.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>visual_feature_size: int, optional (default = 2048)</strong></dt><dd><p>Size of the last dimension (channels) of output from forward pass.</p>
-</dd>
-<dt><strong>bias_value: float, optional (default = 1.0)</strong></dt><dd><p>Constant value to fill in the output tensor.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<dl class="py method">
-<dt id="virtex.modules.visual_backbones.BlindVisualBackbone.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">image</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.8.0)">torch.Tensor</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.8.0)">torch.Tensor</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L43-L61"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.BlindVisualBackbone.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute visual features for a batch of input images. Since this model
-is <em>blind</em>, output will always be constant.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>image: torch.Tensor</strong></dt><dd><p>Batch of input images. A tensor of shape
-<code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">3,</span> <span class="pre">height,</span> <span class="pre">width)</span></code>.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>torch.Tensor</dt><dd><p>Output visual features, filled with <code class="xref py py-attr docutils literal notranslate"><span class="pre">bias_value</span></code>. A tensor of
-shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">visual_feature_size)</span></code>.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt id="virtex.modules.visual_backbones.TorchvisionVisualBackbone">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.modules.visual_backbones.</code><code class="sig-name descname">TorchvisionVisualBackbone</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'resnet50'</span></em>, <em class="sig-param"><span class="n">visual_feature_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2048</span></em>, <em class="sig-param"><span class="n">pretrained</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">frozen</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L64-L199"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.TorchvisionVisualBackbone" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.modules.visual_backbones.</code><code class="sig-name descname">TorchvisionVisualBackbone</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'resnet50'</span></em>, <em class="sig-param"><span class="n">visual_feature_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2048</span></em>, <em class="sig-param"><span class="n">pretrained</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">frozen</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L20-L127"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.TorchvisionVisualBackbone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#virtex.modules.visual_backbones.VisualBackbone" title="virtex.modules.visual_backbones.VisualBackbone"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.modules.visual_backbones.VisualBackbone</span></code></a></p>
 <p>A visual backbone from <a class="reference external" href="https://pytorch.org/docs/stable/torchvision/models.html">Torchvision model zoo</a>. Any model can
 be specified using corresponding method name from the model zoo.</p>
@@ -127,7 +86,7 @@ be specified using corresponding method name from the model zoo.</p>
 </dl>
 <dl class="py method">
 <dt id="virtex.modules.visual_backbones.TorchvisionVisualBackbone.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">image</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.8.0)">torch.Tensor</a></span></em>, <em class="sig-param"><span class="n">return_intermediate_outputs</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Union<span class="p">[</span><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.8.0)">torch.Tensor</a><span class="p">, </span>Dict<span class="p">[</span>str<span class="p">, </span><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.8.0)">torch.Tensor</a><span class="p">]</span><span class="p">]</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L106-L151"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.TorchvisionVisualBackbone.forward" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">image</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.8.0a0+56b43f4)">torch.Tensor</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v1.8.0a0+56b43f4)">torch.Tensor</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L60-L79"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.TorchvisionVisualBackbone.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute visual features for a batch of input images.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -135,23 +94,12 @@ be specified using corresponding method name from the model zoo.</p>
 <dt><strong>image: torch.Tensor</strong></dt><dd><p>Batch of input images. A tensor of shape
 <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">3,</span> <span class="pre">height,</span> <span class="pre">width)</span></code>.</p>
 </dd>
-<dt><strong>return_intermediate_outputs: bool, optional (default = False)</strong></dt><dd><p>Whether to return feaures extracted from all intermediate stages or
-just the last one. This can only be set <code class="docutils literal notranslate"><span class="pre">True</span></code> when using a
-ResNet-like model.</p>
-</dd>
 </dl>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt>Union[torch.Tensor, Dict[str, torch.Tensor]]</dt><dd><ul class="simple">
-<li><p>If <code class="docutils literal notranslate"><span class="pre">return_intermediate_outputs</span> <span class="pre">=</span> <span class="pre">False</span></code>, this will be a tensor
-of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">channels,</span> <span class="pre">height,</span> <span class="pre">width)</span></code>, for example
-it will be <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">2048,</span> <span class="pre">7,</span> <span class="pre">7)</span></code> for ResNet-50 (<code class="docutils literal notranslate"><span class="pre">layer4</span></code>).</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">return_intermediate_outputs</span> <span class="pre">=</span> <span class="pre">True</span></code>, this will be a dict
-with keys <code class="docutils literal notranslate"><span class="pre">{&quot;layer1&quot;,</span> <span class="pre">&quot;layer2&quot;,</span> <span class="pre">&quot;layer3&quot;,</span> <span class="pre">&quot;layer4&quot;,</span> <span class="pre">&quot;avgpool&quot;}</span></code>
-containing features from all intermediate layers and global
-average pooling layer.</p></li>
-</ul>
+<dt>torch.Tensor</dt><dd><p>A tensor of shape <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">channels,</span> <span class="pre">height,</span> <span class="pre">width)</span></code>, for
+example it will be <code class="docutils literal notranslate"><span class="pre">(batch_size,</span> <span class="pre">2048,</span> <span class="pre">7,</span> <span class="pre">7)</span></code> for ResNet-50.</p>
 </dd>
 </dl>
 </dd>
@@ -160,7 +108,7 @@ average pooling layer.</p></li>
 
 <dl class="py method">
 <dt id="virtex.modules.visual_backbones.TorchvisionVisualBackbone.detectron2_backbone_state_dict">
-<code class="sig-name descname">detectron2_backbone_state_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L153-L199"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.TorchvisionVisualBackbone.detectron2_backbone_state_dict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">detectron2_backbone_state_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/modules/visual_backbones.py#L81-L127"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.modules.visual_backbones.TorchvisionVisualBackbone.detectron2_backbone_state_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return state dict of visual backbone which can be loaded with
 <a class="reference external" href="https://github.com/facebookresearch/detectron2">Detectron2</a>.
 This is useful for downstream tasks based on Detectron2 (such as

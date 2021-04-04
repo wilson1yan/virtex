@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 
 
-    <title>virtex.factories &#8212; virtex 1.0 documentation</title>
+    <title>virtex.factories &#8212; virtex 1.1 documentation</title>
 
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -168,7 +168,7 @@ used by <a class="reference internal" href="#virtex.factories.PretrainingDataset
 <dt id="virtex.factories.PretrainingDatasetFactory">
 <em class="property">class </em><code class="sig-prename descclassname">virtex.factories.</code><code class="sig-name descname">PretrainingDatasetFactory</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L175-L253"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.PretrainingDatasetFactory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#virtex.factories.Factory" title="virtex.factories.Factory"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.factories.Factory</span></code></a></p>
-<p>Factory to create <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset" title="(in PyTorch v1.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a> s for pretraining
+<p>Factory to create <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset" title="(in PyTorch v1.8.0a0+56b43f4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a> s for pretraining
 VirTex models. Datasets are created depending on pretraining task used.
 Typically these datasets either provide image-caption pairs, or only images
 from COCO Captions dataset (serialized to an LMDB file).</p>
@@ -200,7 +200,7 @@ parameter <code class="docutils literal notranslate"><span class="pre">MODEL.NAM
 <dt id="virtex.factories.DownstreamDatasetFactory">
 <em class="property">class </em><code class="sig-prename descclassname">virtex.factories.</code><code class="sig-name descname">DownstreamDatasetFactory</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L256-L313"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.DownstreamDatasetFactory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#virtex.factories.Factory" title="virtex.factories.Factory"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.factories.Factory</span></code></a></p>
-<p>Factory to create <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset" title="(in PyTorch v1.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a> s for evaluating
+<p>Factory to create <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset" title="(in PyTorch v1.8.0a0+56b43f4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a> s for evaluating
 VirTex models on downstream tasks.</p>
 <p>Possible choices: <code class="docutils literal notranslate"><span class="pre">{&quot;datasets/VOC2007&quot;,</span> <span class="pre">&quot;datasets/imagenet&quot;}</span></code>.</p>
 <dl class="py method">
@@ -230,17 +230,17 @@ for VOC2007, or one of <code class="docutils literal notranslate"><span class="p
 <h2>Modeling-related Factories<a class="headerlink" href="#modeling-related-factories" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="virtex.factories.VisualBackboneFactory">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.factories.</code><code class="sig-name descname">VisualBackboneFactory</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L316-L354"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.VisualBackboneFactory" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.factories.</code><code class="sig-name descname">VisualBackboneFactory</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L316-L353"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.VisualBackboneFactory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#virtex.factories.Factory" title="virtex.factories.Factory"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.factories.Factory</span></code></a></p>
 <p>Factory to create <a class="reference internal" href="modules.visual_backbones.html#module-virtex.modules.visual_backbones" title="virtex.modules.visual_backbones"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visual_backbones</span></code></a>. This factory
 supports any ResNet-like model from
 <a class="reference external" href="https://pytorch.org/docs/stable/torchvision/models.html">Torchvision</a>.
 Use the method name for model as in torchvision, for example,
 <code class="docutils literal notranslate"><span class="pre">torchvision::resnet50</span></code>, <code class="docutils literal notranslate"><span class="pre">torchvision::wide_resnet50_2</span></code> etc.</p>
-<p>Possible choices: <code class="docutils literal notranslate"><span class="pre">{&quot;blind&quot;,</span> <span class="pre">&quot;torchvision&quot;}</span></code>.</p>
+<p>Possible choices: <code class="docutils literal notranslate"><span class="pre">{&quot;torchvision&quot;}</span></code>.</p>
 <dl class="py method">
 <dt id="virtex.factories.VisualBackboneFactory.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference internal" href="config.html#virtex.config.Config" title="virtex.config.Config">virtex.config.Config</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="modules.visual_backbones.html#virtex.modules.visual_backbones.VisualBackbone" title="virtex.modules.visual_backbones.VisualBackbone">virtex.modules.visual_backbones.VisualBackbone</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L332-L354"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.VisualBackboneFactory.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference internal" href="config.html#virtex.config.Config" title="virtex.config.Config">virtex.config.Config</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="modules.visual_backbones.html#virtex.modules.visual_backbones.VisualBackbone" title="virtex.modules.visual_backbones.VisualBackbone">virtex.modules.visual_backbones.VisualBackbone</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L331-L353"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.VisualBackboneFactory.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a visual backbone directly from config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -256,19 +256,19 @@ Use the method name for model as in torchvision, for example,
 
 <dl class="py class">
 <dt id="virtex.factories.TextualHeadFactory">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.factories.</code><code class="sig-name descname">TextualHeadFactory</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L357-L417"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.TextualHeadFactory" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.factories.</code><code class="sig-name descname">TextualHeadFactory</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L356-L421"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.TextualHeadFactory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#virtex.factories.Factory" title="virtex.factories.Factory"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.factories.Factory</span></code></a></p>
 <p>Factory to create <a class="reference internal" href="modules.textual_heads.html#module-virtex.modules.textual_heads" title="virtex.modules.textual_heads"><code class="xref py py-mod docutils literal notranslate"><span class="pre">textual_heads</span></code></a>. Architectural
 hyperparameters for transformers can be specified as <code class="docutils literal notranslate"><span class="pre">name::*</span></code>.
-For example, <code class="docutils literal notranslate"><span class="pre">transformer_postnorm::L1_H1024_A16_F4096</span></code> would create a
+For example, <code class="docutils literal notranslate"><span class="pre">transdec_postnorm::L1_H1024_A16_F4096</span></code> would create a
 transformer textual head with <code class="docutils literal notranslate"><span class="pre">L</span> <span class="pre">=</span> <span class="pre">1</span></code> layers, <code class="docutils literal notranslate"><span class="pre">H</span> <span class="pre">=</span> <span class="pre">1024</span></code> hidden size,
 <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">=</span> <span class="pre">16</span></code> attention heads, and <code class="docutils literal notranslate"><span class="pre">F</span> <span class="pre">=</span> <span class="pre">4096</span></code> size of feedforward layers.</p>
 <p>Textual head should be <code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code> for pretraining tasks which do not
 involve language modeling, such as <code class="docutils literal notranslate"><span class="pre">&quot;token_classification&quot;</span></code>.</p>
-<p>Possible choices: <code class="docutils literal notranslate"><span class="pre">{&quot;transformer_postnorm&quot;,</span> <span class="pre">&quot;transformer_prenorm&quot;,</span> <span class="pre">&quot;none&quot;}</span></code>.</p>
+<p>Possible choices: <code class="docutils literal notranslate"><span class="pre">{&quot;transdec_postnorm&quot;,</span> <span class="pre">&quot;transdec_prenorm&quot;,</span> <span class="pre">&quot;none&quot;}</span></code>.</p>
 <dl class="py method">
 <dt id="virtex.factories.TextualHeadFactory.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference internal" href="config.html#virtex.config.Config" title="virtex.config.Config">virtex.config.Config</a></span></em><span class="sig-paren">)</span> &#x2192; torch.nn.modules.module.Module<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L379-L417"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.TextualHeadFactory.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference internal" href="config.html#virtex.config.Config" title="virtex.config.Config">virtex.config.Config</a></span></em><span class="sig-paren">)</span> &#x2192; torch.nn.modules.module.Module<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L380-L421"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.TextualHeadFactory.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a textual head directly from config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -284,14 +284,14 @@ involve language modeling, such as <code class="docutils literal notranslate"><s
 
 <dl class="py class">
 <dt id="virtex.factories.PretrainingModelFactory">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.factories.</code><code class="sig-name descname">PretrainingModelFactory</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L420-L477"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.PretrainingModelFactory" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.factories.</code><code class="sig-name descname">PretrainingModelFactory</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L424-L482"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.PretrainingModelFactory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#virtex.factories.Factory" title="virtex.factories.Factory"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.factories.Factory</span></code></a></p>
 <p>Factory to create <code class="xref py py-mod docutils literal notranslate"><span class="pre">models</span></code> for different pretraining tasks.</p>
 <p>Possible choices: <code class="docutils literal notranslate"><span class="pre">{&quot;bicaptioning&quot;,</span> <span class="pre">&quot;captioning&quot;,</span> <span class="pre">&quot;masked_lm&quot;,</span>
 <span class="pre">&quot;token_classification&quot;,</span> <span class="pre">&quot;multilabel_classification&quot;}</span></code>.</p>
 <dl class="py method">
 <dt id="virtex.factories.PretrainingModelFactory.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference internal" href="config.html#virtex.config.Config" title="virtex.config.Config">virtex.config.Config</a></span></em><span class="sig-paren">)</span> &#x2192; torch.nn.modules.module.Module<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L438-L477"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.PretrainingModelFactory.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference internal" href="config.html#virtex.config.Config" title="virtex.config.Config">virtex.config.Config</a></span></em><span class="sig-paren">)</span> &#x2192; torch.nn.modules.module.Module<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L442-L482"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.PretrainingModelFactory.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a model directly from config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -311,12 +311,12 @@ involve language modeling, such as <code class="docutils literal notranslate"><s
 <h2>Optimization-related Factories<a class="headerlink" href="#optimization-related-factories" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="virtex.factories.OptimizerFactory">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.factories.</code><code class="sig-name descname">OptimizerFactory</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L480-L524"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.OptimizerFactory" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.factories.</code><code class="sig-name descname">OptimizerFactory</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L485-L529"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.OptimizerFactory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#virtex.factories.Factory" title="virtex.factories.Factory"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.factories.Factory</span></code></a></p>
 <p>Factory to create optimizers. Possible choices: <code class="docutils literal notranslate"><span class="pre">{&quot;sgd&quot;,</span> <span class="pre">&quot;adamw&quot;}</span></code>.</p>
 <dl class="py method">
 <dt id="virtex.factories.OptimizerFactory.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference internal" href="config.html#virtex.config.Config" title="virtex.config.Config">virtex.config.Config</a></span></em>, <em class="sig-param"><span class="n">named_parameters</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; torch.optim.optimizer.Optimizer<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L485-L524"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.OptimizerFactory.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference internal" href="config.html#virtex.config.Config" title="virtex.config.Config">virtex.config.Config</a></span></em>, <em class="sig-param"><span class="n">named_parameters</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; torch.optim.optimizer.Optimizer<a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L490-L529"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.OptimizerFactory.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create an optimizer directly from config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -336,14 +336,14 @@ turn off weight decay for certain parameters based on their names.</p>
 
 <dl class="py class">
 <dt id="virtex.factories.LRSchedulerFactory">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.factories.</code><code class="sig-name descname">LRSchedulerFactory</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L527-L566"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.LRSchedulerFactory" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.factories.</code><code class="sig-name descname">LRSchedulerFactory</code><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L532-L571"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.LRSchedulerFactory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#virtex.factories.Factory" title="virtex.factories.Factory"><code class="xref py py-class docutils literal notranslate"><span class="pre">virtex.factories.Factory</span></code></a></p>
 <p>Factory to create LR schedulers. All schedulers have a built-in LR warmup
 schedule before actual LR scheduling (decay) starts.</p>
 <p>Possible choices: <code class="docutils literal notranslate"><span class="pre">{&quot;none&quot;,</span> <span class="pre">&quot;multistep&quot;,</span> <span class="pre">&quot;linear&quot;,</span> <span class="pre">&quot;cosine&quot;}</span></code>.</p>
 <dl class="py method">
 <dt id="virtex.factories.LRSchedulerFactory.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference internal" href="config.html#virtex.config.Config" title="virtex.config.Config">virtex.config.Config</a></span></em>, <em class="sig-param"><span class="n">optimizer</span><span class="p">:</span> <span class="n">torch.optim.optimizer.Optimizer</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.lr_scheduler.LambdaLR" title="(in PyTorch v1.8.0)">torch.optim.lr_scheduler.LambdaLR</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L542-L566"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.LRSchedulerFactory.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference internal" href="config.html#virtex.config.Config" title="virtex.config.Config">virtex.config.Config</a></span></em>, <em class="sig-param"><span class="n">optimizer</span><span class="p">:</span> <span class="n">torch.optim.optimizer.Optimizer</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.lr_scheduler.LambdaLR" title="(in PyTorch v1.8.0a0+56b43f4)">torch.optim.lr_scheduler.LambdaLR</a><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/factories.py#L547-L571"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.factories.LRSchedulerFactory.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create an LR scheduler directly from config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 
 
-    <title>virtex.config &#8212; virtex 1.0 documentation</title>
+    <title>virtex.config &#8212; virtex 1.1 documentation</title>
 
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -57,7 +57,7 @@
 <h1>virtex.config<a class="headerlink" href="#virtex-config" title="Permalink to this headline">¶</a></h1>
 <hr><span class="target" id="module-virtex.config"></span><dl class="py class">
 <dt id="virtex.config.Config">
-<em class="property">class </em><code class="sig-prename descclassname">virtex.config.</code><code class="sig-name descname">Config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_file</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">override_list</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Any<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L6-L242"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">virtex.config.</code><code class="sig-name descname">Config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_file</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">override_list</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Any<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L6-L243"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This class provides package-wide configuration management. It is a
 nested dict-like structure with nested keys accessible as attributes. It
@@ -94,13 +94,13 @@ This happens after overriding from YAML file.</p>
 </div>
 <dl class="py method">
 <dt id="virtex.config.Config.add_derived_params">
-<code class="sig-name descname">add_derived_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L219-L223"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config.add_derived_params" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add_derived_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L220-L224"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config.add_derived_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add parameters with values derived from existing parameters.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="virtex.config.Config.dump">
-<code class="sig-name descname">dump</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">file_path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L225-L233"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config.dump" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">dump</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">file_path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/kdexd/virtex/blob/master/virtex/config.py#L226-L234"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#virtex.config.Config.dump" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save config at the specified file path.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -275,7 +275,8 @@ This happens after overriding from YAML file.</p>
 157
 158
 159
-160</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Random seed for NumPy and PyTorch, important for reproducibility.</span>
+160
+161</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Random seed for NumPy and PyTorch, important for reproducibility.</span>
 <span class="n">_C</span><span class="o">.</span><span class="n">RANDOM_SEED</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="c1"># Train with Automatic Mixed Precision (native PyTorch).</span>
 <span class="n">_C</span><span class="o">.</span><span class="n">AMP</span> <span class="o">=</span> <span class="kc">True</span>
@@ -378,9 +379,9 @@ This happens after overriding from YAML file.</p>
 
 <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">TEXTUAL</span> <span class="o">=</span> <span class="n">CN</span><span class="p">()</span>
 <span class="c1"># Name of textual head. Set to &quot;none&quot; for MODEL.NAME = &quot;*_classification&quot;.</span>
-<span class="c1"># Possible choices: {&quot;transformer_postnorm&quot;, &quot;transformer_prenorm&quot;}.</span>
+<span class="c1"># Possible choices: {&quot;transdec_postnorm&quot;, &quot;transdec_prenorm&quot;}.</span>
 <span class="c1"># Architectural hyper-parameters are specified as shown above.</span>
-<span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">TEXTUAL</span><span class="o">.</span><span class="n">NAME</span> <span class="o">=</span> <span class="s2">&quot;transformer_postnorm::L1_H2048_A32_F8192&quot;</span>
+<span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">TEXTUAL</span><span class="o">.</span><span class="n">NAME</span> <span class="o">=</span> <span class="s2">&quot;transdec_postnorm::L1_H2048_A32_F8192&quot;</span>
 <span class="c1"># L = Number of layers in the transformer.</span>
 <span class="c1"># H = Hidden size of the transformer (embeddings, attention features).</span>
 <span class="c1"># A = Number of attention heads in the transformer.</span>
@@ -406,12 +407,13 @@ This happens after overriding from YAML file.</p>
 <span class="c1"># Regex pattern of params for which there will be no weight decay.</span>
 <span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">NO_DECAY</span> <span class="o">=</span> <span class="s2">&quot;.*textual.(embedding|transformer).*(norm.*|bias)&quot;</span>
 <span class="c1"># Max gradient norm for clipping to avoid exploding gradients.</span>
-<span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">CLIP_GRAD_NORM</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">CLIP_GRAD_NORM</span> <span class="o">=</span> <span class="mf">10.0</span>
 
 <span class="c1"># Wrap our optimizer with Lookahead (https://arxiv.org/abs/1907.08610).</span>
-<span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">USE_LOOKAHEAD</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">LOOKAHEAD_ALPHA</span> <span class="o">=</span> <span class="mf">0.5</span>
-<span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">LOOKAHEAD_STEPS</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">LOOKAHEAD</span> <span class="o">=</span> <span class="n">CN</span><span class="p">()</span>
+<span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">LOOKAHEAD</span><span class="o">.</span><span class="n">USE</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">LOOKAHEAD</span><span class="o">.</span><span class="n">ALPHA</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">_C</span><span class="o">.</span><span class="n">OPTIM</span><span class="o">.</span><span class="n">LOOKAHEAD</span><span class="o">.</span><span class="n">STEPS</span> <span class="o">=</span> <span class="mi">5</span>
 
 <span class="c1"># We set different learning rates for CNN (visual backbone) and rest of</span>
 <span class="c1"># the model. CNN LR is typically much higher for training from scratch.</span>
