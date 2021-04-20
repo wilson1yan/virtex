@@ -1,4 +1,5 @@
 import os
+import os.path as osp
 import random
 from typing import Callable, Dict, List
 
@@ -6,13 +7,14 @@ import albumentations as alb
 import numpy as np
 import torch
 from torch.utils.data import Dataset
+from torchvision.datasets.coco improt CocoCaptions
 
 from virtex.data.readers import LmdbReader
 from virtex.data.tokenizers import SentencePieceBPETokenizer
 from virtex.data import transforms as T
 
 
-class CaptioningDataset(Dataset):
+class CaptioningDataset(CocoCaptions):
     r"""
     A dataset which provides image-caption (forward and backward) pairs from
     a serialized LMDB file (COCO Captions in this codebase). This is used for
@@ -52,13 +54,14 @@ class CaptioningDataset(Dataset):
         split: str,
         tokenizer: SentencePieceBPETokenizer,
         image_transform: Callable = T.DEFAULT_IMAGE_TRANSFORM,
-        max_caption_length: int = 30,
+        max_caption_length: int = 77,
         use_single_caption: bool = False,
         percentage: float = 100.0,
     ):
-        lmdb_path = os.path.join(data_root, f"serialized_{split}.lmdb")
-        self.reader = LmdbReader(lmdb_path, percentage=percentage)
-
+        root = osp.join(data_root, f'{split}2017')
+        ann_file = osp.join(data_root, 'annotations', f'captions_{split}2017.json')
+        super().__init__(root, ann_file)
+        
         self.image_transform = image_transform
         self.caption_transform = alb.Compose(
             [
@@ -70,12 +73,10 @@ class CaptioningDataset(Dataset):
         self.use_single_caption = use_single_caption
         self.padding_idx = tokenizer.pad_id
 
-    def __len__(self):
-        return len(self.reader)
-
     def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
-
-        image_id, image, captions = self.reader[idx]
+        image_id = self.ids[idx]
+        image, captions = super().__getitem__(idx)
+        image = np.array(image)
 
         # Pick a random caption or first caption and process (transform) it.
         if self.use_single_caption:
