@@ -3,21 +3,21 @@
 # ResNet-50 + (L = 1, H = 1024) transformer trained for 500K iterations.
 # -----------------------------------------------------------------------------
 RANDOM_SEED: 0
-AMP: true
+AMP: false
 CUDNN_BENCHMARK: true
 CUDNN_DETERMINISTIC: false
 
 DATA:
-  ROOT: "datasets/coco"
-  TOKENIZER_MODEL: "datasets/vocab/coco_10k.model"
+  ROOT: "/home/wilson/data/datasets/coco"
+  TOKENIZER_MODEL: "/home/wilson/data/datasets/vocab/coco_10k.model"
   VOCAB_SIZE: 10000
   UNK_INDEX: 0
   SOS_INDEX: 1
-  EOS_INDEX: 2
-  MASK_INDEX: 3
+  EOS_INDEX: 9999
+  MASK_INDEX: 2
 
   IMAGE_CROP_SIZE: 224
-  MAX_CAPTION_LENGTH: 30
+  MAX_CAPTION_LENGTH: 77
 
   IMAGE_TRANSFORM_TRAIN:
     - "random_resized_crop"
@@ -40,7 +40,7 @@ MODEL:
     PRETRAINED: false
     FROZEN: false
   TEXTUAL:
-    NAME: "transdec_postnorm::L1_H1024_A16_F4096"
+    NAME: "transdec_prenorm::L1_H2048_A32_F8192"
     DROPOUT: 0.1
 
 OPTIM:
@@ -53,7 +53,7 @@ OPTIM:
     ALPHA: 0.5
     STEPS: 5
 
-  BATCH_SIZE: 256
+  BATCH_SIZE: 400
   CNN_LR: 0.2
   LR: 0.001
   NUM_ITERATIONS: 500000

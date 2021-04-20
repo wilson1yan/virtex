@@ -1,6 +1,7 @@
 import random
 from typing import List
 import unicodedata
+import string
 
 import albumentations as alb
 import cv2
@@ -58,7 +59,8 @@ class NormalizeCaption(CaptionOnlyTransform):
         super().__init__(always_apply=True)
 
     def apply_to_caption(self, caption: str, **params) -> str:
-        caption = caption.lower()
+        caption = caption.lower().strip()
+        caption = caption.translate(str.maketrans('', '', string.punctuation))
         caption = unicodedata.normalize("NFKD", caption)
         caption = "".join([chr for chr in caption if not unicodedata.combining(chr)])
         return caption
@@ -93,8 +95,8 @@ class TokenizeCaption(CaptionOnlyTransform):
         token_indices: List[int] = self.tokenizer.encode(caption)
 
         # Add boundary tokens.
-        token_indices.insert(0, self.tokenizer.token_to_id("[SOS]"))
-        token_indices.append(self.tokenizer.token_to_id("[EOS]"))
+        token_indices.insert(0, self.tokenizer.bos_id)
+        token_indices.append(self.tokenizer.eos_id)
         return token_indices
 
     def get_transform_init_args_names(self):

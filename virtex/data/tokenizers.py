@@ -38,6 +38,18 @@ class SentencePieceBPETokenizer(object):
         self.model = sp.SentencePieceProcessor()
         self.model.Load(self.model_path)
 
+    @property
+    def bos_id(self):
+        return self.model.bos_id()
+    
+    @property
+    def eos_id(self):
+        return self.model.eos_id()
+
+    @property
+    def pad_id(self):
+        return self.model.pad_id()
+
     def get_vocab_size(self) -> int:
         r"""Return number of tokens in vocabulary (including special tokens)."""
         return len(self.model)

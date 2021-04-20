@@ -129,7 +129,7 @@ def common_parser(description: str = "") -> argparse.ArgumentParser:
         help="A list of key-value pairs to modify pretraining config params.",
     )
     parser.add_argument(
-        "--serialization-dir", default="/tmp/virtex",
+        "--serialization-dir", default="/shared/wilson/data/virtex",
         help="Path to a directory to serialize checkpoints and save job logs."
     )
 

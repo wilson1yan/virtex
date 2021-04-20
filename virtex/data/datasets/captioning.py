@@ -68,7 +68,7 @@ class CaptioningDataset(Dataset):
             ]
         )
         self.use_single_caption = use_single_caption
-        self.padding_idx = tokenizer.token_to_id("<unk>")
+        self.padding_idx = tokenizer.pad_id
 
     def __len__(self):
         return len(self.reader)
