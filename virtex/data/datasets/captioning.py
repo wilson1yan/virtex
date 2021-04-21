@@ -3,7 +3,7 @@ import os.path as osp
 import random
 from typing import Callable, Dict, List
 
-from PIL improt ImageFile
+from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 from PIL import Image
 
@@ -24,6 +24,7 @@ class ConcatDataset(Dataset):
     def __init__(self, *datasets):
         super().__init__()
         self.datasets = datasets
+        self.collate_fn = datasets[0].collate_fn
     
     @property
     def tokenizer(self):
@@ -38,7 +39,7 @@ class ConcatDataset(Dataset):
                 break
             idx -= len(dataset)
         return dataset[idx]
-
+    
 
 class CaptionDataset(Dataset):
     def __init__(
@@ -51,6 +52,7 @@ class CaptionDataset(Dataset):
         percentage: float = 100.0,
     ):
         super().__init__()
+        self.percentage = percentage
         self.tokenizer = tokenizer
         self.image_transform = image_transform
         self.caption_transform = alb.Compose(
@@ -130,7 +132,7 @@ class CocoDataset(CaptionDataset):
         caption = random.choice(captions)
 
         return {
-            "image_id": image_id,
+            "image_id": torch.tensor(image_id, dtype=torch.long),
             "image": image,
             "caption": caption
         }

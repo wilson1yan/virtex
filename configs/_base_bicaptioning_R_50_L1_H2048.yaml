@@ -33,7 +33,7 @@ DATA:
   USE_PERCENTAGE: 100.0
 
 MODEL:
-  NAME: "caption_coco"
+  NAME: "virtex_coco"
   VISUAL:
     NAME: "torchvision::resnet50"
     PRETRAINED: false
@@ -53,6 +53,7 @@ OPTIM:
     STEPS: 5
 
   BATCH_SIZE: 400
+  SEPARATE_LR: true
   CNN_LR: 0.2
   LR: 0.001
   NUM_ITERATIONS: 500000

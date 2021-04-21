@@ -233,7 +233,7 @@ def main(_A: argparse.Namespace):
 
             captions = []
             for i in range(predictions.shape[0]):
-                caption = train_dataset.tokenizer.decode(predictions[i]).tolist()
+                caption = train_dataset.tokenizer.decode(predictions[i].tolist())
                 captions.append(caption)
             
             mean = torch.tensor(IMAGENET_COLOR_MEAN, dtype=torch.float).view(1, 3, 1, 1)
@@ -245,7 +245,7 @@ def main(_A: argparse.Namespace):
                 log_text = ""
                 for i, caption in enumerate(captions):
                     logger.info(f"\t{caption}")
-                    log_text += f"{caption}\n"
+                    log_text += f"{caption}\n\n"
                 tensorboard_writer.add_text(f"samples_itr{iteration}", log_text, iteration)
                 tensorboard_writer.add_images(f"samples_itr{iteration}", image, iteration)
 

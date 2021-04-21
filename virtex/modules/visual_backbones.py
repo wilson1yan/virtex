@@ -25,13 +25,15 @@ class ViTVisualBackbone(VisualBackbone):
         name: str = 'B_32', 
         visual_feature_size: int = 768,
         pretrained: bool = True,
-        frozen: bool = False
+        frozen: bool = False,
+        image_size: int = 224,
     ):
         super().__init__(visual_feature_size)
 
-        self.cnn = ViT('B_32', pretrained=pretrained)
+        self.cnn = ViT(name, pretrained=pretrained, image_size=(image_size, image_size))
         del self.cnn.norm
         del self.cnn.fc
+        self.patch_size = round(math.sqrt(self.cnn.positional_embedding.pos_embedding.shape[1]))
 
         if frozen:
             for param in self.cnn.parameters():
@@ -70,6 +72,7 @@ class TorchvisionVisualBackbone(VisualBackbone):
         visual_feature_size: int = 2048,
         pretrained: bool = False,
         frozen: bool = False,
+        image_size: int = 224,
     ):
         super().__init__(visual_feature_size)
 

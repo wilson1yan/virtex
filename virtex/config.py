@@ -195,6 +195,8 @@ class Config(object):
         # Number of iterations to train for, batches are randomly sampled.
         _C.OPTIM.NUM_ITERATIONS = 500000
 
+        _C.OPTIM.SEPARATE_LR = True
+
         # Number of steps at the start of training for linear LR warmup.
         _C.OPTIM.WARMUP_STEPS = 10000
         # Learning rate annealing schedule for decay after warmup.

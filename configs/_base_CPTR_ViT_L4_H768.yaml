@@ -16,7 +16,7 @@ DATA:
   EOS_INDEX: 9999
   MASK_INDEX: 2
 
-  IMAGE_CROP_SIZE: 224
+  IMAGE_CROP_SIZE: 384
   MAX_CAPTION_LENGTH: 77
 
   IMAGE_TRANSFORM_TRAIN:
@@ -35,9 +35,10 @@ DATA:
 MODEL:
   NAME: "captioning_coco"
   VISUAL:
-    NAME: "vit::B_32"
+    NAME: "vit::B_16"
     PRETRAINED: true
     FROZEN: false
+    FEATURE_SIZE: 768
   TEXTUAL:
     NAME: "transdec_prenorm::L4_H768_A12_F3072"
     DROPOUT: 0.1

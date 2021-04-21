@@ -336,6 +336,7 @@ class VisualBackboneFactory(Factory):
             cls_name, cnn_name = _C.MODEL.VISUAL.NAME.split("::")
             kwargs["pretrained"] = _C.MODEL.VISUAL.PRETRAINED
             kwargs["frozen"] = _C.MODEL.VISUAL.FROZEN
+            kwargs["image_size"] = _C.DATA.IMAGE_CROP_SIZE
 
             return cls.create(cls_name, cnn_name, **kwargs)
         else:
@@ -395,7 +396,8 @@ class TextualHeadFactory(Factory):
             feedforward_size = int(architecture.group(4))
 
             # Mask the future tokens for autoregressive captioning.
-            mask_future = _C.MODEL.NAME in {"virtex", "captioning", "bicaptioning"}
+            model_name = _C.MODEL.NAME.split('_')[0]
+            mask_future = model_name in {"virtex", "captioning", "bicaptioning"}
 
             kwargs.update(
                 hidden_size=hidden_size,
