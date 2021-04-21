@@ -9,7 +9,7 @@ CUDNN_DETERMINISTIC: false
 
 DATA:
   ROOT: "/home/wilson/data/datasets/coco"
-  TOKENIZER_MODEL: "/home/wilson/data/datasets/vocab/coco_10k.model"
+  TOKENIZER_MODEL: "/home/wilson/data/datasets/coco/coco_10k.model"
   VOCAB_SIZE: 10000
   UNK_INDEX: 0
   SOS_INDEX: 1

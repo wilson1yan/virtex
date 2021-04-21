@@ -7,7 +7,7 @@ import albumentations as alb
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-from torchvision.datasets.coco improt CocoCaptions
+from torchvision.datasets.coco import CocoCaptions
 
 from virtex.data.readers import LmdbReader
 from virtex.data.tokenizers import SentencePieceBPETokenizer

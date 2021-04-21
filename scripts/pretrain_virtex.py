@@ -2,6 +2,7 @@ import argparse
 from collections import Counter
 from typing import Any
 
+import numpy as np
 from loguru import logger
 import torch
 from torch import nn
@@ -98,6 +99,7 @@ def main(_A: argparse.Namespace):
     model = PretrainingModelFactory.from_config(_C).to(device)
     optimizer = OptimizerFactory.from_config(_C, model.named_parameters())
     scheduler = LRSchedulerFactory.from_config(_C, optimizer)
+    print('total parameters:', sum([np.prod(p.shape) for p in model.parameters() if p.requires_grad]))
 
     # -------------------------------------------------------------------------
     #   BEFORE TRAINING STARTS
