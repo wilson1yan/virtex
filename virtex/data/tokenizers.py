@@ -1,4 +1,5 @@
 import csv
+import os
 from typing import Any, Dict, List
 
 import sentencepiece as sp
@@ -18,10 +19,20 @@ class SentencePieceBPETokenizer(object):
 
     def __init__(self, model_path: str):
         self.model_path = model_path
+        self.model = self._load_model(model_path)
+        self.use_huggingface = model_path in ['gpt2']
 
-        # Load pretrained tokenizer model.
-        self.model = sp.SentencePieceProcessor()
-        self.model.Load(model_path)
+    def _load_model(self, model_path):
+        if not os.path.exists(model_path):
+            if model_path == 'gpt2':
+                from transformers import GPT2Tokenizer
+                model = GPT2Tokenizer.from_pretrained('gpt2')
+            else:
+                raise Exception(f"Invalid model_path = {model_path}")
+        else:
+            model = sp.SentencePieceProcessor()
+            model.Load(model_path)
+        return model
 
     def __getstate__(self):
         r"""
@@ -34,21 +45,28 @@ class SentencePieceBPETokenizer(object):
 
     def __setstate__(self, state_dict: Dict[str, Any]):
         self.__dict__ = state_dict
-
-        self.model = sp.SentencePieceProcessor()
-        self.model.Load(self.model_path)
+        self.model = self._load_model(self.model_path)
 
     @property
     def bos_id(self):
-        return self.model.bos_id()
+        if self.use_huggingface:
+            return self.model.bos_token_id
+        else:
+            return self.model.bos_id()
     
     @property
     def eos_id(self):
-        return self.model.eos_id()
+        if self.use_huggingface:
+            return self.model.eos_token_id
+        else:
+            return self.model.eos_id()
 
     @property
     def pad_id(self):
-        return self.model.pad_id()
+        if self.use_huggingface:
+            return 0
+        else:
+            return self.model.pad_id()
 
     def get_vocab_size(self) -> int:
         r"""Return number of tokens in vocabulary (including special tokens)."""
@@ -66,8 +84,14 @@ class SentencePieceBPETokenizer(object):
 
     def encode(self, text: str) -> List[int]:
         r"""Convert a text string to a list of integer token ids."""
-        return self.model.EncodeAsIds(text)
+        if self.use_huggingface:
+            return self.model.encode(text)
+        else:
+            return self.model.EncodeAsIds(text)
 
     def decode(self, token_ids: List[int]) -> str:
         r"""Convert a sequence of token IDs to a text string."""
-        return self.model.DecodeIds(token_ids)
+        if self.use_huggingface:
+            return self.model.encode(text)
+        else:
+            return self.model.DecodeIds(token_ids)
