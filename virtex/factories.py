@@ -368,7 +368,7 @@ class TextualHeadFactory(Factory):
     }
 
     @classmethod
-    def from_config(cls, config: Config) -> nn.Module:
+    def from_config(cls, config: Config, tokenizer) -> nn.Module:
         r"""
         Create a textual head directly from config.
 
@@ -377,12 +377,11 @@ class TextualHeadFactory(Factory):
         config: virtex.config.Config
             Config object with all the parameters.
         """
-
         _C = config
         name = _C.MODEL.TEXTUAL.NAME
         kwargs = {
             "visual_feature_size": _C.MODEL.VISUAL.FEATURE_SIZE,
-            "vocab_size": _C.DATA.VOCAB_SIZE,
+            "vocab_size": tokenizer.get_vocab_size(),
         }
 
         if "trans" in _C.MODEL.TEXTUAL.NAME:
@@ -440,20 +439,21 @@ class PretrainingModelFactory(Factory):
         config: virtex.config.Config
             Config object with all the parameters.
         """
+        tokenizer = TokenizerFactory.from_config(config)
 
         _C = config
 
         # Build visual and textual streams based on config.
         visual = VisualBackboneFactory.from_config(_C)
-        textual = TextualHeadFactory.from_config(_C)
+        textual = TextualHeadFactory.from_config(_C, tokenizer)
 
         model_name = _C.MODEL.NAME.split('_')[0]
         # Add model specific kwargs. Refer call signatures of specific models
         # for matching kwargs here.
         kwargs = {
             "max_decoding_steps": _C.DATA.MAX_CAPTION_LENGTH,
-            "sos_index": _C.DATA.SOS_INDEX,
-            "eos_index": _C.DATA.EOS_INDEX,
+            "sos_index": tokenizer.bos_id,
+            "eos_index": tokenizer.eos_id,
         }
 
         return cls.create(model_name, visual, textual, **kwargs)
