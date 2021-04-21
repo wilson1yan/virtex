@@ -1,4 +1,4 @@
-from .datasets.captioning import CaptioningDataset
+from .datasets.captioning import CoCoDataset, ConceptualCaptionsDataset, ConcatDataset
 from .datasets.classification import (
     TokenClassificationDataset,
     MultiLabelClassificationDataset,

@@ -1,4 +1,5 @@
 from typing import Any, Dict
+import math
 
 import torch
 from torch import nn
@@ -15,6 +16,34 @@ class VisualBackbone(nn.Module):
     def __init__(self, visual_feature_size: int):
         super().__init__()
         self.visual_feature_size = visual_feature_size
+        
+        
+from pytorch_pretrained_vit import ViT
+class ViTVisualBackbone(VisualBackbone):
+    def __init__(
+        self,
+        name: str = 'B_32', 
+        visual_feature_size: int = 768,
+        pretrained: bool = True,
+        frozen: bool = False
+    ):
+        super().__init__(visual_feature_size)
+
+        self.cnn = ViT('B_32', pretrained=pretrained)
+        del self.cnn.norm
+        del self.cnn.fc
+
+        if frozen:
+            for param in self.cnn.parameters():
+                param.requires_grad = False
+            self.cnn.eval()
+    
+    def forward(self, image: torch.Tensor):
+        out = self.cnn(image)[:, 1:] # remove cls token
+        out = out.permute(0, 2, 1).contiguous() # NLD -> NDL
+        B, D, _ = out.shape
+        out = out.view(B, D, self.patch_size, self.patch_size)
+        return out
 
 
 class TorchvisionVisualBackbone(VisualBackbone):

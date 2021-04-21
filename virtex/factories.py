@@ -187,12 +187,8 @@ class PretrainingDatasetFactory(Factory):
     """
 
     PRODUCTS: Dict[str, Callable] = {
-        "virtex": vdata.CaptioningDataset,
-        "bicaptioning": vdata.CaptioningDataset,
-        "captioning": vdata.CaptioningDataset,
-        "masked_lm": vdata.MaskedLmDataset,
-        "token_classification": vdata.TokenClassificationDataset,
-        "multilabel_classification": vdata.MultiLabelClassificationDataset,
+        "coco": vdata.CocoDataset,
+        "cc": vdata.ConceptualCaptionsDataset,
     }
 
     @classmethod
@@ -209,10 +205,9 @@ class PretrainingDatasetFactory(Factory):
         split: str, optional (default = "train")
             Which split to load for the dataset. One of ``{"train", "val"}``.
         """
-
         _C = config
         # Every dataset needs these two args.
-        kwargs = {"data_root": _C.DATA.ROOT, "split": split}
+        kwargs = {"split": split}
 
         # Create a list of image transformations based on transform names.
         image_transform_list: List[Callable] = []
@@ -230,27 +225,20 @@ class PretrainingDatasetFactory(Factory):
         kwargs["image_transform"] = alb.Compose(image_transform_list)
 
         # Add dataset specific kwargs.
-        if _C.MODEL.NAME != "multilabel_classification":
-            tokenizer = TokenizerFactory.from_config(_C)
-            kwargs.update(
-                tokenizer=tokenizer,
-                max_caption_length=_C.DATA.MAX_CAPTION_LENGTH,
-            )
-            if _C.MODEL.NAME != "token_classification":
-                kwargs.update(
-                    use_single_caption=_C.DATA.USE_SINGLE_CAPTION,
-                    percentage=_C.DATA.USE_PERCENTAGE if split == "train" else 100.0,
-                )
+        tokenizer = TokenizerFactory.from_config(_C)
+        kwargs.update(
+            tokenizer=tokenizer,
+            max_caption_length=_C.DATA.MAX_CAPTION_LENGTH,
+            percentage=_C.DATA.USE_PERCENTAGE if split == 'train' else 100.0
+        )
 
-        if _C.MODEL.NAME == "masked_lm":
-            kwargs.update(
-                mask_proportion=_C.DATA.MASKED_LM.MASK_PROPORTION,
-                mask_probability=_C.DATA.MASKED_LM.MASK_PROBABILITY,
-                replace_probability=_C.DATA.MASKED_LM.REPLACE_PROBABILITY,
-            )
+        data_roots = _C.DATA.ROOT.split('+')
+        data_names = _C.MODEL.NAME.split('_')[1].split('+')
+        assert len(data_roots) == len(data_names)
 
-        # Dataset names match with model names (and ofcourse pretext names).
-        return cls.create(_C.MODEL.NAME, **kwargs)
+        datasets = [cls.create(name, data_root=root, **kwargs)
+                    for name, root, in zip(data_names, data_roots)]
+        return vdata.ConcatDataset(*datasets)
 
 
 class DownstreamDatasetFactory(Factory):
@@ -326,6 +314,7 @@ class VisualBackboneFactory(Factory):
 
     PRODUCTS: Dict[str, Callable] = {
         "torchvision": visual_backbones.TorchvisionVisualBackbone,
+        "vit": visual_backbones.ViTVisualBackbone,
     }
 
     @classmethod
@@ -342,13 +331,13 @@ class VisualBackboneFactory(Factory):
         _C = config
         kwargs = {"visual_feature_size": _C.MODEL.VISUAL.FEATURE_SIZE}
 
-        if "torchvision" in _C.MODEL.VISUAL.NAME:
+        if "torchvision" in _C.MODEL.VISUAL.NAME or "vit" in _C.MODEL.VISUAL.NAME:
             # Check the name for models from torchvision.
-            cnn_name = _C.MODEL.VISUAL.NAME.split("::")[-1]
+            cls_name, cnn_name = _C.MODEL.VISUAL.NAME.split("::")
             kwargs["pretrained"] = _C.MODEL.VISUAL.PRETRAINED
             kwargs["frozen"] = _C.MODEL.VISUAL.FROZEN
 
-            return cls.create("torchvision", cnn_name, **kwargs)
+            return cls.create(cls_name, cnn_name, **kwargs)
         else:
             return cls.create(_C.MODEL.VISUAL.NAME, **kwargs)
 
@@ -456,36 +445,22 @@ class PretrainingModelFactory(Factory):
         visual = VisualBackboneFactory.from_config(_C)
         textual = TextualHeadFactory.from_config(_C)
 
+        model_name = _C.MODEL.NAME.split('_')[0]
         # Add model specific kwargs. Refer call signatures of specific models
         # for matching kwargs here.
-        if _C.MODEL.NAME in {"virtex", "captioning", "bicaptioning"}:
-            kwargs = {
-                "max_decoding_steps": _C.DATA.MAX_CAPTION_LENGTH,
-                "sos_index": _C.DATA.SOS_INDEX,
-                "eos_index": _C.DATA.EOS_INDEX,
-            }
+        kwargs = {
+            "max_decoding_steps": _C.DATA.MAX_CAPTION_LENGTH,
+            "sos_index": _C.DATA.SOS_INDEX,
+            "eos_index": _C.DATA.EOS_INDEX,
+        }
 
-        elif _C.MODEL.NAME == "token_classification":
-            kwargs = {
-                "ignore_indices": [
-                    _C.DATA.UNK_INDEX,
-                    _C.DATA.SOS_INDEX,
-                    _C.DATA.EOS_INDEX,
-                    _C.DATA.MASK_INDEX,
-                ]
-            }
-        elif _C.MODEL.NAME == "multilabel_classification":
-            kwargs = {"ignore_indices": [0]}  # background index
-        else:
-            kwargs = {}
-
-        return cls.create(_C.MODEL.NAME, visual, textual, **kwargs)
+        return cls.create(model_name, visual, textual, **kwargs)
 
 
 class OptimizerFactory(Factory):
     r"""Factory to create optimizers. Possible choices: ``{"sgd", "adamw"}``."""
 
-    PRODUCTS: Dict[str, Callable] = {"sgd": optim.SGD, "adamw": optim.AdamW}
+    PRODUCTS: Dict[str, Callable] = {"sgd": optim.SGD, "adamw": optim.AdamW, "adam": optim.Adam}
 
     @classmethod
     def from_config(
@@ -513,7 +488,10 @@ class OptimizerFactory(Factory):
         param_groups = []
         for name, param in named_parameters:
             wd = 0.0 if re.match(_C.OPTIM.NO_DECAY, name) else _C.OPTIM.WEIGHT_DECAY
-            lr = _C.OPTIM.CNN_LR if "cnn" in name else _C.OPTIM.LR
+            if _C.OPTIM.SEPARATE_LR:
+                lr = _C.OPTIM.CNN_LR if "cnn" in name else _C.OPTIM.LR
+            else:
+                lr = _C.OPTIM.LR
             param_groups.append({"params": [param], "lr": lr, "weight_decay": wd})
 
         if _C.OPTIM.OPTIMIZER_NAME == "sgd":

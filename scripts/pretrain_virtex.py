@@ -20,6 +20,7 @@ from virtex.utils.checkpointing import CheckpointManager
 from virtex.utils.common import common_parser, common_setup, cycle
 import virtex.utils.distributed as dist
 from virtex.utils.timer import Timer
+from virtex.data.transforms import IMAGENET_COLOR_MEAN, IMAGENET_COLOR_STD
 
 
 parser = common_parser(
@@ -221,6 +222,35 @@ def main(_A: argparse.Namespace):
             logger.info(f"Iteration: {iteration} [Val loss: {val_loss_dict}]")
             if dist.is_master_process():
                 tensorboard_writer.add_scalars("val", val_loss_dict, iteration)
+
+        if iteration % _A.checkpoint_every == 0:
+            torch.set_grad_enabled(False)
+            model.eval()
+
+            batch = next(iter(val_dataloader))
+            batch = {"image": batch["image"][:8].to(device)}
+            predictions = model(batch)["predictions"].cpu()
+
+            captions = []
+            for i in range(predictions.shape[0]):
+                caption = train_dataset.tokenizer.decode(predictions[i]).tolist()
+                captions.append(caption)
+            
+            mean = torch.tensor(IMAGENET_COLOR_MEAN, dtype=torch.float).view(1, 3, 1, 1)
+            std = torch.tensor(IMAGENET_COLOR_STD, dtype=torch.float).view(1, 3, 1, 1)
+            image = batch["image"].cpu() * std + mean
+
+            if dist.is_master_process():
+                logger.info(f"Sample Generated Captions:")
+                log_text = ""
+                for i, caption in enumerate(captions):
+                    logger.info(f"\t{caption}")
+                    log_text += f"{caption}\n"
+                tensorboard_writer.add_text(f"samples_itr{iteration}", log_text, iteration)
+                tensorboard_writer.add_images(f"samples_itr{iteration}", image, iteration)
+
+            torch.set_grad_enabled(True)
+            model.train()
 
 
 if __name__ == "__main__":
