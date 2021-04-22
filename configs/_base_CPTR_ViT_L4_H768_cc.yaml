@@ -8,13 +8,13 @@ CUDNN_BENCHMARK: true
 CUDNN_DETERMINISTIC: false
 
 DATA:
-  ROOT: "/home/wilson/data/datasets/coco"
-  TOKENIZER_MODEL: "/home/wilson/data/datasets/coco/coco_10k.model"
-  VOCAB_SIZE: 10000
+  ROOT: "/home/wilson/data/datasets/coco+/home/group/conceptual_captions"
+  TOKENIZER_MODEL: "clip"
+  VOCAB_SIZE: 0
   UNK_INDEX: 0
-  SOS_INDEX: 1
-  EOS_INDEX: 9999
-  MASK_INDEX: 2
+  SOS_INDEX: 0
+  EOS_INDEX: 0
+  MASK_INDEX: 0
 
   IMAGE_CROP_SIZE: 384
   MAX_CAPTION_LENGTH: 77
@@ -33,14 +33,14 @@ DATA:
   USE_PERCENTAGE: 100.0
 
 MODEL:
-  NAME: "captioning_coco"
+  NAME: "captioning_coco+cc"
   VISUAL:
     NAME: "vit::B_16"
     PRETRAINED: true
     FROZEN: false
     FEATURE_SIZE: 768
   TEXTUAL:
-    NAME: "transdec_prenorm::L4_H768_A12_F3072"
+    NAME: "transdec_prenorm::L6_H768_A12_F3072"
     DROPOUT: 0.1
 
 OPTIM:
@@ -55,12 +55,10 @@ OPTIM:
   BATCH_SIZE: 128
   SEPARATE_LR: false
   LR: 0.00003
-  NUM_ITERATIONS: 100000
+  NUM_ITERATIONS: 500000
 
   WARMUP_STEPS: 0
-  LR_DECAY_NAME: "multistep"
-  LR_GAMMA: 0.5
-  LR_STEPS: [50000]
+  LR_DECAY_NAME: "cosine"
 
   NO_DECAY: "none"
   CLIP_GRAD_NORM: 10.0

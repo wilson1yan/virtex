@@ -1,4 +1,5 @@
 import argparse
+from tqdm import tqdm
 import json
 import os
 from typing import Any, Dict, List
@@ -71,6 +72,7 @@ def main(_A: argparse.Namespace):
     # Make a list of predictions to evaluate.
     predictions: List[Dict[str, Any]] = []
 
+    pbar = tqdm(total=len(val_dataloader))
     for val_iteration, val_batch in enumerate(val_dataloader, start=1):
 
         val_batch["image"] = val_batch["image"].to(device)
@@ -88,6 +90,8 @@ def main(_A: argparse.Namespace):
                     "caption": tokenizer.decode(caption.tolist()),
                 }
             )
+        pbar.update(1)
+    pbar.close()
 
     # Save predictions as a JSON file if specified.
     if _A.output is not None:

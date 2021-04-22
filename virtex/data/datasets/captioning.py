@@ -85,6 +85,7 @@ class CaptionDataset(Dataset):
 
         caption_tokens = self.caption_transform(caption=caption)["caption"]
         del data['caption']
+
         data.update({
             "image": torch.tensor(image, dtype=torch.float),
             "caption_tokens": torch.tensor(caption_tokens, dtype=torch.long),
@@ -153,11 +154,12 @@ class ConceptualCaptionsDataset(CaptionDataset):
 
         image_filename = row['filename']
         image = Image.open(osp.join(self.data_root, image_filename))
-        image = np.array(image)
+        image = np.array(image.convert("RGB"))
 
         caption = row['caption']
 
         return {
+            "image_id": torch.tensor(0, dtype=torch.long),
             "image": image,
             "caption": caption
         }
