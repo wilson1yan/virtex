@@ -20,13 +20,12 @@ class SentencePieceBPETokenizer(object):
     def __init__(self, model_path: str):
         self.model_path = model_path
         self.model = self._load_model(model_path)
-        self.use_huggingface = model_path in ['gpt2']
 
     def _load_model(self, model_path):
         if not os.path.exists(model_path):
-            if model_path == 'gpt2':
-                from transformers import GPT2Tokenizer
-                model = GPT2Tokenizer.from_pretrained('gpt2')
+            if model_path == 'clip':
+                from clip.clip import _tokenizer
+                model = _tokenizer
             else:
                 raise Exception(f"Invalid model_path = {model_path}")
         else:
@@ -49,28 +48,31 @@ class SentencePieceBPETokenizer(object):
 
     @property
     def bos_id(self):
-        if self.use_huggingface:
-            return self.model.bos_token_id
+        if self.model_path == 'clip':
+            return self.model.encoder["<|startoftext|>"]
         else:
             return self.model.bos_id()
     
     @property
     def eos_id(self):
-        if self.use_huggingface:
-            return self.model.eos_token_id
+        if self.model_path == 'clip':
+            return self.model.encoder["<|endoftext|>"]
         else:
             return self.model.eos_id()
 
     @property
     def pad_id(self):
-        if self.use_huggingface:
+        if self.model_path == 'clip':
             return 0
         else:
             return self.model.pad_id()
 
     def get_vocab_size(self) -> int:
         r"""Return number of tokens in vocabulary (including special tokens)."""
-        return len(self.model)
+        if self.model_path == 'clip':
+            return len(self.model.encoder)
+        else:
+            return len(self.model)
 
     def token_to_id(self, token: str) -> int:
         r"""Get integer ID of a string token (``<unk>`` if does not exist)."""
@@ -84,14 +86,14 @@ class SentencePieceBPETokenizer(object):
 
     def encode(self, text: str) -> List[int]:
         r"""Convert a text string to a list of integer token ids."""
-        if self.use_huggingface:
+        if self.model_path == 'clip':
             return self.model.encode(text)
         else:
             return self.model.EncodeAsIds(text)
 
     def decode(self, token_ids: List[int]) -> str:
         r"""Convert a sequence of token IDs to a text string."""
-        if self.use_huggingface:
+        if self.model_path == 'clip':
             token_ids = token_ids[:token_ids.index(self.eos_id)]
             return self.model.decode(token_ids)
         else:

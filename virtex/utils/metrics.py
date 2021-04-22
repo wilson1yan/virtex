@@ -187,11 +187,27 @@ def tokenize(image_id_to_captions: Dict[int, List[str]]) -> Dict[int, List[str]]
     return image_id_to_tokenized_captions
 
 
+def compute_scts_reward(
+    greedy_dec: torch.Tensor, 
+    sample_dec: torch.Tensor, 
+    caption_tokens: torch.Tensor, 
+    tokenizer
+):
+    batch_size = caption_tokens.shape[0]
+    n_samples_per_image = sample_dec.shape[0] // batch_size
+    assert greedy_dec.shape[0] == batch_size
+
+    greedy_captions = [tokenizer.decode(c) for c in greedy_dec]
+    sample_captions = [tokenizer.decode(c) for c in sample_dec]
+    ground_truth = [tokenizer.decode(c) for c in caption_tokens]
+    
+
 def cider(
     predictions: Dict[int, List[str]],
     ground_truth: Dict[int, List[str]],
     n: int = 4,
     sigma: float = 6.0,
+    reduce: bool = True,
 ) -> float:
     r"""Compute CIDEr score given ground truth captions and predictions."""
 
@@ -273,8 +289,11 @@ def cider(
         score_avg /= len(refs)
         score_avg *= 10.0
         scores.append(score_avg)
-
-    return np.mean(scores)
+    scores = np.array(scores)
+    
+    if reduce:
+        scores = np.mean(scores)
+    return scores
 
 
 def spice(

@@ -62,6 +62,7 @@ class CaptioningModel(nn.Module):
         self.textual = textual
         self.padding_idx = self.textual.padding_idx
         self.caption_backward = caption_backward
+        self.max_decoding_steps = max_decoding_steps
 
         # Clone the textual module for backward direction if doing captioning
         # in both directions (separately).
@@ -81,7 +82,8 @@ class CaptioningModel(nn.Module):
         )
         self.loss = nn.CrossEntropyLoss(ignore_index=self.padding_idx)
 
-    def forward(self, batch: Dict[str, torch.Tensor]) -> Dict[str, Any]:
+    def forward(self, batch: Dict[str, torch.Tensor], sample_mode: str ='beam',
+                n_samples_per_image: int = 1) -> Dict[str, Any]:
         r"""
         Given a batch of images and captions, compute log likelihood loss per
         caption token during training. During inference, given a batch of
@@ -94,6 +96,8 @@ class CaptioningModel(nn.Module):
             A batch of images and (optionally) ground truth caption tokens.
             Possible set of keys: ``{"image_id", "image", "caption_tokens",
             "noitpac_tokens", "caption_lengths"}``.
+        sample_mode: str
+            Valid sampling modes are ["beam", "greedy", "sample"]
 
         Returns
         -------
@@ -163,22 +167,57 @@ class CaptioningModel(nn.Module):
                 # at every time-step.
                 output_dict["predictions"] = torch.argmax(output_logits, dim=-1)
         else:
+            batch_size *= n_samples_per_image
+            visual_features = visual_features.repeat_interleave(n_samples_per_image, dim=0)
             # During inference, get beam search predictions for forward
             # model. Predictions from forward transformer will be shifted
             # right by one time-step.
             start_predictions = visual_features.new_full(
                 (batch_size,), self.sos_index
             ).long()
-            # Add image features as a default argument to match callable
-            # signature accepted by beam search class (partial captions only).
-            beam_search_step = functools.partial(
-                self.beam_search_step, visual_features
-            )
-            all_top_k_predictions, _ = self.beam_search.search(
-                start_predictions, beam_search_step
-            )
-            best_beam = all_top_k_predictions[:, 0, :]
-            output_dict = {"predictions": best_beam}
+            if sample_mode == "beam":
+                # Add image features as a default argument to match callable
+                # signature accepted by beam search class (partial captions only).
+                beam_search_step = functools.partial(
+                    self.beam_search_step, visual_features
+                )
+                all_top_k_predictions, _ = self.beam_search.search(
+                    start_predictions, beam_search_step
+                )
+                best_beam = all_top_k_predictions[:, 0, :]
+                output_dict = {"predictions": best_beam}
+            elif sample_mode in ["sample", "greedy"]:
+                output_logits = self.textual(
+                    visual_features, caption_tokens, caption_lengths
+                )
+                done = torch.zeros(batch_size, dtype=torch.bool, device=visual_features.device)
+                caption_lengths = torch.ones(batch_size, dtype=torch.long, device=visual_features.device)
+                
+                likelihoods = []
+                predictions = start_predictions
+                for i in range(self.max_decoding_steps):
+                    output_logits = self.textual(
+                        visual_features, predictions, caption_lengths
+                    )
+                    output_logits = F.log_softmax(output_logits[:, i], dim=-1) # NLD
+
+                    if sample_mode == "greedy":
+                        sample_tokens = torch.argmax(output_logits, dim=-1)
+                    else:
+                        token_dist = F.softmax(output_logits, dim=-1)
+                        sample_tokens = torch.multinomial(token_dist, 1)
+
+                    caption_lengths += (~done).long()
+                    done |= sample_tokens == self.eos_index
+                    sample_tokens = sample_tokens * (~done).long()
+                    predictions = torch.cat((predictions, sample_tokens), dim=1)
+
+                    likelihoods.append(output_logits[torch.arange(batch_size), sample_tokens])
+                likelihoods = torch.stack(likelihoods, dim=1)
+                predictions = predictions[:, 1:]
+                output_dict = {"predictions": predictions, "log_probs": likelihoods}
+            else:
+                raise ValueError(f"Invalid sample_mode = {sample_mode}")
 
         return output_dict
 
