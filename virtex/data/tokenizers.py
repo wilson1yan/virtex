@@ -92,6 +92,7 @@ class SentencePieceBPETokenizer(object):
     def decode(self, token_ids: List[int]) -> str:
         r"""Convert a sequence of token IDs to a text string."""
         if self.use_huggingface:
-            return self.model.encode(text)
+            token_ids = token_ids[:token_ids.index(self.eos_id)]
+            return self.model.decode(token_ids)
         else:
             return self.model.DecodeIds(token_ids)
