@@ -72,7 +72,7 @@ def main(_A: argparse.Namespace):
         else None
     )
     val_sampler = (
-        DistributedSampler(val_dataset, shuffle=False)  # type: ignore
+        DistributedSampler(val_dataset, shuffle=True)  # type: ignore
         if _A.num_gpus_per_machine > 0
         else None
     )
@@ -90,7 +90,7 @@ def main(_A: argparse.Namespace):
         val_dataset,
         batch_size=_C.OPTIM.BATCH_SIZE // dist.get_world_size(),
         sampler=val_sampler,
-        shuffle=False,
+        shuffle=val_sampler is None,
         num_workers=_A.cpu_workers,
         pin_memory=True,
         drop_last=False,
@@ -227,7 +227,8 @@ def main(_A: argparse.Namespace):
         if iteration % _A.checkpoint_every == 0:
             torch.set_grad_enabled(False)
             model.eval()
-
+    
+            val_dataloader.sampler.set_epoch(iteration)
             batch = next(iter(val_dataloader))
             batch = {"image": batch["image"][:8].to(device)}
             predictions = model(batch)["predictions"].cpu()
