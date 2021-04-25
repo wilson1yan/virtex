@@ -8,7 +8,7 @@ downstream evaluation. Two main classes here are:
 Parts of this module (:meth:`tokenize`, :meth:`cider` and :meth:`spice`) are
 adapted from `coco-captions evaluation code <https://github.com/tylin/coco-caption>`_.
 """
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import json
 import os
 from subprocess import Popen, PIPE, check_call
@@ -199,8 +199,27 @@ def compute_scts_reward(
 
     greedy_captions = [tokenizer.decode(c) for c in greedy_dec]
     sample_captions = [tokenizer.decode(c) for c in sample_dec]
-    ground_truth = [tokenizer.decode(c) for c in caption_tokens]
+    true_captions = [tokenizer.decode(c) for c in caption_tokens]
+
+    predictions = {i: [caption] for i, caption in enumerate(sample_captions)}
+    predictions.update({i + len(sample_captions): [caption] 
+                        for i, caption in enumerate(greedy_captions)})
+
+    ground_truth = {i: [true_captions[i // n_samples_per_image]] 
+                    for i in range(len(sample_captions))}
+    ground_truth.update({i + len(sample_captions): [true_captions[i]]
+                         for i in range(batch_size)})
+
+    predictions = tokenize(predictions)
+    ground_truth = tokenize(ground_truth)
     
+    scores = cider(predictions, ground_truth, reduce=False) 
+    scores = scores[:len(sample_captions)].reshape(batch_size, n_samples_per_image) - scores[-batch_size:][:, None]
+    scores = scores.reshape(-1)
+
+    rewards = np.repeat(scores[:, None], sample_dec.shape[1], 1)
+    return rewards
+
 
 def cider(
     predictions: Dict[int, List[str]],
@@ -208,7 +227,7 @@ def cider(
     n: int = 4,
     sigma: float = 6.0,
     reduce: bool = True,
-) -> float:
+):
     r"""Compute CIDEr score given ground truth captions and predictions."""
 
     # -------------------------------------------------------------------------

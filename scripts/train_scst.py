@@ -1,7 +1,9 @@
 import argparse
 from collections import Counter
 from typing import Any
+import math
 
+from tqdm import tqdm
 import numpy as np
 from loguru import logger
 import torch
@@ -21,6 +23,7 @@ from virtex.utils.common import common_parser, common_setup, cycle
 import virtex.utils.distributed as dist
 from virtex.utils.timer import Timer
 from virtex.data.transforms import IMAGENET_COLOR_MEAN, IMAGENET_COLOR_STD
+from virtex.utils.metrics import compute_scts_reward, tokenize, cider, spice
 
 
 parser = common_parser(
@@ -62,7 +65,7 @@ def main(_A: argparse.Namespace):
     #   INSTANTIATE DATALOADER, MODEL, OPTIMIZER, SCHEDULER
     # -------------------------------------------------------------------------
     train_dataset = PretrainingDatasetFactory.from_config(_C, split="train")
-    val_dataset = PretrainingDatasetFactory.from_config(_C, split="val")
+    val_dataset = PretrainingDatasetFactory.from_config(_C, split="val", all_captions=True)
 
     # Make `DistributedSampler`s to shard datasets across GPU processes.
     # Skip this if training on CPUs.
@@ -101,6 +104,8 @@ def main(_A: argparse.Namespace):
     optimizer = OptimizerFactory.from_config(_C, model.named_parameters())
     scheduler = LRSchedulerFactory.from_config(_C, optimizer)
     print('total parameters:', sum([np.prod(p.shape) for p in model.parameters() if p.requires_grad]))
+
+    tokenizer = train_dataset.tokenizer
 
     # -------------------------------------------------------------------------
     #   BEFORE TRAINING STARTS
@@ -161,11 +166,12 @@ def main(_A: argparse.Namespace):
             sample_dec, sample_log_probs = output_dict['predictions'], output_dict['log_probs']
 
             caption_tokens = batch['caption_tokens']
+            reward = compute_scts_reward(greedy_dec, sample_dec, caption_tokens, tokenizer)
+            reward = torch.from_numpy(reward).to(device)
 
-            
-            output_dict = model(batch)
-            loss = output_dict["loss"]
-
+            mask = caption_tokens != tokenizer.pad_id
+            loss = -sample_log_probs * reward * mask
+            loss = loss.sum() / mask.sum()            
         scaler.scale(loss).backward()
 
         # First clip norm of gradients, and then perform optimizer step.
@@ -182,7 +188,7 @@ def main(_A: argparse.Namespace):
         # ---------------------------------------------------------------------
         if iteration % _A.log_every == 0:
             logger.info(
-                f"{timer.stats} [Loss {loss:.3f}] [GPU {dist.gpu_mem_usage()} MB]"
+                f"{timer.stats} [Reward {-loss:.3f}] [GPU {dist.gpu_mem_usage()} MB]"
             )
             if dist.is_master_process():
                 tensorboard_writer.add_scalars(
@@ -192,9 +198,6 @@ def main(_A: argparse.Namespace):
                         "common": optimizer.param_groups[-1]["lr"],
                     },
                     iteration,
-                )
-                tensorboard_writer.add_scalars(
-                    "train", output_dict["loss_components"], iteration
                 )
 
         # ---------------------------------------------------------------------
@@ -210,28 +213,45 @@ def main(_A: argparse.Namespace):
             torch.set_grad_enabled(False)
             model.eval()
 
-            # Accumulate different val loss components according to the type of
-            # pretraining model.
-            val_loss_counter: Counter = Counter()
-
+            predictions: Dict[int, List[str]] = []
+            ground_truth: Dict[int, List[str]] = []
+            
+            if dist.is_master_process():
+                pbar = tqdm(total=math.ceil(len(val_dataloader) // dist.get_world_size()))
             for val_iteration, val_batch in enumerate(val_dataloader, start=1):
-                for key in val_batch:
-                    val_batch[key] = val_batch[key].to(device)
+                true_captions = val_batch['caption']
+                val_batch = {'image_id': val_batch['image_id'].to(device),
+                             'image': val_batch['image'].to(device)}
                 output_dict = model(val_batch)
 
-                val_loss_counter.update(output_dict["loss_components"])
+                for image_id, caption, true_caption in zip(
+                    val_batch['image_id'], output_dict['predictions'], true_captions
+                ):
+                    image_id = int(image_id) if image_id.isdigit() else image_id
+                    caption = tokenizer.decode(caption.tolist())
+                    predictions[image_id] = [caption]
+                    ground_truth[image_id] = true_caption
+                if dist.is_master_process():
+                    pbar.update(1)
+            if dist.is_master_process():
+                pbar.close()
+            
+            predictions = tokenize(predictions)            
+            ground_truth = tokenize(ground_truth)
 
-            # Divide each loss component by number of val batches per GPU.
-            val_loss_dict = {
-                k: v / val_iteration for k, v in dict(val_loss_counter).items()
-            }
-            dist.average_across_processes(val_loss_dict)
+            cider_score = cider(predictions, ground_truth)
+            spice_score = spice(predictions, ground_truth)
+            cider_score = torch.tensor(cider_score, dtype=torch.float, device=device)
+            spice_score = torch.tensor(spice_score, dtype=torch.float, device=device)
+            cider_score = dist.all_reduce(cider_score) / dist.get_world_size()
+            spice_score = dist.all_reduce(spice_score) / dist.get_world_size()
+
             torch.set_grad_enabled(True)
             model.train()
 
-            logger.info(f"Iteration: {iteration} [Val loss: {val_loss_dict}]")
+            logger.info(f"Iteration: {iteration} [Cider: {cider_score:.2f}, Spice: {spice_score:.2f}]")
             if dist.is_master_process():
-                tensorboard_writer.add_scalars("val", val_loss_dict, iteration)
+                tensorboard_writer.add_scalars("val", {"cider": cider_score, "spice": spice_score}, iteration)
 
         if iteration % _A.checkpoint_every == 0:
             torch.set_grad_enabled(False)
@@ -243,7 +263,7 @@ def main(_A: argparse.Namespace):
 
             captions = []
             for i in range(predictions.shape[0]):
-                caption = train_dataset.tokenizer.decode(predictions[i].tolist())
+                caption = tokenizer.decode(predictions[i].tolist())
                 captions.append(caption)
             
             mean = torch.tensor(IMAGENET_COLOR_MEAN, dtype=torch.float).view(1, 3, 1, 1)

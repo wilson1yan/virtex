@@ -192,7 +192,8 @@ class PretrainingDatasetFactory(Factory):
     }
 
     @classmethod
-    def from_config(cls, config: Config, split: str = "train"):
+    def from_config(cls, config: Config, split: str = "train",
+                    all_captions: bool = False):
         r"""
         Create a dataset directly from config. Names in this factory match with
         names in :class:`PretrainingModelFactory` because both use same config
@@ -229,7 +230,8 @@ class PretrainingDatasetFactory(Factory):
         kwargs.update(
             tokenizer=tokenizer,
             max_caption_length=_C.DATA.MAX_CAPTION_LENGTH,
-            percentage=_C.DATA.USE_PERCENTAGE if split == 'train' else 100.0
+            percentage=_C.DATA.USE_PERCENTAGE if split == 'train' else 100.0,
+            all_captions=all_captions
         )
 
         data_roots = _C.DATA.ROOT.split('+')

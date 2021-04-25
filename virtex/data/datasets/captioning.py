@@ -83,15 +83,22 @@ class CaptionDataset(Dataset):
         image, caption = image_caption["image"], image_caption["caption"]
         image = np.transpose(image, (2, 0, 1))
 
-        caption_tokens = self.caption_transform(caption=caption)["caption"]
-        del data['caption']
+        if isinstance(caption, list):
+            # only used for eval
+            caption_tokens = [self.caption_transform(caption=c)['caption']
+                              for c in caption]
+            caption = [self.tokenizer.decode(c) for c in caption_tokens]
+            data['caption'] = caption
+        else:
+            caption_tokens = self.caption_transform(caption=caption)["caption"]
+            del data['caption']
 
-        data.update({
-            "image": torch.tensor(image, dtype=torch.float),
-            "caption_tokens": torch.tensor(caption_tokens, dtype=torch.long),
-            "noitpac_tokens": torch.tensor(caption_tokens, dtype=torch.long).flip(0),
-            "caption_lengths": torch.tensor(len(caption_tokens), dtype=torch.long)
-        })
+            data.update({
+                "image": torch.tensor(image, dtype=torch.float),
+                "caption_tokens": torch.tensor(caption_tokens, dtype=torch.long),
+                "noitpac_tokens": torch.tensor(caption_tokens, dtype=torch.long).flip(0),
+                "caption_lengths": torch.tensor(len(caption_tokens), dtype=torch.long)
+            })
 
         return data
 
@@ -107,6 +114,8 @@ class CaptionDataset(Dataset):
                     batch_first=True,
                     padding_value=self.padding_idx
                 )
+            elif k == 'caption':
+                batch_datum = [d[k] for d in data]
             else:
                 batch_datum = torch.stack([d[k] for d in data], dim=0)
             batch_data[k] = batch_datum
@@ -115,11 +124,12 @@ class CaptionDataset(Dataset):
         
 
 class CocoDataset(CaptionDataset):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, all_captions=False, **kwargs):
         super().__init__(*args, **kwargs)
         root = osp.join(self.data_root, f'{self.split}2017')
         ann_file = osp.join(self.data_root, 'annotations', f'captions_{self.split}2017.json')
         self.coco = CocoCaptions(root, ann_file)
+        self._all_captions = all_captions
 
     @property
     def size(self):
@@ -127,10 +137,11 @@ class CocoDataset(CaptionDataset):
     
     def _get_data(self, idx):
         image_id = self.coco.ids[idx]
-        image, captions = self.coco[idx]
+        image, caption = self.coco[idx]
 
         image = np.array(image)
-        caption = random.choice(captions)
+        if not self._all_captions:
+            caption = random.choice(caption)
 
         return {
             "image_id": torch.tensor(image_id, dtype=torch.long),
@@ -140,10 +151,11 @@ class CocoDataset(CaptionDataset):
 
         
 class ConceptualCaptionsDataset(CaptionDataset):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, all_captions=False, **kwargs):
         super().__init__(*args, **kwargs)
         data_file = osp.join(self.data_root, f'{self.split}_data2.tsv')
         self.data = pd.read_csv(data_file, sep='\t')
+        self._all_captions = all_captions
 
     @property
     def size(self):
@@ -157,6 +169,8 @@ class ConceptualCaptionsDataset(CaptionDataset):
         image = np.array(image.convert("RGB"))
 
         caption = row['caption']
+        if self._all_captions:
+            caption = [caption]
 
         return {
             "image_id": torch.tensor(0, dtype=torch.long),
