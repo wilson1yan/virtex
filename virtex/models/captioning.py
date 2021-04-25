@@ -82,6 +82,12 @@ class CaptioningModel(nn.Module):
         )
         self.loss = nn.CrossEntropyLoss(ignore_index=self.padding_idx)
 
+    def sample_on(self):
+        self.textual.transformer.sample_on()
+
+    def sample_off(self):
+        self.textual.transformer.sample_off()
+
     def forward(self, batch: Dict[str, torch.Tensor], sample_mode: str ='beam',
                 n_samples_per_image: int = 1) -> Dict[str, Any]:
         r"""
@@ -173,9 +179,10 @@ class CaptioningModel(nn.Module):
             # model. Predictions from forward transformer will be shifted
             # right by one time-step.
             start_predictions = visual_features.new_full(
-                (batch_size,), self.sos_index
+                (batch_size, 1), self.sos_index
             ).long()
             if sample_mode == "beam":
+                assert not self.textual.transformer.sampling
                 # Add image features as a default argument to match callable
                 # signature accepted by beam search class (partial captions only).
                 beam_search_step = functools.partial(
@@ -187,30 +194,29 @@ class CaptioningModel(nn.Module):
                 best_beam = all_top_k_predictions[:, 0, :]
                 output_dict = {"predictions": best_beam}
             elif sample_mode in ["sample", "greedy"]:
-                output_logits = self.textual(
-                    visual_features, caption_tokens, caption_lengths
-                )
+                assert self.textual.transformer.sampling
                 done = torch.zeros(batch_size, dtype=torch.bool, device=visual_features.device)
                 caption_lengths = torch.ones(batch_size, dtype=torch.long, device=visual_features.device)
                 
                 likelihoods = []
+                cache = None
                 predictions = start_predictions
                 for i in range(self.max_decoding_steps):
-                    output_logits = self.textual(
-                        visual_features, predictions, caption_lengths
+                    output_logits, cache = self.textual(
+                        visual_features, predictions, caption_lengths, cache=cache
                     )
-                    output_logits = F.log_softmax(output_logits[:, i], dim=-1) # NLD
+                    output_logits = F.log_softmax(output_logits[:, -1], dim=-1) # N1D
 
                     if sample_mode == "greedy":
                         sample_tokens = torch.argmax(output_logits, dim=-1)
                     else:
                         token_dist = F.softmax(output_logits, dim=-1)
-                        sample_tokens = torch.multinomial(token_dist, 1)
+                        sample_tokens = torch.multinomial(token_dist, 1).squeeze(-1)
 
                     caption_lengths += (~done).long()
                     done |= sample_tokens == self.eos_index
                     sample_tokens = sample_tokens * (~done).long()
-                    predictions = torch.cat((predictions, sample_tokens), dim=1)
+                    predictions = torch.cat((predictions, sample_tokens.unsqueeze(1)), dim=1)
 
                     likelihoods.append(output_logits[torch.arange(batch_size), sample_tokens])
                 likelihoods = torch.stack(likelihoods, dim=1)
@@ -266,7 +272,7 @@ class CaptioningModel(nn.Module):
             partial_captions = partial_captions.unsqueeze(1)
 
         # shape: (batch_size * beam_size, partial_caption_length, vocab_size)
-        output_logits = self.textual(
+        output_logits, _ = self.textual(
             visual_features, partial_captions, caption_lengths
         )
         # Keep features for last time-step only, we only care about those.

@@ -8,7 +8,7 @@ from torch import nn
 from typing import Optional
 
 from virtex.modules.embedding import WordAndPositionalEmbedding
-from virtex.modules.transformer import PreNormTransformerDecoderLayer
+from virtex.modules.transformer import PreNormTransformerDecoderLayer, CausalTransformerDecoder
 
 
 class TextualHead(nn.Module):
@@ -205,7 +205,7 @@ class TransformerDecoderTextualHead(TextualHead):
             dropout=dropout,
             activation="gelu",
         )
-        self.transformer = nn.TransformerDecoder(_layer, self.num_layers)
+        self.transformer = CausalTransformerDecoder(_layer, self.num_layers)
         self.apply(self._init_weights)
 
         # Create an output linear layer and tie the input and output word
@@ -232,6 +232,7 @@ class TransformerDecoderTextualHead(TextualHead):
         visual_features: torch.Tensor,
         caption_tokens: torch.Tensor,
         caption_lengths: torch.Tensor,
+        cache = None,
     ) -> torch.Tensor:
         r"""
         Given (projected) visual features from visual backbone and caption
@@ -292,19 +293,22 @@ class TransformerDecoderTextualHead(TextualHead):
         projected_visual_features = projected_visual_features.transpose(0, 1)
 
         # shape: (max_caption_length, batch_size, hidden_size)
-        textual_features = self.transformer(
+        textual_features, cache = self.transformer(
             caption_embeddings,
             projected_visual_features,
             tgt_mask=unidirectional_mask,
             tgt_key_padding_mask=caption_mask,
+            cache=cache
         )
+
+
         # Undo the transpose and bring batch to dim 0.
         # shape: (batch_size, max_caption_length, hidden_size)
         textual_features = textual_features.transpose(0, 1)
 
         # shape: (batch_size, max_caption_length, vocab_size)
         output_logits = self.output(textual_features)
-        return output_logits
+        return output_logits, cache
 
     def _generate_future_mask(
         self, size: int, dtype: torch.dtype, device: torch.device

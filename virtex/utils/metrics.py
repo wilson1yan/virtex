@@ -91,12 +91,10 @@ class CocoCaptionsEvaluator(object):
         be COCO Captions ``val2017`` split).
     """
 
-    def __init__(self, gt_annotations_path: str):
-        gt_annotations = json.load(open(gt_annotations_path))["annotations"]
-
+    def __init__(self, ground_truth):
         # Keep a mapping from image id to a list of captions.
         self.ground_truth: Dict[int, List[str]] = defaultdict(list)
-        for ann in gt_annotations:
+        for ann in ground_truth:
             self.ground_truth[ann["image_id"]].append(ann["caption"])
 
         self.ground_truth = tokenize(self.ground_truth)
@@ -200,6 +198,9 @@ def compute_scts_reward(
     greedy_captions = [tokenizer.decode(c) for c in greedy_dec]
     sample_captions = [tokenizer.decode(c) for c in sample_dec]
     true_captions = [tokenizer.decode(c) for c in caption_tokens]
+    print('greedy', greedy_captions)
+    print('sample', sample_captions)
+    print('true', true_captions)
 
     predictions = {i: [caption] for i, caption in enumerate(sample_captions)}
     predictions.update({i + len(sample_captions): [caption] 

@@ -1,0 +1,65 @@
+# -----------------------------------------------------------------------------
+# Base config: VirTex pretraining for our "base" bicaptioning model:
+# ResNet-50 + (L = 1, H = 1024) transformer trained for 500K iterations.
+# -----------------------------------------------------------------------------
+RANDOM_SEED: 0
+AMP: false
+CUDNN_BENCHMARK: true
+CUDNN_DETERMINISTIC: false
+
+DATA:
+  ROOT: "/home/wilson/data/datasets/coco+/home/group/conceptual_captions"
+  TOKENIZER_MODEL: "clip"
+  VOCAB_SIZE: 0
+  UNK_INDEX: 0
+  SOS_INDEX: 0
+  EOS_INDEX: 0
+  MASK_INDEX: 0
+
+  IMAGE_CROP_SIZE: 384
+  MAX_CAPTION_LENGTH: 77
+
+  IMAGE_TRANSFORM_TRAIN:
+    - "random_resized_crop"
+    - "horizontal_flip"
+    - "color_jitter"
+    - "normalize"
+
+  IMAGE_TRANSFORM_VAL:
+    - "smallest_resize"
+    - "center_crop"
+    - "normalize"
+
+  USE_PERCENTAGE: 100.0
+
+MODEL:
+  NAME: "captioning_coco+cc"
+  VISUAL:
+    NAME: "vit::B_16"
+    PRETRAINED: true
+    FROZEN: false
+    FEATURE_SIZE: 768
+  TEXTUAL:
+    NAME: "transdec_prenorm::L6_H768_A12_F3072"
+    DROPOUT: 0.1
+
+OPTIM:
+  OPTIMIZER_NAME: "adam"
+  WEIGHT_DECAY: 0.000001
+
+  LOOKAHEAD:
+    USE: false
+    ALPHA: 0.5
+    STEPS: 5
+
+  BATCH_SIZE: 128
+  SEPARATE_LR: false
+  LR: 0.0000075
+  NUM_ITERATIONS: 500000
+
+  WARMUP_STEPS: 0
+  LR_DECAY_NAME: "cosine"
+
+  NO_DECAY: "none"
+  CLIP_GRAD_NORM: 10.0
+

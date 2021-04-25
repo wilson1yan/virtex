@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 
 from loguru import logger
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, DistributedSampler
 
 from virtex.config import Config
 from virtex.data import ImageDirectoryDataset
@@ -14,6 +14,7 @@ from virtex.factories import TokenizerFactory, PretrainingModelFactory
 from virtex.utils.checkpointing import CheckpointManager
 from virtex.utils.common import common_parser
 from virtex.utils.metrics import CocoCaptionsEvaluator
+import virtex.utils.distributed as dist
 
 
 # fmt: off
@@ -58,23 +59,35 @@ def main(_A: argparse.Namespace):
     if _A.data_root is None:
         _A.data_root = os.path.join(_C.DATA.ROOT, "val2017")
 
+    val_dataset = ImageDirectoryDataset(_A.data_root)
+
+    val_sampler = (
+        DistributedSampler(val_dataset, shuffle=False)
+        if _A.num_gpus_per_machine > 0
+        else None
+    )
+
     val_dataloader = DataLoader(
-        ImageDirectoryDataset(_A.data_root),
-        batch_size=_C.OPTIM.BATCH_SIZE,
+        val_dataset,
+        batch_size=_C.OPTIM.BATCH_SIZE // dist.get_world_size(),
+        sampler=val_sampler,
+        shuffle=False,
         num_workers=_A.cpu_workers,
         pin_memory=True,
+        drop_last=False
     )
     # Initialize model from a checkpoint.
     model = PretrainingModelFactory.from_config(_C).to(device)
     ITERATION = CheckpointManager(model=model).load(_A.checkpoint_path)
     model.eval()
+#    model.sample_on()
 
     # Make a list of predictions to evaluate.
     predictions: List[Dict[str, Any]] = []
 
-    pbar = tqdm(total=len(val_dataloader))
+    if dist.is_master_process():
+        pbar = tqdm(total=len(val_dataloader))
     for val_iteration, val_batch in enumerate(val_dataloader, start=1):
-
         val_batch["image"] = val_batch["image"].to(device)
         with torch.no_grad():
             output_dict = model(val_batch)
@@ -90,8 +103,10 @@ def main(_A: argparse.Namespace):
                     "caption": tokenizer.decode(caption.tolist()),
                 }
             )
-        pbar.update(1)
-    pbar.close()
+        if dist.is_master_process():
+            pbar.update(1)
+    if dist.is_master_process():
+        pbar.close()
 
     # Save predictions as a JSON file if specified.
     if _A.output is not None:
@@ -102,17 +117,32 @@ def main(_A: argparse.Namespace):
     # Calculate CIDEr and SPICE metrics using ground truth COCO Captions. This
     # should be skipped when running inference on arbitrary images.
     if _A.calc_metrics:
+        valid_image_ids = [p['image_id'] for p in predictions]
         # Assume ground truth (COCO val2017 annotations) exist.
         gt = os.path.join(_C.DATA.ROOT, "annotations", "captions_val2017.json")
+        gt = json.load(open(gt, 'r'))['annotations']
+        gt = [g for g in gt if g['image_id'] in valid_image_ids]
 
         metrics = CocoCaptionsEvaluator(gt).evaluate(predictions)
-        logger.info(f"Iter: {ITERATION} | Metrics: {metrics}")
+        metrics = {k: torch.tensor(v, dtype=torch.float, device=device)
+                   for k, v in metrics.items()}
+        dist.average_across_processes(metrics)
+        metrics = {k: v.item() for k, v in metrics.items()}
+        if dist.is_master_process():
+            logger.info(f"Iter: {ITERATION} | Metrics: {metrics}")
 
 
 if __name__ == "__main__":
     _A = parser.parse_args()
-    if _A.num_gpus_per_machine > 1:
-        raise ValueError("Using multiple GPUs is not supported for this script.")
 
-    # No distributed training here, just a single process.
-    main(_A)
+    if _A.num_gpus_per_machine == 0:
+        main(_A)
+    else:
+        dist.launch(
+            main,
+            num_machines=_A.num_machines,
+            num_gpus_per_machine=_A.num_gpus_per_machine,
+            machine_rank=_A.machine_rank,
+            dist_url=_A.dist_url,
+            args=(_A,),
+        )

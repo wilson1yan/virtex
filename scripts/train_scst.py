@@ -1,7 +1,6 @@
 import argparse
 from collections import Counter
 from typing import Any
-import math
 
 from tqdm import tqdm
 import numpy as np
@@ -30,6 +29,9 @@ parser = common_parser(
     description="Train a VirTex model (CNN + Transformer) on COCO Captions."
 )
 group = parser.add_argument_group("Checkpointing and Logging")
+group.add_argument(
+    "--start-checkpoint", required=True,
+)
 group.add_argument(
     "--resume-from", default=None,
     help="Path to a checkpoint to resume training from (if provided)."
@@ -100,7 +102,10 @@ def main(_A: argparse.Namespace):
         collate_fn=val_dataset.collate_fn,
     )
 
+    # Load supervised trained model
     model = PretrainingModelFactory.from_config(_C).to(device)
+    CheckpointManager(model=model).load(_A.start_checkpoint)
+
     optimizer = OptimizerFactory.from_config(_C, model.named_parameters())
     scheduler = LRSchedulerFactory.from_config(_C, optimizer)
     print('total parameters:', sum([np.prod(p.shape) for p in model.parameters() if p.requires_grad]))
@@ -162,7 +167,7 @@ def main(_A: argparse.Namespace):
             with torch.no_grad():
                 greedy_dec = model({"image": batch["image"]}, sample_mode="greedy")['predictions']
             model.train()
-            output_dict = model({"image": batch["Image"]}, sample_mode="sample", n_samples_per_image=16)
+            output_dict = model({"image": batch["image"]}, sample_mode="sample", n_samples_per_image=16)
             sample_dec, sample_log_probs = output_dict['predictions'], output_dict['log_probs']
 
             caption_tokens = batch['caption_tokens']
@@ -217,7 +222,7 @@ def main(_A: argparse.Namespace):
             ground_truth: Dict[int, List[str]] = []
             
             if dist.is_master_process():
-                pbar = tqdm(total=math.ceil(len(val_dataloader) // dist.get_world_size()))
+                pbar = tqdm(total=len(val_dataloader))
             for val_iteration, val_batch in enumerate(val_dataloader, start=1):
                 true_captions = val_batch['caption']
                 val_batch = {'image_id': val_batch['image_id'].to(device),
