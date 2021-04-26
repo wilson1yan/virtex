@@ -318,6 +318,7 @@ class VisualBackboneFactory(Factory):
     PRODUCTS: Dict[str, Callable] = {
         "torchvision": visual_backbones.TorchvisionVisualBackbone,
         "vit": visual_backbones.ViTVisualBackbone,
+        "simclr": visual_backbones.SimCLRVisualBackbone
     }
 
     @classmethod
@@ -334,7 +335,7 @@ class VisualBackboneFactory(Factory):
         _C = config
         kwargs = {"visual_feature_size": _C.MODEL.VISUAL.FEATURE_SIZE}
 
-        if "torchvision" in _C.MODEL.VISUAL.NAME or "vit" in _C.MODEL.VISUAL.NAME:
+        if "torchvision" in _C.MODEL.VISUAL.NAME or "vit" in _C.MODEL.VISUAL.NAME or 'simclr' in _C.MODEL.VISUAL.NAME:
             # Check the name for models from torchvision.
             cls_name, cnn_name = _C.MODEL.VISUAL.NAME.split("::")
             kwargs["pretrained"] = _C.MODEL.VISUAL.PRETRAINED

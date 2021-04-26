@@ -128,7 +128,10 @@ def main(_A: argparse.Namespace):
 
     optimizer = OptimizerFactory.from_config(_C, model.named_parameters())
     scheduler = LRSchedulerFactory.from_config(_C, optimizer)
-    print('total parameters:', sum([np.prod(p.shape) for p in model.parameters() if p.requires_grad]))
+
+    if dist.is_master_process():
+        print('total parameters:', sum([np.prod(p.shape) for p in model.parameters() if p.requires_grad]))
+        print(f'train data: {len(train_dataloader)}, val data: {len(val_dataloader)}')
 
     tokenizer = train_dataset.tokenizer
 

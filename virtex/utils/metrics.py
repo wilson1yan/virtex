@@ -11,7 +11,7 @@ adapted from `coco-captions evaluation code <https://github.com/tylin/coco-capti
 from collections import defaultdict, OrderedDict
 import json
 import os
-from subprocess import Popen, PIPE, check_call
+from subprocess import Popen, PIPE, DEVNULL, check_call
 import tempfile
 from typing import Any, Dict, List
 from contextlib import contextmanager
@@ -230,7 +230,7 @@ def tokenize(image_id_to_captions: Dict[int, List[str]]) -> Dict[int, List[str]]
         "-preserveLines", "-lowerCase", tmp_file.name
     ]
     tokenized_captions = (
-        Popen(command, cwd=os.path.dirname(os.path.abspath(__file__)), stdout=PIPE)
+        Popen(command, cwd=os.path.dirname(os.path.abspath(__file__)), stdout=PIPE, stderr=DEVNULL)
         .communicate(input=sentences.rstrip())[0]
         .decode()
         .split("\n")
@@ -403,7 +403,7 @@ def spice(
         "java", "-jar", "-Xmx8G", SPICE_JAR, INPUT_PATH,
         "-cache", CACHE_DIR, "-out", OUTPUT_PATH, "-subset", "-silent",
     ]
-    check_call(spice_cmd, cwd=CURRENT_DIR)
+    check_call(spice_cmd, cwd=CURRENT_DIR, stdout=DEVNULL, stderr=DEVNULL)
     # fmt: on
 
     # Read and process results

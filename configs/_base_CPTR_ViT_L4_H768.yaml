@@ -16,7 +16,7 @@ DATA:
   EOS_INDEX: 9999
   MASK_INDEX: 2
 
-  IMAGE_CROP_SIZE: 384
+  IMAGE_CROP_SIZE: 224
   MAX_CAPTION_LENGTH: 77
 
   IMAGE_TRANSFORM_TRAIN:
@@ -35,7 +35,7 @@ DATA:
 MODEL:
   NAME: "captioning_coco"
   VISUAL:
-    NAME: "vit::B_16"
+    NAME: "vit::B_32"
     PRETRAINED: true
     FROZEN: false
     FEATURE_SIZE: 768
@@ -60,7 +60,7 @@ OPTIM:
   WARMUP_STEPS: 0
   LR_DECAY_NAME: "multistep"
   LR_GAMMA: 0.5
-  LR_STEPS: [50000]
+  LR_STEPS: [30000]
 
   NO_DECAY: "none"
   CLIP_GRAD_NORM: 10.0

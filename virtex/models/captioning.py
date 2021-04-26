@@ -223,6 +223,11 @@ class CaptioningModel(nn.Module):
                     caption_lengths += (~done).long()
                     sample_tokens = sample_tokens * (~done).long()
                     predictions = torch.cat((predictions, sample_tokens.unsqueeze(1)), dim=1)
+
+                for i in range(predictions.shape[0]):
+                    if not done[i].item():
+                        predictions[i, -1] = self.eos_index
+
                 output_dict = {"predictions": predictions, "caption_lengths": caption_lengths}
             else:
                 raise ValueError(f"Invalid sample_mode = {sample_mode}")

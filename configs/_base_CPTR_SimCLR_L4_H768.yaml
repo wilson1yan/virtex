@@ -35,10 +35,10 @@ DATA:
 MODEL:
   NAME: "captioning_coco"
   VISUAL:
-    NAME: "vit::B_16"
+    NAME: "simclr::r50_2x_sk1"
     PRETRAINED: true
     FROZEN: false
-    FEATURE_SIZE: 768
+    FEATURE_SIZE: 4096
   TEXTUAL:
     NAME: "transdec_prenorm::L4_H768_A12_F3072"
     DROPOUT: 0.1
@@ -52,13 +52,15 @@ OPTIM:
     ALPHA: 0.5
     STEPS: 5
 
-  BATCH_SIZE: 40
+  BATCH_SIZE: 128
   SEPARATE_LR: false
-  LR: 0.0000075
-  NUM_ITERATIONS: 50000
+  LR: 0.00003
+  NUM_ITERATIONS: 100000
 
   WARMUP_STEPS: 0
-  LR_DECAY_NAME: "cosine"
+  LR_DECAY_NAME: "multistep"
+  LR_GAMMA: 0.5
+  LR_STEPS: [30000]
 
   NO_DECAY: "none"
   CLIP_GRAD_NORM: 10.0

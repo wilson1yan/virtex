@@ -228,10 +228,9 @@ def main(_A: argparse.Namespace):
             torch.set_grad_enabled(False)
             model.eval()
     
-            val_dataloader.sampler.set_epoch(iteration)
             batch = next(iter(val_dataloader))
             batch = {"image": batch["image"][:8].to(device)}
-            predictions = model(batch)["predictions"].cpu()
+            predictions = model(batch)["predictions"].cpu()[:, 1:]
 
             captions = []
             for i in range(predictions.shape[0]):

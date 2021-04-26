@@ -16,6 +16,33 @@ class VisualBackbone(nn.Module):
     def __init__(self, visual_feature_size: int):
         super().__init__()
         self.visual_feature_size = visual_feature_size
+
+
+from .resnet import get_resnet, name_to_params
+class SimCLRVisualBackbone(VisualBackbone):
+    def __init__(
+        self,
+        name: str = 'r50_2x_sk1',
+        visual_feature_size: int = 4096,
+        pretrained: bool = True,
+        frozen: bool = False,
+        image_size: int = 224
+    ):
+        super().__init__(visual_feature_size)
+
+        path = f'/home/wilson/.cache/{name}.pth'
+        self.cnn, _ = get_resnet(*name_to_params(path))
+        
+        if pretrained:
+            self.cnn.load_state_dict(torch.load(path)['resnet'])
+
+        if frozen:
+            for param in self.cnn.parameters():
+                param.requires_grad = False
+            self.cnn.eval()
+
+    def forward(self, image: torch.Tensor):
+        return self.cnn(image)
         
         
 from pytorch_pretrained_vit import ViT
