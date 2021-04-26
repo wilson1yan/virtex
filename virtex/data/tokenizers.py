@@ -26,6 +26,9 @@ class SentencePieceBPETokenizer(object):
             if model_path == 'clip':
                 from clip.clip import _tokenizer
                 model = _tokenizer
+            elif model_path == 'gpt2':
+                from transformers import GPT2Tokenizer
+                model = GPT2Tokenizer.from_pretrained('gpt2')
             else:
                 raise Exception(f"Invalid model_path = {model_path}")
         else:
@@ -50,6 +53,8 @@ class SentencePieceBPETokenizer(object):
     def bos_id(self):
         if self.model_path == 'clip':
             return self.model.encoder["<|startoftext|>"]
+        elif self.model_path == 'gpt2':
+            return self.model.bos_token_id
         else:
             return self.model.bos_id()
     
@@ -57,12 +62,14 @@ class SentencePieceBPETokenizer(object):
     def eos_id(self):
         if self.model_path == 'clip':
             return self.model.encoder["<|endoftext|>"]
+        elif self.model_path == 'gpt2':
+            return self.model.eos_token_id
         else:
             return self.model.eos_id()
 
     @property
     def pad_id(self):
-        if self.model_path == 'clip':
+        if self.model_path in ['clip', 'gpt2']:
             return 0
         else:
             return self.model.pad_id()
@@ -86,14 +93,14 @@ class SentencePieceBPETokenizer(object):
 
     def encode(self, text: str) -> List[int]:
         r"""Convert a text string to a list of integer token ids."""
-        if self.model_path == 'clip':
+        if self.model_path in ['clip', 'gpt2']:
             return self.model.encode(text)
         else:
             return self.model.EncodeAsIds(text)
 
     def decode(self, token_ids: List[int]) -> str:
         r"""Convert a sequence of token IDs to a text string."""
-        if self.model_path == 'clip':
+        if self.model_path in ['clip', 'gpt2']:
             token_ids = token_ids[:token_ids.index(self.eos_id)]
             return self.model.decode(token_ids)
         else:

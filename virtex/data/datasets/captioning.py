@@ -214,3 +214,39 @@ class ConceptualCaptionsDataset(CaptionDataset):
             data['image'] = image
 
         return data
+
+
+import glob
+import io
+from datadings.reader.sharded import ShardedReader
+class YFCC100MDataset(CaptionDataset):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        data_file = osp.join(self.data_root, 'processed')
+        self.reader = ShardedReader(osp.join(data_file, '*.msgpack'))
+
+    @property
+    def name(self):
+        return 'yfcc100m'
+    
+    @property
+    def size(self):
+        return len(self.reader)
+    
+    def _get_data(self, idx):
+        sample = self.reader[idx]
+
+        caption = "TODO"
+        if self._all_captions:
+            caption = [caption]
+
+        data = {'image_id': torch.tensor(idx, dtype=torch.long),
+                'caption': caption}
+        
+        if self._include_image:
+            image = Image.open(io.BytesIO(sample['image']))
+            image = np.array(image.convert('RGB'))
+            data['image'] = image 
+        
+        return data
+            

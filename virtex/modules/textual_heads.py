@@ -102,6 +102,51 @@ class LinearTextualHead(TextualHead):
         output_logits = self.output(visual_features)
         return output_logits
 
+        
+from .gpt import GPT2Model
+class GPT2TextualHead(TextualHead):
+    def __init__(
+        self,
+        visual_feature_size: int,
+        vocab_size: int,
+        max_caption_length: int = 30,
+        padding_idx: int = 0
+    ):
+        super().__init__(visual_feature_size, vocab_size, 768)
+        self.visual_projection = nn.Linear(
+            visual_feature_size, self.textual_feature_size
+        )
+        self.transformer = GPT2Model.from_pretrained('gpt2')
+        self.output = nn.Linear(self.textual_feature_size, vocab_size)
+        self.output.weight = self.transformer.wte.weight
+    
+    def forward(
+        self,
+        visual_features: torch.Tensor,
+        caption_tokens: torch.Tensor,
+        caption_lengths: torch.Tensor,
+        cache = None
+    ) -> torch.Tensor:
+        batch_size, channels, height, width = visual_features.size()
+        visual_features = visual_features.view(batch_size, channels, -1)
+        visual_features = visual_features.permute(0, 2, 1)
+        projected_visual_features = self.visual_projection(visual_features)
+
+        batch_size, max_caption_length = caption_tokens.size()
+        ones = torch.ones_like(caption_tokens)
+        caption_mask = caption_lengths.unsqueeze(1) < ones.cumsum(dim=1)
+
+        textual_features = self.transformer(
+            caption_tokens,
+            attention_mask=caption_mask,
+            encoder_hidden_states=projected_visual_features,
+        )[0]
+
+        # shape: (batch_size, max_caption_length, vocab_size)
+        output_logits = self.output(textual_features)
+        return output_logits, cache
+
+
 
 class TransformerDecoderTextualHead(TextualHead):
     r"""
