@@ -12,6 +12,14 @@ from torch import distributed as dist
 from torch import multiprocessing as mp
 
 
+class DistributedDataParallel(torch.nn.parallel.DistributedDataParallel):
+    def __getattr__(self, name):
+        try:
+            return super().__getattr__(name)
+        except AttributeError:
+            return getattr(self.module, name)
+
+
 def launch(
     job_fn: Callable,
     num_machines: int = 1,

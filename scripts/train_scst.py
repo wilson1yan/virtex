@@ -22,7 +22,7 @@ from virtex.utils.common import common_parser, common_setup, cycle
 import virtex.utils.distributed as dist
 from virtex.utils.timer import Timer
 from virtex.data.transforms import IMAGENET_COLOR_MEAN, IMAGENET_COLOR_STD
-from virtex.utils.metrics import compute_scts_reward, tokenize, cider, spice
+from virtex.utils.metrics import compute_scts_reward, CiderEvaluator
 
 
 parser = common_parser(
@@ -68,6 +68,8 @@ def main(_A: argparse.Namespace):
     # -------------------------------------------------------------------------
     train_dataset = PretrainingDatasetFactory.from_config(_C, split="train")
     val_dataset = PretrainingDatasetFactory.from_config(_C, split="val", all_captions=True)
+    train_dataset_no_image = PretrainingDatasetFactory.from_config(_C, split="train", all_captions=True, include_image=False)
+    val_dataset_no_image = PretrainingDatasetFactory.from_config(_C, split="val", all_captions=True, include_image=False)
 
     # Make `DistributedSampler`s to shard datasets across GPU processes.
     # Skip this if training on CPUs.
@@ -102,6 +104,24 @@ def main(_A: argparse.Namespace):
         collate_fn=val_dataset.collate_fn,
     )
 
+    train_dataloader_no_image = DataLoader(
+        train_dataset_no_image,
+        batch_size=_C.OPTIM.BATCH_SIZE // dist.get_world_size(),
+        shuffle=False,
+        drop_last=False,
+        collate_fn=val_dataset.collate_fn,
+    )
+    evaluator = CiderEvaluator(train_dataloader_no_image, prefix='train')
+
+    val_dataloader_no_image = DataLoader(
+        val_dataset_no_image,
+        batch_size=_C.OPTIM.BATCH_SIZE // dist.get_world_size(),
+        shuffle=False,
+        drop_last=False,
+        collate_fn=val_dataset.collate_fn,
+    )
+    evaluator_val = CiderEvaluator(val_dataloader_no_image, prefix='val')
+
     # Load supervised trained model
     model = PretrainingModelFactory.from_config(_C).to(device)
     CheckpointManager(model=model).load(_A.start_checkpoint)
@@ -133,8 +153,8 @@ def main(_A: argparse.Namespace):
     # Wrap model in DDP if using more than one processes.
     if dist.get_world_size() > 1:
         dist.synchronize()
-        model = nn.parallel.DistributedDataParallel(
-            model, device_ids=[device], find_unused_parameters=True
+        model = dist.DistributedDataParallel(
+            model, device_ids=[device], find_unused_parameters=False
         )
 
     # Keep track of time per iteration and ETA.
@@ -163,18 +183,24 @@ def main(_A: argparse.Namespace):
         batch = next(train_dataloader_iter)
 
         with amp.autocast(enabled=_C.AMP):
+            model.sample_on()
             model.eval()
             with torch.no_grad():
                 greedy_dec = model({"image": batch["image"]}, sample_mode="greedy")['predictions']
+                out = model({"image": batch["image"]}, sample_mode="sample", n_samples_per_image=5)
+                sample_dec, caption_lengths = out['predictions'], out['caption_lengths']
             model.train()
-            output_dict = model({"image": batch["image"]}, sample_mode="sample", n_samples_per_image=16)
-            sample_dec, sample_log_probs = output_dict['predictions'], output_dict['log_probs']
+            model.sample_off()
 
-            caption_tokens = batch['caption_tokens']
-            reward = compute_scts_reward(greedy_dec, sample_dec, caption_tokens, tokenizer)
+            sample_log_probs = -model({"image": batch["image"], "caption_tokens": sample_dec, 
+                                       "caption_lengths": caption_lengths}, loss_reduction='none')['loss']
+
+            image_ids = batch['image_id'].tolist()
+            reward = compute_scts_reward(image_ids, greedy_dec[:, 1:], 
+                                         sample_dec[:, 1:], tokenizer, evaluator)
             reward = torch.from_numpy(reward).to(device)
 
-            mask = caption_tokens != tokenizer.pad_id
+            mask = sample_dec[:, 1:] != tokenizer.pad_id
             loss = -sample_log_probs * reward * mask
             loss = loss.sum() / mask.sum()            
         scaler.scale(loss).backward()
@@ -218,45 +244,40 @@ def main(_A: argparse.Namespace):
             torch.set_grad_enabled(False)
             model.eval()
 
-            predictions: Dict[int, List[str]] = []
-            ground_truth: Dict[int, List[str]] = []
-            
+            predictions: List[Dict[str, Any]] = []
             if dist.is_master_process():
                 pbar = tqdm(total=len(val_dataloader))
             for val_iteration, val_batch in enumerate(val_dataloader, start=1):
-                true_captions = val_batch['caption']
                 val_batch = {'image_id': val_batch['image_id'].to(device),
                              'image': val_batch['image'].to(device)}
                 output_dict = model(val_batch)
 
-                for image_id, caption, true_caption in zip(
-                    val_batch['image_id'], output_dict['predictions'], true_captions
+                for image_id, caption in zip(
+                        val_batch['image_id'], output_dict['predictions'][:, 1:]
                 ):
-                    image_id = int(image_id) if image_id.isdigit() else image_id
-                    caption = tokenizer.decode(caption.tolist())
-                    predictions[image_id] = [caption]
-                    ground_truth[image_id] = true_caption
+                    predictions.append(
+                        {
+                            'image_id': image_id.item(),
+                            'caption': tokenizer.decode(caption.tolist())
+                        }
+                    )
                 if dist.is_master_process():
                     pbar.update(1)
             if dist.is_master_process():
                 pbar.close()
-            
-            predictions = tokenize(predictions)            
-            ground_truth = tokenize(ground_truth)
 
-            cider_score = cider(predictions, ground_truth)
-            spice_score = spice(predictions, ground_truth)
-            cider_score = torch.tensor(cider_score, dtype=torch.float, device=device)
-            spice_score = torch.tensor(spice_score, dtype=torch.float, device=device)
-            cider_score = dist.all_reduce(cider_score) / dist.get_world_size()
-            spice_score = dist.all_reduce(spice_score) / dist.get_world_size()
+            metrics = evaluator_val.evaluate(predictions)
+            metrics = {k: torch.tensor(v, dtype=torch.float, device=device)
+                       for k, v in metrics.items()}
+            dist.average_across_processes(metrics)
+            metrics = {k: v.item() for k, v in metrics.items()}
 
             torch.set_grad_enabled(True)
             model.train()
 
-            logger.info(f"Iteration: {iteration} [Cider: {cider_score:.2f}, Spice: {spice_score:.2f}]")
             if dist.is_master_process():
-                tensorboard_writer.add_scalars("val", {"cider": cider_score, "spice": spice_score}, iteration)
+                logger.info(f"Iteration: {iteration} | Metrics: {metrics}")
+                tensorboard_writer.add_scalars("val", metrics, iteration)
 
         if iteration % _A.checkpoint_every == 0:
             torch.set_grad_enabled(False)

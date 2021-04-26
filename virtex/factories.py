@@ -193,7 +193,7 @@ class PretrainingDatasetFactory(Factory):
 
     @classmethod
     def from_config(cls, config: Config, split: str = "train",
-                    all_captions: bool = False):
+            all_captions: bool = False, include_image: bool = True):
         r"""
         Create a dataset directly from config. Names in this factory match with
         names in :class:`PretrainingModelFactory` because both use same config
@@ -231,7 +231,8 @@ class PretrainingDatasetFactory(Factory):
             tokenizer=tokenizer,
             max_caption_length=_C.DATA.MAX_CAPTION_LENGTH,
             percentage=_C.DATA.USE_PERCENTAGE if split == 'train' else 100.0,
-            all_captions=all_captions
+            all_captions=all_captions,
+            include_image=include_image
         )
 
         data_roots = _C.DATA.ROOT.split('+')

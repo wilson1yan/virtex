@@ -14,9 +14,14 @@ import os
 from subprocess import Popen, PIPE, check_call
 import tempfile
 from typing import Any, Dict, List
+from contextlib import contextmanager
+import sys
 
+from tqdm import tqdm
 import numpy as np
 import torch
+
+import virtex.utils.distributed as dist
 
 
 class TopkAccuracy(object):
@@ -77,6 +82,71 @@ class TopkAccuracy(object):
         if reset:
             self.reset()
         return accuracy
+
+
+class CiderEvaluator(object):
+    def __init__(self, val_dataloader, prefix):
+        cache_filename = f'{prefix}_{val_dataloader.dataset.name}_cache.json'
+        if not os.path.exists(cache_filename):
+            annotations = self._get_captions(val_dataloader)
+
+            self.ground_truth: Dict[int, List[str]] = defaultdict(list)
+            for ann in annotations:
+                self.ground_truth[ann["image_id"]].append(ann["caption"])
+
+            self.ground_truth = tokenize(self.ground_truth)
+
+            if dist.is_master_process():
+                f = open(cache_filename, 'w')
+                json.dump(self.ground_truth, f)
+        else:
+            f = open(cache_filename, 'r')
+            self.ground_truth = json.load(f)
+            self.ground_truth = {int(k): v for k, v in self.ground_truth.items()}
+    
+    def _get_captions(self, dataloader):
+        if dist.is_master_process():
+            pbar = tqdm(total=len(dataloader))
+
+        annotations = []
+        for batch in dataloader:
+            annotations.extend([
+                {'image_id': image_id.item(),
+                 'caption': c}
+                for image_id, caption in zip(batch['image_id'], batch['caption'])
+                for c in caption
+            ])
+            if dist.is_master_process():
+                pbar.update(1)
+        if dist.is_master_process():
+            pbar.close()
+        return annotations
+
+    
+    def evaluate(self, preds: List[Dict[str, Any]]) -> Dict[str, float]:
+        res = {ann["image_id"]: [ann["caption"]] for ann in preds}
+        res = tokenize(res)
+
+        common_image_ids = self.ground_truth.keys() & res.keys()
+        res = {k: v for k, v in res.items() if k in common_image_ids}
+        gt = {k: self.ground_truth[k] for k in common_image_ids}
+
+        cider_score = cider(res, gt)
+        spice_score = spice(res, gt)
+        
+        return {"CIDEr": 100 * cider_score, "SPICE": 100 * spice_score}
+
+    def evaluate_with_ids(self, preds: List[List[str]], image_ids: List[int],
+                          reduce=True):
+        assert len(preds) == len(image_ids)
+        preds = {i: pred for i, pred in enumerate(preds)}
+        preds = tokenize(preds)
+
+        gt = {i: self.ground_truth[image_id] for i, image_id in enumerate(image_ids)}
+
+        cider_score = cider(preds, gt, reduce=reduce)
+
+        return cider_score
 
 
 class CocoCaptionsEvaluator(object):
@@ -186,40 +256,27 @@ def tokenize(image_id_to_captions: Dict[int, List[str]]) -> Dict[int, List[str]]
 
 
 def compute_scts_reward(
+    image_ids: List[int],
     greedy_dec: torch.Tensor, 
     sample_dec: torch.Tensor, 
-    caption_tokens: torch.Tensor, 
-    tokenizer
+    tokenizer,
+    evaluator
 ):
-    batch_size = caption_tokens.shape[0]
+    batch_size = len(image_ids)
     n_samples_per_image = sample_dec.shape[0] // batch_size
     assert greedy_dec.shape[0] == batch_size
 
-    greedy_captions = [tokenizer.decode(c) for c in greedy_dec]
-    sample_captions = [tokenizer.decode(c) for c in sample_dec]
-    true_captions = [tokenizer.decode(c) for c in caption_tokens]
-    print('greedy', greedy_captions)
-    print('sample', sample_captions)
-    print('true', true_captions)
+    greedy_captions = [[tokenizer.decode(c.tolist())] for c in greedy_dec]
+    sample_captions = [[tokenizer.decode(c.tolist())] for c in sample_dec]
 
-    predictions = {i: [caption] for i, caption in enumerate(sample_captions)}
-    predictions.update({i + len(sample_captions): [caption] 
-                        for i, caption in enumerate(greedy_captions)})
+    predictions = sample_captions + greedy_captions
+    image_ids = sum([[i] * n_samples_per_image for i in image_ids], []) + image_ids
 
-    ground_truth = {i: [true_captions[i // n_samples_per_image]] 
-                    for i in range(len(sample_captions))}
-    ground_truth.update({i + len(sample_captions): [true_captions[i]]
-                         for i in range(batch_size)})
-
-    predictions = tokenize(predictions)
-    ground_truth = tokenize(ground_truth)
+    scores = evaluator.evaluate_with_ids(predictions, image_ids, reduce=False)
     
-    scores = cider(predictions, ground_truth, reduce=False) 
     scores = scores[:len(sample_captions)].reshape(batch_size, n_samples_per_image) - scores[-batch_size:][:, None]
-    scores = scores.reshape(-1)
-
-    rewards = np.repeat(scores[:, None], sample_dec.shape[1], 1)
-    return rewards
+    scores = scores.reshape(-1, 1)
+    return scores
 
 
 def cider(

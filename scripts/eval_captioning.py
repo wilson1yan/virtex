@@ -9,11 +9,10 @@ import torch
 from torch.utils.data import DataLoader, DistributedSampler
 
 from virtex.config import Config
-from virtex.data import ImageDirectoryDataset
-from virtex.factories import TokenizerFactory, PretrainingModelFactory
+from virtex.factories import TokenizerFactory, PretrainingModelFactory, PretrainingDatasetFactory
 from virtex.utils.checkpointing import CheckpointManager
 from virtex.utils.common import common_parser
-from virtex.utils.metrics import CocoCaptionsEvaluator
+from virtex.utils.metrics import CiderEvaluator
 import virtex.utils.distributed as dist
 
 
@@ -59,14 +58,14 @@ def main(_A: argparse.Namespace):
     if _A.data_root is None:
         _A.data_root = os.path.join(_C.DATA.ROOT, "val2017")
 
-    val_dataset = ImageDirectoryDataset(_A.data_root)
+    val_dataset = PretrainingDatasetFactory.from_config(_C, split='val', all_captions=True)
+    val_dataset_no_image = PretrainingDatasetFactory.from_config(_C, split='val', all_captions=True, include_image=False)
 
     val_sampler = (
         DistributedSampler(val_dataset, shuffle=False)
         if _A.num_gpus_per_machine > 0
         else None
     )
-
     val_dataloader = DataLoader(
         val_dataset,
         batch_size=_C.OPTIM.BATCH_SIZE // dist.get_world_size(),
@@ -74,13 +73,24 @@ def main(_A: argparse.Namespace):
         shuffle=False,
         num_workers=_A.cpu_workers,
         pin_memory=True,
-        drop_last=False
+        drop_last=False,
+        collate_fn=val_dataset.collate_fn
     )
+
+    val_dataloader_no_image = DataLoader(
+        val_dataset_no_image,
+        batch_size=_C.OPTIM.BATCH_SIZE // dist.get_world_size(),
+        shuffle=False,
+        drop_last=False,
+        collate_fn=val_dataset.collate_fn
+    )
+
+    evaluator = CiderEvaluator(val_dataloader_no_image, prefix='val')
+
     # Initialize model from a checkpoint.
     model = PretrainingModelFactory.from_config(_C).to(device)
     ITERATION = CheckpointManager(model=model).load(_A.checkpoint_path)
     model.eval()
-#    model.sample_on()
 
     # Make a list of predictions to evaluate.
     predictions: List[Dict[str, Any]] = []
@@ -88,18 +98,19 @@ def main(_A: argparse.Namespace):
     if dist.is_master_process():
         pbar = tqdm(total=len(val_dataloader))
     for val_iteration, val_batch in enumerate(val_dataloader, start=1):
-        val_batch["image"] = val_batch["image"].to(device)
+        val_batch = {'image_id': val_batch['image_id'].to(device),
+                     'image': val_batch['image'].to(device)}
         with torch.no_grad():
             output_dict = model(val_batch)
 
         # Make a dictionary of predictions in COCO format.
         for image_id, caption in zip(
-            val_batch["image_id"], output_dict["predictions"]
+            val_batch["image_id"], output_dict["predictions"][:, 1:]
         ):
             predictions.append(
                 {
                     # Convert image id to int if possible (mainly for COCO eval).
-                    "image_id": int(image_id) if image_id.isdigit() else image_id,
+                    "image_id": image_id.item(),
                     "caption": tokenizer.decode(caption.tolist()),
                 }
             )
@@ -117,13 +128,8 @@ def main(_A: argparse.Namespace):
     # Calculate CIDEr and SPICE metrics using ground truth COCO Captions. This
     # should be skipped when running inference on arbitrary images.
     if _A.calc_metrics:
-        valid_image_ids = [p['image_id'] for p in predictions]
-        # Assume ground truth (COCO val2017 annotations) exist.
-        gt = os.path.join(_C.DATA.ROOT, "annotations", "captions_val2017.json")
-        gt = json.load(open(gt, 'r'))['annotations']
-        gt = [g for g in gt if g['image_id'] in valid_image_ids]
 
-        metrics = CocoCaptionsEvaluator(gt).evaluate(predictions)
+        metrics = evaluator.evaluate(predictions)
         metrics = {k: torch.tensor(v, dtype=torch.float, device=device)
                    for k, v in metrics.items()}
         dist.average_across_processes(metrics)

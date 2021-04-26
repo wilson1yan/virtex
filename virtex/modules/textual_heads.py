@@ -256,50 +256,58 @@ class TransformerDecoderTextualHead(TextualHead):
             A tensor of shape ``(batch_size, max_caption_length, vocab_size)``
             containing output vocabulary logits for each time-step.
         """
+        sampling = self.transformer.sampling
+        if cache is None:
+            batch_size, channels, height, width = visual_features.size()
+            visual_features = visual_features.view(batch_size, channels, -1)
+            visual_features = visual_features.permute(0, 2, 1)
+            projected_visual_features = self.visual_projection(visual_features)
+            projected_visual_features = projected_visual_features.transpose(0, 1)
 
-        # Convert to NHWC and project visual features to textual feature size.
-        batch_size, channels, height, width = visual_features.size()
-        visual_features = visual_features.view(batch_size, channels, -1)
-        visual_features = visual_features.permute(0, 2, 1)
+            if sampling:
+                cache = (projected_visual_features, None)
 
-        # shape: (batch_size, height * width, textual_feature_size)
-        projected_visual_features = self.visual_projection(visual_features)
-        # Now visual and textual features are of same size.
-
-        # Note that `max_caption_length` here may be less than the
-        # `max_caption_length` passed in `__init__`, but it does not matter.
-        batch_size, max_caption_length = caption_tokens.size()
-
-        # Create a mask based on caption lengths, shape: (batch_size, )
-        # Form a binary mask: it is True for padding positions.
-        # These positions will be ignored for multi-headed attention.
-        ones = torch.ones_like(caption_tokens)
-        caption_mask = caption_lengths.unsqueeze(1) < ones.cumsum(dim=1)
-
-        # shape: (batch_size, max_caption_length, textual_feature_size)
-        caption_embeddings = self.embedding(caption_tokens)
-
-        if self.mask_future_positions:
-            # An additive mask for masking the future (one direction).
-            unidirectional_mask = self._generate_future_mask(
-                max_caption_length, caption_embeddings.dtype, caption_embeddings.device
+        if sampling:
+            caption_embeddings = self.embedding(caption_tokens)
+            caption_embeddings = caption_embeddings.transpose(0, 1)
+            textual_features, tfm_cache = self.transformer(
+                caption_embeddings, cache[0], cache=cache[1]
             )
+            cache = (cache[0], tfm_cache)
         else:
-            unidirectional_mask = None
+            # Note that `max_caption_length` here may be less than the
+            # `max_caption_length` passed in `__init__`, but it does not matter.
+            batch_size, max_caption_length = caption_tokens.size()
 
-        # We transpose the first two dimensions of tokens embeddings and visual
-        # features, as required by decoder.
-        caption_embeddings = caption_embeddings.transpose(0, 1)
-        projected_visual_features = projected_visual_features.transpose(0, 1)
+            # Create a mask based on caption lengths, shape: (batch_size, )
+            # Form a binary mask: it is True for padding positions.
+            # These positions will be ignored for multi-headed attention.
+            ones = torch.ones_like(caption_tokens)
+            caption_mask = caption_lengths.unsqueeze(1) < ones.cumsum(dim=1)
 
-        # shape: (max_caption_length, batch_size, hidden_size)
-        textual_features, cache = self.transformer(
-            caption_embeddings,
-            projected_visual_features,
-            tgt_mask=unidirectional_mask,
-            tgt_key_padding_mask=caption_mask,
-            cache=cache
-        )
+            # shape: (batch_size, max_caption_length, textual_feature_size)
+            caption_embeddings = self.embedding(caption_tokens)
+
+            if self.mask_future_positions:
+                # An additive mask for masking the future (one direction).
+                unidirectional_mask = self._generate_future_mask(
+                    max_caption_length, caption_embeddings.dtype, caption_embeddings.device
+                )
+            else:
+                unidirectional_mask = None
+
+            # We transpose the first two dimensions of tokens embeddings and visual
+            # features, as required by decoder.
+            caption_embeddings = caption_embeddings.transpose(0, 1)
+
+            # shape: (max_caption_length, batch_size, hidden_size)
+            textual_features, _ = self.transformer(
+                caption_embeddings,
+                projected_visual_features,
+                tgt_mask=unidirectional_mask,
+                tgt_key_padding_mask=caption_mask,
+                cache=None
+            )
 
 
         # Undo the transpose and bring batch to dim 0.

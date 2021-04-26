@@ -80,7 +80,6 @@ class CaptioningModel(nn.Module):
         self.beam_search = AutoRegressiveBeamSearch(
             self.eos_index, beam_size=beam_size, max_steps=max_decoding_steps
         )
-        self.loss = nn.CrossEntropyLoss(ignore_index=self.padding_idx)
 
     def sample_on(self):
         self.textual.transformer.sample_on()
@@ -89,7 +88,7 @@ class CaptioningModel(nn.Module):
         self.textual.transformer.sample_off()
 
     def forward(self, batch: Dict[str, torch.Tensor], sample_mode: str ='beam',
-                n_samples_per_image: int = 1) -> Dict[str, Any]:
+            n_samples_per_image: int = 1, loss_reduction: str = 'mean') -> Dict[str, Any]:
         r"""
         Given a batch of images and captions, compute log likelihood loss per
         caption token during training. During inference, given a batch of
@@ -127,24 +126,28 @@ class CaptioningModel(nn.Module):
 
         # shape: (batch_size, channels, height, width)
         visual_features = self.visual(batch["image"])
-        batch_size = visual_features.size(0)
 
         if "caption_tokens" in batch:
             caption_tokens = batch["caption_tokens"]
             caption_lengths = batch["caption_lengths"]
 
+            assert caption_tokens.shape[0] % visual_features.shape[0] == 0
+            visual_features = visual_features.repeat_interleave(caption_tokens.shape[0] // visual_features.shape[0], dim=0)
+            batch_size = visual_features.shape[0]
+
             # shape: (batch_size, max_caption_length, vocab_size)
-            output_logits = self.textual(
+            output_logits, _ = self.textual(
                 visual_features, caption_tokens, caption_lengths
             )
-            loss = self.loss(
-                output_logits[:, :-1].contiguous().view(-1, self.textual.vocab_size),
-                caption_tokens[:, 1:].contiguous().view(-1),
+            loss = F.cross_entropy(
+                output_logits[:, :-1].permute(0, 2, 1).contiguous(),
+                caption_tokens[:, 1:].contiguous(),
+                ignore_index=self.padding_idx, reduction=loss_reduction
             )
             output_dict: Dict[str, Any] = {
                 "loss": loss,
                 # Single scalar per batch for logging in training script.
-                "loss_components": {"captioning_forward": loss.clone().detach()},
+                "loss_components": {"captioning_forward": loss.mean().clone().detach()},
             }
             # Do captioning in backward direction if specified.
             if self.caption_backward:
@@ -173,7 +176,7 @@ class CaptioningModel(nn.Module):
                 # at every time-step.
                 output_dict["predictions"] = torch.argmax(output_logits, dim=-1)
         else:
-            batch_size *= n_samples_per_image
+            batch_size = visual_features.shape[0] * n_samples_per_image
             visual_features = visual_features.repeat_interleave(n_samples_per_image, dim=0)
             # During inference, get beam search predictions for forward
             # model. Predictions from forward transformer will be shifted
@@ -192,16 +195,19 @@ class CaptioningModel(nn.Module):
                     start_predictions, beam_search_step
                 )
                 best_beam = all_top_k_predictions[:, 0, :]
+                best_beam = torch.cat((start_predictions, best_beam), dim=1)
                 output_dict = {"predictions": best_beam}
             elif sample_mode in ["sample", "greedy"]:
                 assert self.textual.transformer.sampling
                 done = torch.zeros(batch_size, dtype=torch.bool, device=visual_features.device)
                 caption_lengths = torch.ones(batch_size, dtype=torch.long, device=visual_features.device)
                 
-                likelihoods = []
                 cache = None
                 predictions = start_predictions
-                for i in range(self.max_decoding_steps):
+                for i in range(self.max_decoding_steps - 1):
+                    if done.all():
+                        break
+
                     output_logits, cache = self.textual(
                         visual_features, predictions, caption_lengths, cache=cache
                     )
@@ -213,15 +219,11 @@ class CaptioningModel(nn.Module):
                         token_dist = F.softmax(output_logits, dim=-1)
                         sample_tokens = torch.multinomial(token_dist, 1).squeeze(-1)
 
+                    done |= predictions[:, i] == self.eos_index
                     caption_lengths += (~done).long()
-                    done |= sample_tokens == self.eos_index
                     sample_tokens = sample_tokens * (~done).long()
                     predictions = torch.cat((predictions, sample_tokens.unsqueeze(1)), dim=1)
-
-                    likelihoods.append(output_logits[torch.arange(batch_size), sample_tokens])
-                likelihoods = torch.stack(likelihoods, dim=1)
-                predictions = predictions[:, 1:]
-                output_dict = {"predictions": predictions, "log_probs": likelihoods}
+                output_dict = {"predictions": predictions, "caption_lengths": caption_lengths}
             else:
                 raise ValueError(f"Invalid sample_mode = {sample_mode}")
 
