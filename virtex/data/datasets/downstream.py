@@ -4,6 +4,7 @@ import json
 import os
 from typing import Callable, Dict, List, Tuple
 
+from PIL import Image
 import cv2
 import numpy as np
 import torch
@@ -265,7 +266,7 @@ class ImageDirectoryDataset(Dataset):
     def __init__(
         self, data_root: str, image_transform: Callable = T.DEFAULT_IMAGE_TRANSFORM
     ):
-        self.image_paths = glob.glob(os.path.join(data_root, "*"))
+        self.image_paths = glob.glob(os.path.join(data_root, "**", "*.jpg"), recursive=True)
         self.image_transform = image_transform
 
     def __len__(self):
@@ -277,8 +278,8 @@ class ImageDirectoryDataset(Dataset):
         image_id = os.path.splitext(os.path.basename(image_path))[0]
 
         # Open image from path and apply transformation, convert to CHW format.
-        image = cv2.imread(image_path)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = Image.open(image_path).convert('RGB')
+        image = np.array(image)
         image = self.image_transform(image=image)["image"]
         image = np.transpose(image, (2, 0, 1))
 
