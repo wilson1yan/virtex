@@ -6,9 +6,11 @@ from typing import Any, Dict, List
 from loguru import logger
 import torch
 from torch.utils.data import DataLoader
+from torchvision.utils import save_image
 
 from virtex.config import Config
 from virtex.data import ImageDirectoryDataset
+from virtex.data.transforms import IMAGENET_COLOR_MEAN, IMAGENET_COLOR_STD
 from virtex.factories import TokenizerFactory, PretrainingModelFactory
 from virtex.utils.checkpointing import CheckpointManager
 from virtex.utils.common import common_parser
@@ -59,50 +61,31 @@ def main(_A: argparse.Namespace):
 
     val_dataloader = DataLoader(
         ImageDirectoryDataset(_A.data_root),
-        batch_size=_C.OPTIM.BATCH_SIZE,
+        batch_size=16,
         num_workers=_A.cpu_workers,
         pin_memory=True,
+        shuffle=True,
     )
     # Initialize model from a checkpoint.
     model = PretrainingModelFactory.from_config(_C).to(device)
     ITERATION = CheckpointManager(model=model).load(_A.checkpoint_path)
     model.eval()
+    model.sample_on()
+    
+    val_batch = next(iter(val_dataloader))
+    val_batch['image'] = val_batch['image'].to(device)
+    with torch.no_grad():
+        output_dict = model(val_batch, sample_mode='greedy')
 
-    # Make a list of predictions to evaluate.
-    predictions: List[Dict[str, Any]] = []
+    for caption in output_dict["predictions"][:, 1:]:
+        print(tokenizer.decode(caption.tolist()))
 
-    for val_iteration, val_batch in enumerate(val_dataloader, start=1):
+    mean = torch.tensor(IMAGENET_COLOR_MEAN, dtype=torch.float).view(1, 3, 1, 1)
+    std = torch.tensor(IMAGENET_COLOR_STD, dtype=torch.float).view(1, 3, 1, 1)
+    images = val_batch['image'].cpu() * std + mean
 
-        val_batch["image"] = val_batch["image"].to(device)
-        with torch.no_grad():
-            output_dict = model(val_batch)
+    save_image(images, 'images.png', nrow=4)
 
-        # Make a dictionary of predictions in COCO format.
-        for image_id, caption in zip(
-            val_batch["image_id"], output_dict["predictions"][:, 1:]
-        ):
-            predictions.append(
-                {
-                    # Convert image id to int if possible (mainly for COCO eval).
-                    "image_id": int(image_id) if image_id.isdigit() else image_id,
-                    "caption": tokenizer.decode(caption.tolist()),
-                }
-            )
-
-    # Save predictions as a JSON file if specified.
-    if _A.output is not None:
-        os.makedirs(os.path.dirname(_A.output), exist_ok=True)
-        json.dump(predictions, open(_A.output, "w"))
-        logger.info(f"Saved predictions to {_A.output}")
-
-    # Calculate CIDEr and SPICE metrics using ground truth COCO Captions. This
-    # should be skipped when running inference on arbitrary images.
-    if _A.calc_metrics:
-        # Assume ground truth (COCO val2017 annotations) exist.
-        gt = os.path.join(_C.DATA.ROOT, "annotations", "captions_val2017.json")
-
-        metrics = CocoCaptionsEvaluator(gt).evaluate(predictions)
-        logger.info(f"Iter: {ITERATION} | Metrics: {metrics}")
 
 
 if __name__ == "__main__":
