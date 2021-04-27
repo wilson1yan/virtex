@@ -102,6 +102,7 @@ def main(_A: argparse.Namespace):
     scheduler = LRSchedulerFactory.from_config(_C, optimizer)
     if dist.is_master_process():
         print('total parameters:', sum([np.prod(p.shape) for p in model.parameters() if p.requires_grad]))
+        print(f'data: train {len(train_dataloader)}, val {len(val_dataloader)}')
 
     # -------------------------------------------------------------------------
     #   BEFORE TRAINING STARTS

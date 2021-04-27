@@ -3,7 +3,7 @@
 # ResNet-50 + (L = 1, H = 1024) transformer trained for 500K iterations.
 # -----------------------------------------------------------------------------
 RANDOM_SEED: 0
-AMP: false
+AMP: true
 CUDNN_BENCHMARK: true
 CUDNN_DETERMINISTIC: false
 
@@ -16,7 +16,7 @@ DATA:
   EOS_INDEX: 0
   MASK_INDEX: 0
 
-  IMAGE_CROP_SIZE: 224
+  IMAGE_CROP_SIZE: 384
   MAX_CAPTION_LENGTH: 77
 
   IMAGE_TRANSFORM_TRAIN:
@@ -35,10 +35,10 @@ DATA:
 MODEL:
   NAME: "captioning_coco+cc"
   VISUAL:
-    NAME: "simclr::r50_2x_sk1"
+    NAME: "vit::B_16"
     PRETRAINED: true
     FROZEN: false
-    FEATURE_SIZE: 4096
+    FEATURE_SIZE: 768
   TEXTUAL:
     NAME: "gpt2"
     DROPOUT: 0.1
