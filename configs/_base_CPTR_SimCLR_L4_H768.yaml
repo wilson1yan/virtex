@@ -9,14 +9,14 @@ CUDNN_DETERMINISTIC: false
 
 DATA:
   ROOT: "/home/wilson/data/datasets/coco"
-  TOKENIZER_MODEL: "gpt2"
+  TOKENIZER_MODEL: "/home/wilson/data/datasets/coco/coco_10k.model"
   VOCAB_SIZE: 10000
   UNK_INDEX: 0
   SOS_INDEX: 1
   EOS_INDEX: 9999
   MASK_INDEX: 2
 
-  IMAGE_CROP_SIZE: 224
+  IMAGE_CROP_SIZE: 384
   MAX_CAPTION_LENGTH: 77
 
   IMAGE_TRANSFORM_TRAIN:
@@ -40,7 +40,7 @@ MODEL:
     FROZEN: false
     FEATURE_SIZE: 4096
   TEXTUAL:
-    NAME: "gpt2"
+    NAME: "transdec_prenorm::L4_H768_A12_F3072"
     DROPOUT: 0.1
 
 OPTIM:
@@ -54,7 +54,7 @@ OPTIM:
 
   BATCH_SIZE: 32
   SEPARATE_LR: false
-  LR: 0.0000075
+  LR: 0.00003
   NUM_ITERATIONS: 100000
 
   WARMUP_STEPS: 0

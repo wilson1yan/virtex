@@ -3,13 +3,13 @@
 # ResNet-50 + (L = 1, H = 1024) transformer trained for 500K iterations.
 # -----------------------------------------------------------------------------
 RANDOM_SEED: 0
-AMP: true
+AMP: false
 CUDNN_BENCHMARK: true
 CUDNN_DETERMINISTIC: false
 
 DATA:
   ROOT: "/home/wilson/data/datasets/coco+/home/group/conceptual_captions"
-  TOKENIZER_MODEL: "gpt2"
+  TOKENIZER_MODEL: "clip"
   VOCAB_SIZE: 0
   UNK_INDEX: 0
   SOS_INDEX: 0
@@ -35,12 +35,12 @@ DATA:
 MODEL:
   NAME: "captioning_coco+cc"
   VISUAL:
-    NAME: "vit::B_16"
+    NAME: "simclr::r50_2x_sk1"
     PRETRAINED: true
     FROZEN: false
-    FEATURE_SIZE: 768
+    FEATURE_SIZE: 4096
   TEXTUAL:
-    NAME: "gpt2"
+    NAME: "transdec_prenorm::L6_H768_A12_F3072"
     DROPOUT: 0.1
 
 OPTIM:
@@ -52,10 +52,10 @@ OPTIM:
     ALPHA: 0.5
     STEPS: 5
 
-  BATCH_SIZE: 128
+  BATCH_SIZE: 112
   SEPARATE_LR: false
   LR: 0.00003
-  NUM_ITERATIONS: 300000
+  NUM_ITERATIONS: 400000
 
   WARMUP_STEPS: 0
   LR_DECAY_NAME: "cosine"
