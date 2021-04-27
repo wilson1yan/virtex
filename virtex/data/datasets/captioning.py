@@ -241,7 +241,7 @@ class YFCC100MDataset(CaptionDataset):
             caption = [caption]
 
         data = {'image_id': torch.tensor(idx, dtype=torch.long),
-                'photo_id': torch.tensor(sample['photoid'], dtype=torch.long)
+                'photo_id': torch.tensor(sample['photoid'], dtype=torch.long),
                 'caption': caption}
         
         if self._include_image:

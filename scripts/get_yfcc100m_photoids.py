@@ -48,6 +48,7 @@ def main(_A: argparse.Namespace):
         drop_last=False,
         collate_fn=dataset.collate_fn
     )
+    print('dataloader size:', len(dataloader))
 
     photoids = dict()
 

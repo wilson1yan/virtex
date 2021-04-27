@@ -189,6 +189,7 @@ class PretrainingDatasetFactory(Factory):
     PRODUCTS: Dict[str, Callable] = {
         "coco": vdata.CocoDataset,
         "cc": vdata.ConceptualCaptionsDataset,
+        "yfcc100m": vdata.YFCC100MDataset
     }
 
     @classmethod

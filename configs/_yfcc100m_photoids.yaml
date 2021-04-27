@@ -29,7 +29,7 @@ DATA:
     - "center_crop"
     - "normalize"
 
-  USE_PERCENTAGE: 0.001
+  USE_PERCENTAGE: 10.0
 
 MODEL:
   NAME: "captioning_yfcc100m"
@@ -51,7 +51,7 @@ OPTIM:
     ALPHA: 0.5
     STEPS: 5
 
-  BATCH_SIZE: 128
+  BATCH_SIZE: 512
   SEPARATE_LR: false
   LR: 0.00003
   NUM_ITERATIONS: 500000
