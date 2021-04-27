@@ -103,13 +103,12 @@ class LinearTextualHead(TextualHead):
         return output_logits
 
         
-from .gpt import GPT2Model
+from virtex.modules.gpt2 import GPT2Model
 class GPT2TextualHead(TextualHead):
     def __init__(
         self,
         visual_feature_size: int,
         vocab_size: int,
-        max_caption_length: int = 30,
         padding_idx: int = 0
     ):
         super().__init__(visual_feature_size, vocab_size, 768)
@@ -117,8 +116,10 @@ class GPT2TextualHead(TextualHead):
             visual_feature_size, self.textual_feature_size
         )
         self.transformer = GPT2Model.from_pretrained('gpt2')
-        self.output = nn.Linear(self.textual_feature_size, vocab_size)
+        self.output = nn.Linear(self.textual_feature_size, vocab_size, bias=False)
         self.output.weight = self.transformer.wte.weight
+
+        self.padding_idx = padding_idx
     
     def forward(
         self,
@@ -140,7 +141,7 @@ class GPT2TextualHead(TextualHead):
             caption_tokens,
             attention_mask=caption_mask,
             encoder_hidden_states=projected_visual_features,
-        )[0]
+        ).last_hidden_state
 
         # shape: (batch_size, max_caption_length, vocab_size)
         output_logits = self.output(textual_features)

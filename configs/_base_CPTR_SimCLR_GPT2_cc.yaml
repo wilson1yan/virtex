@@ -8,13 +8,13 @@ CUDNN_BENCHMARK: true
 CUDNN_DETERMINISTIC: false
 
 DATA:
-  ROOT: "/home/wilson/data/datasets/coco"
+  ROOT: "/home/wilson/data/datasets/coco+/home/group/conceptual_captions"
   TOKENIZER_MODEL: "gpt2"
-  VOCAB_SIZE: 10000
+  VOCAB_SIZE: 0
   UNK_INDEX: 0
-  SOS_INDEX: 1
-  EOS_INDEX: 9999
-  MASK_INDEX: 2
+  SOS_INDEX: 0
+  EOS_INDEX: 0
+  MASK_INDEX: 0
 
   IMAGE_CROP_SIZE: 224
   MAX_CAPTION_LENGTH: 77
@@ -33,7 +33,7 @@ DATA:
   USE_PERCENTAGE: 100.0
 
 MODEL:
-  NAME: "captioning_coco"
+  NAME: "captioning_coco+cc"
   VISUAL:
     NAME: "simclr::r50_2x_sk1"
     PRETRAINED: true
@@ -52,15 +52,13 @@ OPTIM:
     ALPHA: 0.5
     STEPS: 5
 
-  BATCH_SIZE: 32
+  BATCH_SIZE: 128
   SEPARATE_LR: false
-  LR: 0.0000075
-  NUM_ITERATIONS: 100000
+  LR: 0.00003
+  NUM_ITERATIONS: 300000
 
   WARMUP_STEPS: 0
-  LR_DECAY_NAME: "multistep"
-  LR_GAMMA: 0.5
-  LR_STEPS: [30000]
+  LR_DECAY_NAME: "cosine"
 
   NO_DECAY: "none"
   CLIP_GRAD_NORM: 10.0

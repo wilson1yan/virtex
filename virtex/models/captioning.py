@@ -81,6 +81,8 @@ class CaptioningModel(nn.Module):
             self.eos_index, beam_size=beam_size, max_steps=max_decoding_steps
         )
 
+        print('Created model with padding_idx:', self.padding_idx)
+
     def sample_on(self):
         self.textual.transformer.sample_on()
 

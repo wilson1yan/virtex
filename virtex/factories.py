@@ -368,6 +368,7 @@ class TextualHeadFactory(Factory):
         "transdec_postnorm": partial(
             textual_heads.TransformerDecoderTextualHead, norm_type="post"
         ),
+        "gpt2": textual_heads.GPT2TextualHead,
         "none": textual_heads.LinearTextualHead,
     }
 
@@ -410,8 +411,14 @@ class TextualHeadFactory(Factory):
                 dropout=_C.MODEL.TEXTUAL.DROPOUT,
                 mask_future_positions=mask_future,
                 max_caption_length=_C.DATA.MAX_CAPTION_LENGTH,
-                padding_idx=_C.DATA.UNK_INDEX,
+                padding_idx=tokenizer.pad_id,
             )
+        elif "gpt2" in _C.MODEL.TEXTUAL.NAME:
+            name = _C.MODEL.TEXTUAL.NAME
+            kwargs.update(
+                padding_idx=tokenizer.pad_id
+            )
+
         return cls.create(name, **kwargs)
 
 

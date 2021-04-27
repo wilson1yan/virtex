@@ -9,7 +9,6 @@ from transformers.modeling_utils import (
 )
 from transformers.utils.model_parallel_utils import assert_device_map, get_device_map
 from transformers.modeling_outputs import BaseModelOutputWithPastAndCrossAttentions
-from transformers.logging import logger
 
 class Conv1D(nn.Module):
     """
@@ -205,28 +204,29 @@ class Block(nn.Module):
         # residual connection
         hidden_states = attn_output + hidden_states
 
-        # add one self-attention block for cross-attention
-        cross_attn_outputs = self.attn(
-            self.ln_1(hidden_states),
-            attention_mask=attention_mask,
-            head_mask=head_mask,
-            encoder_hidden_states=encoder_hidden_states,
-            encoder_attention_mask=encoder_attention_mask,
-            output_attentions=output_attentions,
-        )
-        attn_output = cross_attn_outputs[0]
-        # residual connection
-        hidden_states = hidden_states + attn_output
-        outputs = outputs + cross_attn_outputs[2:]  # add cross attentions if we output attention weights
+        if encoder_hidden_states is not None:
+            # add one self-attention block for cross-attention
+            cross_attn_outputs = self.attn(
+                self.ln_1(hidden_states),
+                attention_mask=attention_mask,
+                head_mask=head_mask,
+                encoder_hidden_states=encoder_hidden_states,
+                encoder_attention_mask=encoder_attention_mask,
+                output_attentions=output_attentions,
+            )
+            attn_output = cross_attn_outputs[0]
+            # residual connection
+            hidden_states = hidden_states + attn_output
+            outputs = outputs + cross_attn_outputs[2:]  # add cross attentions if we output attention weights
 
         feed_forward_hidden_states = self.mlp(self.ln_2(hidden_states))
         # residual connection
         hidden_states = hidden_states + feed_forward_hidden_states
 
         if use_cache:
-            outputs = (hidden_states,) + outputs
+            outputs = (hidden_states,) + tuple(outputs)
         else:
-            outputs = (hidden_states,) + outputs[1:]
+            outputs = (hidden_states,) + tuple(outputs[1:])
 
         return outputs  # hidden_states, present, (attentions, cross_attentions)
 
@@ -240,15 +240,14 @@ class GPT2Model(GPT2PreTrainedModel):
         self.drop = nn.Dropout(config.embd_pdrop)
         self.h = nn.ModuleList([Block(config.n_ctx, config, scale=True) for _ in range(config.n_layer)])
         self.ln_f = nn.LayerNorm(config.n_embd, eps=config.layer_norm_epsilon)
-
-        self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
-        self.lm_head.weight = self.wte.weight
-
         self.init_weights()
 
         # Model parallel
         self.model_parallel = False
         self.device_map = None
+
+        # not used
+        self.sampling = False
 
     def parallelize(self, device_map=None):
         # Check validity of device_map
@@ -418,10 +417,6 @@ class GPT2Model(GPT2PreTrainedModel):
             if getattr(self.config, "gradient_checkpointing", False) and self.training:
 
                 if use_cache:
-                    logger.warn(
-                        "`use_cache=True` is incompatible with `config.gradient_checkpointing=True`. Setting "
-                        "`use_cache=False`..."
-                    )
                     use_cache = False
 
                 def create_custom_forward(module):
@@ -469,7 +464,6 @@ class GPT2Model(GPT2PreTrainedModel):
         hidden_states = self.ln_f(hidden_states)
 
         hidden_states = hidden_states.view(*output_shape)
-        hidden_states = self.lm_head(hidden_states)
         # Add last hidden state
         if output_hidden_states:
             all_hidden_states = all_hidden_states + (hidden_states,)
@@ -489,21 +483,29 @@ class GPT2Model(GPT2PreTrainedModel):
 if __name__ == '__main__':
     from transformers import GPT2Tokenizer
     import torch.nn.functional as F
+    from tqdm import tqdm
 
     device = torch.device('cuda')
     tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
-    gpt = GPT2Model.from_pretrained('gpt2')
+    gpt = GPT2Model.from_pretrained('gpt2').to(device)
+    lm_head = nn.Linear(768, 50207, bias=False).to(device)
+    lm_head.weight = gpt.wte.weight
     gpt.eval()
+    lm_head.eval()
 
     torch.set_grad_enabled(False)
 
     tokens = torch.tensor(tokenizer.encode('a'), dtype=torch.long, device=device)
     tokens = tokens.repeat_interleave(8, dim=0).unsqueeze(1)
 
-    for _ in range(76):
-        logits = F.softmax(gpt(tokens)[:, -1], dim=-1)
-        toks = torch.multinomial(logits, 1)
+    for _ in tqdm(list(range(76))):
+        h = gpt(tokens).last_hidden_state[:, -1]
+        logits = lm_head(h)
+
+        probs = F.softmax(logits, dim=-1)
+        toks = torch.multinomial(probs, 1)
         tokens = torch.cat((tokens, toks), dim=1)
+    tokens[:, -1] = tokenizer.eos_token_id
     
     texts = []
     for t in tokens:
