@@ -51,7 +51,7 @@ class CaptioningModel(nn.Module):
         self,
         visual: VisualBackbone,
         textual: TextualHead,
-        beam_size: int = 5,
+        beam_size: int = 10,
         max_decoding_steps: int = 30,
         sos_index: int = 1,
         eos_index: int = 2,
@@ -77,9 +77,13 @@ class CaptioningModel(nn.Module):
         # These boundary indices are needed for beam search.
         self.sos_index = sos_index
         self.eos_index = eos_index
-        self.beam_search = AutoRegressiveBeamSearch(
-            self.eos_index, beam_size=beam_size, max_steps=max_decoding_steps
-        )
+
+        self.beam_search = {
+            k: AutoRegressiveBeamSearch(
+                self.eos_index, beam_size=k, max_steps=max_decoding_steps
+            )
+            for k in [1, 3, 5]
+        }
 
         print('Created model with padding_idx:', self.padding_idx)
 
@@ -178,8 +182,8 @@ class CaptioningModel(nn.Module):
                 # at every time-step.
                 output_dict["predictions"] = torch.argmax(output_logits, dim=-1)
         else:
-            batch_size = visual_features.shape[0] * n_samples_per_image
-            visual_features = visual_features.repeat_interleave(n_samples_per_image, dim=0)
+            batch_size = visual_features.shape[0] #* n_samples_per_image
+#            visual_features = visual_features.repeat_interleave(n_samples_per_image, dim=0)
             # During inference, get beam search predictions for forward
             # model. Predictions from forward transformer will be shifted
             # right by one time-step.
@@ -193,7 +197,7 @@ class CaptioningModel(nn.Module):
                 beam_search_step = functools.partial(
                     self.beam_search_step, visual_features
                 )
-                all_top_k_predictions, _ = self.beam_search.search(
+                all_top_k_predictions, _ = self.beam_search[n_samples_per_image].search(
                     start_predictions, beam_search_step
                 )
                 best_beam = all_top_k_predictions[:, 0, :]
@@ -225,10 +229,6 @@ class CaptioningModel(nn.Module):
                     caption_lengths += (~done).long()
                     sample_tokens = sample_tokens * (~done).long()
                     predictions = torch.cat((predictions, sample_tokens.unsqueeze(1)), dim=1)
-
-                for i in range(predictions.shape[0]):
-                    if not done[i].item():
-                        predictions[i, -1] = self.eos_index
 
                 output_dict = {"predictions": predictions, "caption_lengths": caption_lengths}
             else:

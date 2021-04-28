@@ -13,6 +13,8 @@ from virtex.factories import TokenizerFactory, PretrainingModelFactory, Pretrain
 from virtex.utils.checkpointing import CheckpointManager
 from virtex.utils.common import common_parser
 import virtex.utils.distributed as dist
+from virtex.data.transforms import IMAGENET_COLOR_MEAN, IMAGENET_COLOR_STD
+from torchvision.utils import save_image
 
 
 # fmt: off
@@ -65,22 +67,39 @@ def main(_A: argparse.Namespace):
     model = PretrainingModelFactory.from_config(_C).to(device)
     ITERATION = CheckpointManager(model=model).load(_A.checkpoint_path)
     model.eval()
-    model.sample_on()
+    torch.set_grad_enabled(False)
 
     captions = dict()
+    
+    mean = torch.tensor(IMAGENET_COLOR_MEAN, dtype=torch.float).view(1, 3, 1, 1)
+    std = torch.tensor(IMAGENET_COLOR_STD, dtype=torch.float).view(1, 3, 1, 1)
 
     if dist.is_master_process():
         pbar = tqdm(total=len(val_dataloader))
     for val_iteration, val_batch in enumerate(val_dataloader, start=1):
         val_batch = {'image_id': val_batch['image_id'].to(device),
                      'image': val_batch['image'].to(device)}
-        with torch.no_grad():
-            output_dict = model(val_batch, sample_mode='greedy')
+        predictions = []
+        model.sample_on()
+        predictions.append(model(val_batch, sample_mode='greedy')['predictions'][:, 1:])
+        model.sample_off()
+        for k in [1, 3, 5]:
+            predictions.append(model(val_batch, sample_mode='beam', n_samples_per_image=k)['predictions'][:, 1:])
+        max_length = max([p.shape[1] for p in predictions])
+        predictions = [torch.cat((p, torch.zeros(p.shape[0], max_length - p.shape[1], device=device)), dim=1) for p in predictions]
+        predictions = torch.stack(predictions, dim=1)
+
+        images = val_batch['image'].cpu() * std + mean
+        save_image(images, f'images_{val_iteration}.png', nrow=4)
+
         # Make a dictionary of predictions in COCO format.
         for image_id, caption in zip(
-            val_batch["image_id"], output_dict["predictions"][:, 1:]
+            val_batch["image_id"], predictions
         ):
-            captions[image_id.item()] = tokenizer.decode(caption.tolist())
+            sub_caps = []
+            for i in range(caption.shape[0]):
+                sub_caps.append(captions[image_id.item()])
+            captions[image_id.item()] = sub_caps
         if dist.is_master_process():
             pbar.update(1)
     if dist.is_master_process():
