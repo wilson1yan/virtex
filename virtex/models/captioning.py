@@ -191,7 +191,6 @@ class CaptioningModel(nn.Module):
                 (batch_size, 1), self.sos_index
             ).long()
             if sample_mode == "beam":
-                assert not self.textual.transformer.sampling
                 # Add image features as a default argument to match callable
                 # signature accepted by beam search class (partial captions only).
                 beam_search_step = functools.partial(
@@ -204,7 +203,6 @@ class CaptioningModel(nn.Module):
                 best_beam = torch.cat((start_predictions, best_beam), dim=1)
                 output_dict = {"predictions": best_beam}
             elif sample_mode in ["sample", "greedy"]:
-                assert self.textual.transformer.sampling
                 done = torch.zeros(batch_size, dtype=torch.bool, device=visual_features.device)
                 caption_lengths = torch.ones(batch_size, dtype=torch.long, device=visual_features.device)
                 
@@ -237,7 +235,7 @@ class CaptioningModel(nn.Module):
         return output_dict
 
     def beam_search_step(
-        self, visual_features: torch.Tensor, partial_captions: torch.Tensor
+        self, visual_features: torch.Tensor, partial_captions: torch.Tensor, cache
     ) -> torch.Tensor:
         r"""
         Given visual features and a batch of (assumed) partial captions, predict
@@ -281,8 +279,8 @@ class CaptioningModel(nn.Module):
             partial_captions = partial_captions.unsqueeze(1)
 
         # shape: (batch_size * beam_size, partial_caption_length, vocab_size)
-        output_logits, _ = self.textual(
-            visual_features, partial_captions, caption_lengths
+        output_logits, cache = self.textual(
+            visual_features, partial_captions, caption_lengths, cache=cache
         )
         # Keep features for last time-step only, we only care about those.
         output_logits = output_logits[:, -1, :]
@@ -296,7 +294,7 @@ class CaptioningModel(nn.Module):
         for index in range(batch_size * beam_size):
             next_logprobs[index, partial_captions[index, -1]] = -10000
 
-        return next_logprobs
+        return next_logprobs, cache
 
     def log_predictions(
         self, batch: Dict[str, torch.Tensor], tokenizer: SentencePieceBPETokenizer

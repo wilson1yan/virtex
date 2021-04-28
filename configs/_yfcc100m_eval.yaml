@@ -29,7 +29,7 @@ DATA:
     - "center_crop"
     - "normalize"
 
-  USE_PERCENTAGE: 0.001
+  USE_PERCENTAGE: 10.0
 
 MODEL:
   NAME: "captioning_yfcc100m"

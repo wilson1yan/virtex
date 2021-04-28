@@ -107,7 +107,8 @@ class AutoRegressiveBeamSearch(object):
         # beam to `beam_size`^2 candidates from which we will select the top
         # `beam_size` elements for the next iteration.
         # shape: (batch_size, num_classes)
-        start_class_log_probs = step(start_predictions)
+        start_class_log_probs, _ = step(start_predictions, cache=None)
+        cache = None
 
         num_classes = start_class_log_probs.size()[1]
 
@@ -162,7 +163,7 @@ class AutoRegressiveBeamSearch(object):
                 batch_size * self.beam_size, -1
             )
             # shape: (batch_size * beam_size, num_classes)
-            class_log_probs = step(predictions_so_far)
+            class_log_probs, cache = step(predictions_so_far, cache=cache)
 
             # shape: (batch_size * beam_size, num_classes)
             last_predictions_expanded = last_predictions.unsqueeze(-1).expand(
@@ -208,6 +209,16 @@ class AutoRegressiveBeamSearch(object):
             restricted_beam_log_probs, restricted_beam_indices = reshaped_summed.topk(
                 self.beam_size
             )
+
+            if cache is not None:
+                cache_tfm = cache[1] 
+                # (n_layers, L, batch_size * beam_size * per_node_beam_size, hidden_dim)
+                cache_tfm = cache_tfm.repeat_interleave(self.per_node_beam_size, dim=2)
+                idxs = restricted_beam_indices + torch.arange(batch_size, dtype=torch.long, device=restricted_beam_indices.device).unsqueeze(1) * self.beam_size * self.per_node_beam_size
+                idxs = idxs.view(-1) # (batch_size * beam_size)
+                cache_tfm = torch.index_select(cache_tfm, 2, idxs)
+                cache = (cache[0], cache_tfm)
+
             # Use the beam indices to extract the corresponding classes.
             # shape: (batch_size, beam_size)
             restricted_predicted_classes = reshaped_predicted_classes.gather(
